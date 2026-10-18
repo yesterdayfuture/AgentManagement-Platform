@@ -1,0 +1,8 @@
+fastapi==0.115.6
+python-multipart==0.0.20
+uvicorn==0.34.0
+sqlalchemy==2.0.36
+openai==1.58.1
+cryptography==44.0.0
+httpx==0.28.1
+pytest==8.3.4
