@@ -59,7 +59,7 @@ def list_traces(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Depen
         desk,
         order=Trace.created_at.desc(),
         text=[Trace.input_text, Trace.output_text, Trace.status, Trace.environment],
-        exact={"status": Trace.status, "environment": Trace.environment},
+        exact={"status": Trace.status, "environment": Trace.environment, "agent_id": Trace.agent_id},
         time_col=Trace.created_at,
         limit_unpaged=100,
     )
@@ -295,17 +295,340 @@ def _secret_board(db, step_rows: list) -> dict:
     }
 
 
-@router.get("/api/observability/summary")
-def summary(ctx=Depends(get_context), db=Depends(get_db), scope: str = "space", space_id: int = 0, time_from: str = "", time_to: str = ""):
+def _scope_space_ids(db, ctx, scope: str, space_id: int) -> list[int]:
     if is_platform(ctx.user) and space_id:
         chosen = db.get(Space, space_id)
         if chosen is None:
             raise HTTPException(404, "部门不存在")
-        space_ids = [chosen.id]
-    elif is_platform(ctx.user) and scope == "all":
-        space_ids = [item["id"] for item in _spaces_for(db, ctx.user)]
+        return [chosen.id]
+    if is_platform(ctx.user) and scope == "all":
+        return [item["id"] for item in _spaces_for(db, ctx.user)]
+    return [ctx.space.id]
+
+
+def _agent_pulse(db, agent: Agent, traces: list[Trace], pending: int) -> dict:
+    """单智能体监控卡片：生命周期、窗口用量、当前执行与告警。"""
+    stable = db.get(AgentVersion, agent.stable_version_id) if agent.stable_version_id else None
+    latest = (
+        db.query(AgentVersion)
+        .filter_by(agent_id=agent.id)
+        .order_by(AgentVersion.number.desc())
+        .first()
+    )
+    model = db.get(ModelEndpoint, latest.model_id) if latest and latest.model_id else None
+    space = db.get(Space, agent.space_id) if agent.space_id else None
+    running = [row for row in traces if row.status == "running"]
+    finished = [row for row in traces if row.status in {"completed", "failed", "denied", "cancelled", "blocked"}]
+    completed = [row for row in finished if row.status == "completed"]
+    failed = [row for row in traces if row.status in {"failed", "denied", "blocked"}]
+    cost = round(sum(row.cost or 0 for row in traces), 6)
+    tokens = sum((row.tokens_in or 0) + (row.tokens_out or 0) for row in traces)
+    latency = int(sum(row.latency_ms or 0 for row in traces) / len(traces)) if traces else 0
+    success_rate = round(len(completed) / len(finished), 4) if finished else None
+    last = max(traces, key=lambda row: row.created_at or datetime.min) if traces else None
+    draft_ahead = bool(
+        latest
+        and (
+            latest.status == "draft"
+            or (stable is not None and latest.number > stable.number)
+            or (stable is None and latest.status == "draft")
+        )
+    )
+    if agent.status == "offline":
+        pulse = "offline"
+        pulse_label = "已下线"
+    elif running:
+        pulse = "running"
+        pulse_label = f"执行中 · {len(running)}"
+    elif agent.status == "published":
+        pulse = "ready"
+        pulse_label = "可服务"
+    elif agent.status == "draft":
+        pulse = "draft"
+        pulse_label = "未发布"
     else:
-        space_ids = [ctx.space.id]
+        pulse = agent.status or "unknown"
+        pulse_label = agent.status or "未知"
+    alerts = []
+    if agent.status == "offline":
+        alerts.append("已下线，操作者不可用")
+    if draft_ahead and agent.status == "published":
+        alerts.append("有未发布草稿")
+    if pending:
+        alerts.append(f"{pending} 条待审批")
+    if failed:
+        alerts.append(f"窗口内失败 {len(failed)} 次")
+    if model and (model.quota_limit or 0) > 0:
+        remain = max(0, model.quota_limit - (model.quota_used or 0))
+        if remain <= model.quota_limit * 0.2:
+            alerts.append("绑定模型额度将尽")
+    tool_count = len(load(latest.tool_ids_json, [])) if latest else 0
+    skill_count = len(load(latest.skill_ids_json, [])) if latest else 0
+    mcp_count = len(load(latest.mcp_ids_json, [])) if latest else 0
+    duty = ((latest.system_prompt if latest else "") or "").strip().split("\n", 1)[0][:72]
+    return {
+        "id": agent.id,
+        "name": agent.name,
+        "key": agent.key,
+        "space_id": agent.space_id,
+        "department": space.name if space else "平台",
+        "status": agent.status,
+        "pulse": pulse,
+        "pulse_label": pulse_label,
+        "running": len(running),
+        "stable_version": stable.number if stable else None,
+        "latest_version": latest.number if latest else None,
+        "draft_ahead": draft_ahead,
+        "model_id": model.id if model else None,
+        "model_name": model.name if model else "按任务自动选",
+        "tool_count": tool_count,
+        "skill_count": skill_count,
+        "mcp_count": mcp_count,
+        "duty": duty,
+        "calls": len(traces),
+        "cost": cost,
+        "tokens": tokens,
+        "latency_ms": latency,
+        "success_rate": success_rate,
+        "failed": len(failed),
+        "pending_approvals": pending,
+        "alerts": alerts,
+        "attention": bool(alerts),
+        "last_at": stamp(last.created_at) if last and last.created_at else "",
+        "last_status": last.status if last else "",
+        "last_input": ((last.input_text if last else "") or "").strip()[:72],
+        "last_trace_id": last.id if last else "",
+        "href": f"/agents/{agent.id}",
+        "traces_href": f"/traces?exact_field=agent_id&exact={agent.id}",
+    }
+
+
+@router.get("/api/observability/agents")
+def agent_monitor(
+    ctx=Depends(get_context),
+    db=Depends(get_db),
+    scope: str = "space",
+    space_id: int = 0,
+    time_from: str = "",
+    time_to: str = "",
+):
+    """总览用的智能体实时监控。窗口统计跟时间筛选走；执行中数量看当前库状态。"""
+    require(ctx, "viewer")
+    space_ids = _scope_space_ids(db, ctx, scope, space_id)
+    if not space_ids:
+        space_ids = [-1]
+    query = db.query(Agent)
+    if is_platform(ctx.user) and scope == "all" and not space_id:
+        query = query.filter((Agent.space_id.in_(space_ids)) | (Agent.space_id.is_(None)))
+    else:
+        query = query.filter(Agent.space_id.in_(space_ids))
+    agents = query.order_by(Agent.id.asc()).all()
+    agent_ids = [row.id for row in agents] or [-1]
+    desk = Desk(time_from=time_from, time_to=time_to)
+    window_traces = apply_desk(
+        db.query(Trace).filter(Trace.agent_id.in_(agent_ids)),
+        desk,
+        text=[],
+        exact={},
+        time_col=Trace.created_at,
+    ).all()
+    live_running = (
+        db.query(Trace)
+        .filter(Trace.agent_id.in_(agent_ids), Trace.status == "running")
+        .all()
+    )
+    by_agent: dict[int, list[Trace]] = {item: [] for item in agent_ids if item != -1}
+    for row in window_traces:
+        if row.agent_id in by_agent:
+            by_agent[row.agent_id].append(row)
+    # 执行中不在时间窗内时仍并入，保证实时态
+    for row in live_running:
+        bucket = by_agent.get(row.agent_id)
+        if bucket is None:
+            continue
+        if row.id not in {item.id for item in bucket}:
+            bucket.append(row)
+    from sqlalchemy import func
+
+    pending_by = {
+        int(agent_id): int(count)
+        for agent_id, count in (
+            db.query(Approval.agent_id, func.count(Approval.id))
+            .filter(Approval.agent_id.in_(agent_ids), Approval.status == "pending")
+            .group_by(Approval.agent_id)
+            .all()
+        )
+    }
+    items = [_agent_pulse(db, agent, by_agent.get(agent.id, []), pending_by.get(agent.id, 0)) for agent in agents]
+    items.sort(key=lambda item: (-item["running"], -item["attention"], -item["calls"], item["name"]))
+    return {
+        "checked_at": stamp(datetime.utcnow()),
+        "total": len(items),
+        "running": sum(1 for item in items if item["running"]),
+        "attention": sum(1 for item in items if item["attention"]),
+        "ready": sum(1 for item in items if item["pulse"] == "ready"),
+        "items": items,
+    }
+
+
+def _workflow_pulse(db, workflow: Workflow, runs: list[WorkflowRun]) -> dict:
+    """单工作流监控卡片：发布态、定时、窗口执行量与告警。"""
+    space = db.get(Space, workflow.space_id)
+    definition = load(workflow.definition_json, {})
+    nodes = [node for node in (definition.get("nodes") or []) if isinstance(node, dict)]
+    agent_nodes = [node for node in nodes if node.get("type") == "agent" or node.get("agent_id")]
+    kind = definition.get("kind") or "agents"
+    kind_label = "自主调度" if kind == "autonomous" else "固定步骤"
+    active = [row for row in runs if row.status in {"running", "paused"}]
+    finished = [row for row in runs if row.status in {"completed", "failed", "denied", "cancelled", "blocked", "stopped"}]
+    completed = [row for row in finished if row.status == "completed"]
+    failed = [row for row in runs if row.status in {"failed", "denied", "blocked"}]
+    duration = int(sum(row.duration_ms or 0 for row in runs) / len(runs)) if runs else 0
+    success_rate = round(len(completed) / len(finished), 4) if finished else None
+    last = max(runs, key=lambda row: row.started_at or datetime.min) if runs else None
+    cost = 0.0
+    tokens = 0
+    for row in runs:
+        if not row.trace_id:
+            continue
+        trace = db.get(Trace, row.trace_id)
+        if trace is None:
+            continue
+        cost += float(trace.cost or 0)
+        tokens += int(trace.tokens_in or 0) + int(trace.tokens_out or 0)
+    cost = round(cost, 6)
+    release = workflow.release or "draft"
+    if not workflow.enabled:
+        pulse = "offline"
+        pulse_label = "已停用"
+    elif active:
+        pulse = "running"
+        running_n = sum(1 for row in active if row.status == "running")
+        paused_n = sum(1 for row in active if row.status == "paused")
+        if running_n and paused_n:
+            pulse_label = f"执行中 {running_n} · 暂停 {paused_n}"
+        elif paused_n:
+            pulse_label = f"已暂停 · {paused_n}"
+        else:
+            pulse_label = f"执行中 · {running_n}"
+    elif release != "published":
+        pulse = "draft"
+        pulse_label = "草稿"
+    else:
+        pulse = "ready"
+        pulse_label = "可执行"
+    alerts = []
+    if not workflow.enabled:
+        alerts.append("已停用，不能执行")
+    if release != "published":
+        alerts.append("未发布，操作者不能执行")
+    if failed:
+        alerts.append(f"窗口内失败 {len(failed)} 次")
+    if workflow.schedule_enabled:
+        budget = int(workflow.schedule_token_budget or 0)
+        used = int(workflow.schedule_token_used or 0)
+        if budget > 0 and used >= budget:
+            alerts.append("定时 token 额度已用尽")
+        elif space is not None and space.token_used >= space.token_budget:
+            alerts.append("部门 token 额度已用尽，定时将停")
+    entry_agent = db.get(Agent, int(agent_nodes[0].get("agent_id") or 0)) if agent_nodes else None
+    return {
+        "id": workflow.id,
+        "name": workflow.name,
+        "space_id": workflow.space_id,
+        "department": space.name if space else "",
+        "enabled": bool(workflow.enabled),
+        "release": release,
+        "kind": kind,
+        "kind_label": kind_label,
+        "pulse": pulse,
+        "pulse_label": pulse_label,
+        "running": sum(1 for row in active if row.status == "running"),
+        "paused": sum(1 for row in active if row.status == "paused"),
+        "node_count": len(agent_nodes),
+        "entry_agent": entry_agent.name if entry_agent else "",
+        "schedule_enabled": bool(workflow.schedule_enabled),
+        "schedule_minutes": int(workflow.schedule_minutes or 0),
+        "schedule_next_at": stamp(workflow.schedule_next_at) if workflow.schedule_next_at else "",
+        "schedule_token_budget": int(workflow.schedule_token_budget or 0),
+        "schedule_token_used": int(workflow.schedule_token_used or 0),
+        "calls": len(runs),
+        "cost": cost,
+        "tokens": tokens,
+        "latency_ms": duration,
+        "success_rate": success_rate,
+        "failed": len(failed),
+        "alerts": alerts,
+        "attention": bool(alerts),
+        "last_at": stamp(last.started_at) if last and last.started_at else "",
+        "last_status": last.status if last else "",
+        "last_input": ((last.message if last else "") or "").strip()[:72],
+        "last_run_id": last.id if last else None,
+        "href": f"/workflows?open={workflow.id}",
+        "runs_href": f"/workflow-runs?workflow_id={workflow.id}",
+    }
+
+
+@router.get("/api/observability/workflows")
+def workflow_monitor(
+    ctx=Depends(get_context),
+    db=Depends(get_db),
+    scope: str = "space",
+    space_id: int = 0,
+    time_from: str = "",
+    time_to: str = "",
+):
+    """总览用的工作流实时监控。窗口统计跟时间筛选走；执行中/暂停看当前库状态。"""
+    require(ctx, "viewer")
+    space_ids = _scope_space_ids(db, ctx, scope, space_id)
+    if not space_ids:
+        space_ids = [-1]
+    workflows = (
+        db.query(Workflow)
+        .filter(Workflow.space_id.in_(space_ids))
+        .order_by(Workflow.id.asc())
+        .all()
+    )
+    workflow_ids = [row.id for row in workflows] or [-1]
+    desk = Desk(time_from=time_from, time_to=time_to)
+    window_runs = apply_desk(
+        db.query(WorkflowRun).filter(WorkflowRun.workflow_id.in_(workflow_ids)),
+        desk,
+        text=[],
+        exact={},
+        time_col=WorkflowRun.started_at,
+    ).all()
+    live_active = (
+        db.query(WorkflowRun)
+        .filter(WorkflowRun.workflow_id.in_(workflow_ids), WorkflowRun.status.in_(["running", "paused"]))
+        .all()
+    )
+    by_flow: dict[int, list[WorkflowRun]] = {item: [] for item in workflow_ids if item != -1}
+    for row in window_runs:
+        if row.workflow_id in by_flow:
+            by_flow[row.workflow_id].append(row)
+    for row in live_active:
+        bucket = by_flow.get(row.workflow_id)
+        if bucket is None:
+            continue
+        if row.id not in {item.id for item in bucket}:
+            bucket.append(row)
+    items = [_workflow_pulse(db, row, by_flow.get(row.id, [])) for row in workflows]
+    items.sort(key=lambda item: (-(item["running"] + item["paused"]), -item["attention"], -item["calls"], item["name"]))
+    return {
+        "checked_at": stamp(datetime.utcnow()),
+        "total": len(items),
+        "running": sum(1 for item in items if item["running"]),
+        "paused": sum(1 for item in items if item["paused"]),
+        "attention": sum(1 for item in items if item["attention"]),
+        "ready": sum(1 for item in items if item["pulse"] == "ready"),
+        "items": items,
+    }
+
+
+@router.get("/api/observability/summary")
+def summary(ctx=Depends(get_context), db=Depends(get_db), scope: str = "space", space_id: int = 0, time_from: str = "", time_to: str = ""):
+    space_ids = _scope_space_ids(db, ctx, scope, space_id)
     if not space_ids:
         space_ids = [-1]
     desk = Desk(time_from=time_from, time_to=time_to)

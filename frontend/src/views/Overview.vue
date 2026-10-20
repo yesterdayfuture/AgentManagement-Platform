@@ -1,12 +1,22 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import DistributionChart from "../components/DistributionChart.vue";
 import { api } from "../api";
-import { axisText, countText, formatCount, formatDuration, formatMoney, moneyText } from "../format";
+import { axisText, countText, durationText, formatCount, formatDuration, formatMoney, moneyText } from "../format";
 
+const router = useRouter();
 const summary = ref(null);
 const system = ref(null);
 const traces = ref([]);
+const agentBoard = ref(null);
+const flowBoard = ref(null);
+const agentFilter = ref("all");
+const flowFilter = ref("all");
+const agentSectionOpen = ref(true);
+const flowSectionOpen = ref(true);
+const agentExpanded = reactive({});
+const flowExpanded = reactive({});
 const error = ref("");
 const loading = ref(false);
 let loadId = 0;
@@ -73,9 +83,42 @@ const maxMcpSecretDept = computed(() => Math.max(1, ...(summary.value?.mcp_secre
 const maxUser = computed(() => Math.max(1, ...(summary.value?.by_user || []).map((item) => item.traffic)));
 const skillbox = computed(() => system.value?.skillbox || null);
 const skillboxChecked = ref("");
+const agentChecked = ref("");
+const flowChecked = ref("");
 let skillTimer = 0;
+let liveTimer = 0;
 const skillboxState = computed(() => ({ running: "运行中", exited: "已退出", created: "已创建", dead: "已停止", paused: "已暂停", missing: "未创建", unavailable: "不可用" })[skillbox.value?.state] || skillbox.value?.state || "不可用");
 const skillJobs = computed(() => skillbox.value?.jobs || []);
+const agentFilters = [
+  { value: "all", label: "全部" },
+  { value: "running", label: "执行中" },
+  { value: "attention", label: "需关注" },
+  { value: "ready", label: "可服务" },
+  { value: "offline", label: "已下线" },
+  { value: "draft", label: "未发布" },
+];
+const flowFilters = [
+  { value: "all", label: "全部" },
+  { value: "running", label: "执行中" },
+  { value: "attention", label: "需关注" },
+  { value: "ready", label: "可执行" },
+  { value: "offline", label: "已停用" },
+  { value: "draft", label: "草稿" },
+];
+const agentCards = computed(() => {
+  const rows = agentBoard.value?.items || [];
+  if (agentFilter.value === "all") return rows;
+  if (agentFilter.value === "running") return rows.filter((item) => item.running > 0);
+  if (agentFilter.value === "attention") return rows.filter((item) => item.attention);
+  return rows.filter((item) => item.pulse === agentFilter.value);
+});
+const flowCards = computed(() => {
+  const rows = flowBoard.value?.items || [];
+  if (flowFilter.value === "all") return rows;
+  if (flowFilter.value === "running") return rows.filter((item) => item.running > 0 || item.paused > 0);
+  if (flowFilter.value === "attention") return rows.filter((item) => item.attention);
+  return rows.filter((item) => item.pulse === flowFilter.value);
+});
 function jobSpan(job) {
   const start = Number(job.started_at || 0);
   const end = job.state === "running" ? Date.now() / 1000 : Number(job.ended_at || start);
@@ -87,6 +130,62 @@ function jobState(job) {
 }
 function jobLabel(job) {
   return job.skill_name || (job.skill_key ? job.skill_key : `技能 ${job.skill_id}`);
+}
+function agentStatusText(value) {
+  return (
+    {
+      completed: "已完成",
+      failed: "失败",
+      running: "运行中",
+      pending: "待处理",
+      denied: "已拒绝",
+      cancelled: "已取消",
+      blocked: "已熔断",
+      paused: "已暂停",
+      limited: "轮次上限",
+      stopped: "已停止",
+    }[value] || value || "—"
+  );
+}
+function successText(rate) {
+  if (rate == null) return "暂无样本";
+  return `${Math.round(rate * 100)}%`;
+}
+function versionText(item) {
+  if (item.stable_version != null && item.draft_ahead) return `线上 v${item.stable_version} · 有草稿`;
+  if (item.stable_version != null) return `线上 v${item.stable_version}`;
+  if (item.latest_version != null) return `草稿 v${item.latest_version}`;
+  return "尚无版本";
+}
+function openAgent(item) {
+  router.push(item.href || `/agents/${item.id}`);
+}
+function openFlow(item) {
+  router.push(item.href || `/workflows?open=${item.id}`);
+}
+function cardOpen(store, item) {
+  const key = String(item.id);
+  if (store[key] === undefined) return Boolean(item.running || item.paused || item.attention);
+  return Boolean(store[key]);
+}
+function toggleCard(store, item, event) {
+  event?.stopPropagation?.();
+  const key = String(item.id);
+  store[key] = !cardOpen(store, item);
+}
+function setAllCards(store, rows, open) {
+  for (const item of rows) store[String(item.id)] = open;
+}
+function scopeQuery() {
+  const search = params();
+  if (platform.value && departmentId.value) search.set("space_id", departmentId.value);
+  else if (platform.value) search.set("scope", "all");
+  else search.set("scope", "space");
+  return search;
+}
+function whenShort(value) {
+  if (!value) return "—";
+  return String(value).replace("T", " ").slice(0, 19);
 }
 const resourceItems = computed(() => [
   { label: "工具", value: summary.value?.resources?.tools || 0, to: "/tools" },
@@ -148,17 +247,25 @@ async function load() {
   } else {
     summaryQuery.set("scope", "space");
   }
+  const liveQuery = new URLSearchParams(summaryQuery);
   try {
-    const [board, info, page] = await Promise.all([
+    const [board, info, page, agents, flows] = await Promise.all([
       api(`/api/observability/summary?${summaryQuery}`),
       api("/api/system"),
       api(`/api/traces?${traceQuery}`),
+      api(`/api/observability/agents?${liveQuery}`),
+      api(`/api/observability/workflows?${liveQuery}`),
     ]);
     if (requestId !== loadId) return;
     summary.value = board;
     system.value = info;
     traces.value = page.items || [];
-    if (info?.skillbox) skillboxChecked.value = clockText(new Date());
+    agentBoard.value = agents;
+    flowBoard.value = flows;
+    const now = clockText(new Date());
+    agentChecked.value = now;
+    flowChecked.value = now;
+    if (info?.skillbox) skillboxChecked.value = now;
   } catch (err) {
     if (requestId === loadId) error.value = err.message;
   } finally {
@@ -179,20 +286,43 @@ async function refreshSkillbox() {
     skillboxChecked.value = "";
   }
 }
-function watchSkillbox() {
+async function refreshLiveBoards() {
+  if (document.visibilityState === "hidden") return;
+  try {
+    const query = scopeQuery();
+    const [agents, flows] = await Promise.all([
+      api(`/api/observability/agents?${query}`),
+      api(`/api/observability/workflows?${query}`),
+    ]);
+    agentBoard.value = agents;
+    flowBoard.value = flows;
+    const now = clockText(new Date());
+    agentChecked.value = now;
+    flowChecked.value = now;
+  } catch {
+    /* 保持上一帧，避免闪空 */
+  }
+}
+function watchLive() {
   window.clearInterval(skillTimer);
+  window.clearInterval(liveTimer);
   skillTimer = window.setInterval(refreshSkillbox, 1000);
+  liveTimer = window.setInterval(refreshLiveBoards, 3000);
 }
 function onVisible() {
-  if (document.visibilityState === "visible") refreshSkillbox();
+  if (document.visibilityState === "visible") {
+    refreshSkillbox();
+    refreshLiveBoards();
+  }
 }
 onMounted(() => {
   load();
-  watchSkillbox();
+  watchLive();
   document.addEventListener("visibilitychange", onVisible);
 });
 onUnmounted(() => {
   window.clearInterval(skillTimer);
+  window.clearInterval(liveTimer);
   document.removeEventListener("visibilitychange", onVisible);
 });
 </script>
@@ -200,7 +330,7 @@ onUnmounted(() => {
 <template>
   <section class="overview-page">
   <header class="overview-header">
-    <div><p class="kicker">运行观测 / OVERVIEW</p><h1>运行总览</h1><p class="sub">集中查看部门调用、资源分布与运行质量。</p></div>
+    <div><p class="kicker">运行观测 / OVERVIEW</p><h1>运行总览</h1><p class="sub">集中查看智能体与工作流实时状态、部门调用、资源分布与运行质量。</p></div>
     <label v-if="platform" class="field department-filter"><span>统计部门</span>
       <select aria-label="统计部门" v-model="departmentId" @change="load">
         <option value="">全部部门</option>
@@ -251,6 +381,228 @@ onUnmounted(() => {
       </ul>
     </div>
     <p v-if="skillbox.error" class="error" role="alert">{{ skillbox.error }}</p>
+  </section>
+  <section class="sheet agent-monitor" aria-label="智能体实时监控">
+    <div class="top">
+      <div>
+        <h2>智能体实时监控</h2>
+        <p class="sub">
+          每 3 秒刷新。{{ agentChecked ? `最近检查 ${agentChecked}` : "正在检查…" }}。
+          卡片统计跟随上方时间与部门范围；「执行中」看当前库状态。
+        </p>
+      </div>
+      <div class="monitor-toolbar">
+        <div class="agent-monitor-stats" v-if="agentBoard" aria-live="polite">
+          <span><b>{{ agentBoard.total || 0 }}</b> 总数</span>
+          <span><b>{{ agentBoard.running || 0 }}</b> 执行中</span>
+          <span><b>{{ agentBoard.ready || 0 }}</b> 可服务</span>
+          <span><b>{{ agentBoard.attention || 0 }}</b> 需关注</span>
+        </div>
+        <button class="ghost" type="button" :aria-expanded="agentSectionOpen" @click="agentSectionOpen = !agentSectionOpen">
+          {{ agentSectionOpen ? "折叠面板" : "展开面板" }}
+        </button>
+      </div>
+    </div>
+    <template v-if="agentSectionOpen">
+      <div class="row agent-filter-row">
+        <button
+          v-for="item in agentFilters"
+          :key="item.value"
+          class="ghost"
+          type="button"
+          :aria-pressed="agentFilter === item.value"
+          @click="agentFilter = item.value"
+        >{{ item.label }}</button>
+        <span class="monitor-spacer"></span>
+        <button class="ghost" type="button" @click="setAllCards(agentExpanded, agentCards, true)">全部展开</button>
+        <button class="ghost" type="button" @click="setAllCards(agentExpanded, agentCards, false)">全部收起</button>
+      </div>
+      <div v-if="agentCards.length" class="agent-board">
+        <article
+          v-for="item in agentCards"
+          :key="item.id"
+          class="agent-card"
+          :data-pulse="item.pulse"
+          :class="{ attention: item.attention, live: item.running > 0, collapsed: !cardOpen(agentExpanded, item) }"
+          role="link"
+          tabindex="0"
+          :aria-label="`打开智能体 ${item.name}`"
+          @click="openAgent(item)"
+          @keydown.enter.prevent="openAgent(item)"
+          @keydown.space.prevent="openAgent(item)"
+        >
+          <header class="agent-card-head">
+            <div>
+              <h3>{{ item.name }}</h3>
+              <p class="sub">{{ item.department }} · {{ item.key }}</p>
+            </div>
+            <div class="agent-card-head-actions" @click.stop>
+              <span class="agent-pulse" :data-pulse="item.pulse"><i></i>{{ item.pulse_label }}</span>
+              <button
+                class="ghost agent-fold"
+                type="button"
+                :aria-expanded="cardOpen(agentExpanded, item)"
+                :aria-label="cardOpen(agentExpanded, item) ? '收起卡片' : '展开卡片'"
+                @click="toggleCard(agentExpanded, item, $event)"
+              >{{ cardOpen(agentExpanded, item) ? "收起" : "展开" }}</button>
+            </div>
+          </header>
+          <p v-if="!cardOpen(agentExpanded, item)" class="agent-compact">
+            {{ versionText(item) }} · {{ item.model_name }} · 调用 {{ countText(item.calls) }}
+            <template v-if="item.alerts?.length"> · {{ item.alerts[0] }}</template>
+          </p>
+          <template v-else>
+            <p v-if="item.duty" class="agent-duty" :title="item.duty">{{ item.duty }}</p>
+            <p class="agent-version">{{ versionText(item) }} · {{ item.model_name }}</p>
+            <div class="agent-caps">
+              <span>工具 {{ item.tool_count }}</span>
+              <span>技能 {{ item.skill_count }}</span>
+              <span>MCP {{ item.mcp_count }}</span>
+            </div>
+            <dl class="agent-metrics">
+              <div><dt>窗口调用</dt><dd class="mono">{{ countText(item.calls) }}</dd></div>
+              <div><dt>成功率</dt><dd class="mono">{{ successText(item.success_rate) }}</dd></div>
+              <div><dt>花费</dt><dd class="mono">{{ moneyText(item.cost) }}</dd></div>
+              <div><dt>token</dt><dd class="mono">{{ countText(item.tokens) }}</dd></div>
+              <div><dt>均耗时</dt><dd class="mono">{{ item.calls ? durationText(item.latency_ms) : "—" }}</dd></div>
+              <div><dt>失败</dt><dd class="mono">{{ item.failed || 0 }}</dd></div>
+            </dl>
+            <p class="agent-last" v-if="item.last_at">
+              最近 {{ agentStatusText(item.last_status) }} · {{ whenShort(item.last_at) }}
+              <template v-if="item.last_input"> · {{ item.last_input }}</template>
+            </p>
+            <p class="agent-last" v-else>窗口内尚无调用</p>
+            <ul v-if="item.alerts?.length" class="agent-alerts">
+              <li v-for="(note, index) in item.alerts" :key="index">{{ note }}</li>
+            </ul>
+            <footer class="agent-card-foot" @click.stop>
+              <span class="sub">进入智能体配置</span>
+              <router-link class="ghost" :to="item.traces_href">轨迹</router-link>
+              <router-link v-if="item.pending_approvals" class="ghost" to="/approvals">审批 {{ item.pending_approvals }}</router-link>
+              <router-link v-if="item.last_trace_id" class="ghost" :to="`/traces/${item.last_trace_id}`">最近一次</router-link>
+            </footer>
+          </template>
+        </article>
+      </div>
+      <p v-else class="sub agent-empty">
+        {{ agentBoard?.total ? "当前筛选下没有智能体。" : "当前范围还没有智能体。" }}
+        <router-link to="/agents">去智能体页</router-link>
+      </p>
+    </template>
+  </section>
+  <section class="sheet agent-monitor flow-monitor" aria-label="工作流实时监控">
+    <div class="top">
+      <div>
+        <h2>工作流实时监控</h2>
+        <p class="sub">
+          每 3 秒刷新。{{ flowChecked ? `最近检查 ${flowChecked}` : "正在检查…" }}。
+          点卡片打开工作流执行对话框；统计跟随上方时间与部门范围。
+        </p>
+      </div>
+      <div class="monitor-toolbar">
+        <div class="agent-monitor-stats" v-if="flowBoard" aria-live="polite">
+          <span><b>{{ flowBoard.total || 0 }}</b> 总数</span>
+          <span><b>{{ flowBoard.running || 0 }}</b> 执行中</span>
+          <span><b>{{ flowBoard.paused || 0 }}</b> 暂停</span>
+          <span><b>{{ flowBoard.ready || 0 }}</b> 可执行</span>
+          <span><b>{{ flowBoard.attention || 0 }}</b> 需关注</span>
+        </div>
+        <button class="ghost" type="button" :aria-expanded="flowSectionOpen" @click="flowSectionOpen = !flowSectionOpen">
+          {{ flowSectionOpen ? "折叠面板" : "展开面板" }}
+        </button>
+      </div>
+    </div>
+    <template v-if="flowSectionOpen">
+      <div class="row agent-filter-row">
+        <button
+          v-for="item in flowFilters"
+          :key="item.value"
+          class="ghost"
+          type="button"
+          :aria-pressed="flowFilter === item.value"
+          @click="flowFilter = item.value"
+        >{{ item.label }}</button>
+        <span class="monitor-spacer"></span>
+        <button class="ghost" type="button" @click="setAllCards(flowExpanded, flowCards, true)">全部展开</button>
+        <button class="ghost" type="button" @click="setAllCards(flowExpanded, flowCards, false)">全部收起</button>
+      </div>
+      <div v-if="flowCards.length" class="agent-board">
+        <article
+          v-for="item in flowCards"
+          :key="item.id"
+          class="agent-card"
+          :data-pulse="item.pulse"
+          :class="{ attention: item.attention, live: item.running > 0 || item.paused > 0, collapsed: !cardOpen(flowExpanded, item) }"
+          role="link"
+          tabindex="0"
+          :aria-label="`打开工作流 ${item.name}`"
+          @click="openFlow(item)"
+          @keydown.enter.prevent="openFlow(item)"
+          @keydown.space.prevent="openFlow(item)"
+        >
+          <header class="agent-card-head">
+            <div>
+              <h3>{{ item.name }}</h3>
+              <p class="sub">{{ item.department }} · {{ item.kind_label }} · {{ item.release === "published" ? "已发布" : "草稿" }}</p>
+            </div>
+            <div class="agent-card-head-actions" @click.stop>
+              <span class="agent-pulse" :data-pulse="item.pulse"><i></i>{{ item.pulse_label }}</span>
+              <button
+                class="ghost agent-fold"
+                type="button"
+                :aria-expanded="cardOpen(flowExpanded, item)"
+                :aria-label="cardOpen(flowExpanded, item) ? '收起卡片' : '展开卡片'"
+                @click="toggleCard(flowExpanded, item, $event)"
+              >{{ cardOpen(flowExpanded, item) ? "收起" : "展开" }}</button>
+            </div>
+          </header>
+          <p v-if="!cardOpen(flowExpanded, item)" class="agent-compact">
+            节点 {{ item.node_count }} · 调用 {{ countText(item.calls) }}
+            <template v-if="item.schedule_enabled"> · 定时每 {{ item.schedule_minutes }} 分钟</template>
+            <template v-if="item.alerts?.length"> · {{ item.alerts[0] }}</template>
+          </p>
+          <template v-else>
+            <p class="agent-version">
+              {{ item.entry_agent ? `起点 ${item.entry_agent}` : "未配置起点" }}
+              <template v-if="item.schedule_enabled"> · 定时每 {{ item.schedule_minutes }} 分钟</template>
+              <template v-else> · 未开定时</template>
+            </p>
+            <div class="agent-caps">
+              <span>节点 {{ item.node_count }}</span>
+              <span>{{ item.kind_label }}</span>
+              <span>{{ item.enabled ? "启用" : "停用" }}</span>
+              <span v-if="item.schedule_enabled">已用 {{ countText(item.schedule_token_used) }} token</span>
+            </div>
+            <dl class="agent-metrics">
+              <div><dt>窗口执行</dt><dd class="mono">{{ countText(item.calls) }}</dd></div>
+              <div><dt>成功率</dt><dd class="mono">{{ successText(item.success_rate) }}</dd></div>
+              <div><dt>花费</dt><dd class="mono">{{ moneyText(item.cost) }}</dd></div>
+              <div><dt>token</dt><dd class="mono">{{ countText(item.tokens) }}</dd></div>
+              <div><dt>均耗时</dt><dd class="mono">{{ item.calls ? durationText(item.latency_ms) : "—" }}</dd></div>
+              <div><dt>失败</dt><dd class="mono">{{ item.failed || 0 }}</dd></div>
+            </dl>
+            <p class="agent-last" v-if="item.last_at">
+              最近 {{ agentStatusText(item.last_status) }} · {{ whenShort(item.last_at) }}
+              <template v-if="item.last_input"> · {{ item.last_input }}</template>
+            </p>
+            <p class="agent-last" v-else>窗口内尚无执行</p>
+            <p v-if="item.schedule_enabled && item.schedule_next_at" class="agent-last">下次定时 {{ whenShort(item.schedule_next_at) }}</p>
+            <ul v-if="item.alerts?.length" class="agent-alerts">
+              <li v-for="(note, index) in item.alerts" :key="index">{{ note }}</li>
+            </ul>
+            <footer class="agent-card-foot" @click.stop>
+              <span class="sub">打开工作流</span>
+              <router-link class="ghost" :to="item.runs_href">执行记录</router-link>
+              <router-link v-if="item.last_run_id" class="ghost" :to="`/workflow-runs?workflow_id=${item.id}`">最近一次</router-link>
+            </footer>
+          </template>
+        </article>
+      </div>
+      <p v-else class="sub agent-empty">
+        {{ flowBoard?.total ? "当前筛选下没有工作流。" : "当前范围还没有工作流。" }}
+        <router-link to="/workflows">去工作流页</router-link>
+      </p>
+    </template>
   </section>
   <div class="stats overview-metrics" v-if="summary">
     <router-link class="stat" to="/traces"><b>{{ formatCount(summary.traffic).value }}</b><span>调用总量{{ formatCount(summary.traffic).unit }}</span></router-link>
