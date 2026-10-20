@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api, session, stream } from "../api";
-import { prettyJson } from "../format";
+import { countText, moneyText, prettyJson } from "../format";
 import { useDesk, when, withScope, departmentNote } from "../useDesk";
 import Desk from "../components/Desk.vue";
 import Dialog from "../components/Dialog.vue";
@@ -26,9 +26,13 @@ const running = ref(false);
 const runOpen = ref(false);
 const runForm = ref(null);
 const draft = ref(null);
+const estimate = ref(null);
+const confirmOpen = ref(false);
+const pendingAction = ref("");
 const platform = computed(() => Boolean(session().user?.platform_admin));
 const columns = computed(() => [
   { key: "name", label: "名称" },
+  { key: "release", label: "发布", format: (value) => (value === "published" ? "已发布" : "草稿") },
   { key: "enabled", label: "启用", format: (value) => (value ? "启用" : "停用") },
   { key: "node_count", label: "节点" },
   { key: "schedule_enabled", label: "定时", format: (_value, row) => (row.schedule_enabled ? `每 ${row.schedule_minutes} 分钟` : "—") },
@@ -43,7 +47,7 @@ const columns = computed(() => [
 ]);
 
 function blank() {
-  return { id: null, name: "", enabled: true, mode: "agents", legacy: false, nodes: [], edges: [] };
+  return { id: null, name: "", enabled: true, release: "draft", mode: "agents", legacy: false, nodes: [], edges: [] };
 }
 function statusText(value) {
   return (
@@ -72,6 +76,7 @@ function fromRow(row) {
     id: row.id,
     name: row.name,
     enabled: row.enabled !== false,
+    release: row.release || "draft",
     mode: definition.kind === "autonomous" ? "autonomous" : "agents",
     legacy: !agentNodes.length && (definition.nodes || []).length > 0,
     nodes: agentNodes.map((node, index) => ({
@@ -330,15 +335,19 @@ async function openRun(row) {
     mcp_ids: Array.isArray(node.mcp_ids) ? [...node.mcp_ids] : null,
     skill_ids: Array.isArray(node.skill_ids) ? [...node.skill_ids] : null,
   }));
+  const taskFromQuery = String(route.query.task || "").trim();
   runForm.value = {
     id: row.id,
     name: row.name,
+    release: row.release || "draft",
     mode: definition.kind === "autonomous" ? "autonomous" : "agents",
     filling: true,
     scheduled: Boolean(row.schedule_enabled),
     everyMinutes: row.schedule_minutes || 60,
     nextAt: row.schedule_next_at || "",
-    message: row.schedule_enabled && row.schedule_message ? row.schedule_message : runMessage.value,
+    tokenBudget: row.schedule_token_budget || 0,
+    tokenUsed: row.schedule_token_used || 0,
+    message: taskFromQuery || (row.schedule_enabled && row.schedule_message ? row.schedule_message : runMessage.value),
     edges: (definition.edges || []).map((edge) => ({ src: edge.src, dst: edge.dst })),
     nodes,
   };
@@ -369,15 +378,18 @@ async function saveSchedule(enabled) {
       schedule_minutes: Math.max(1, Number(form.everyMinutes) || 60),
       schedule_message: enabled ? form.message.trim() : "",
       schedule_nodes: form.nodes.map(nodePayload),
+      schedule_token_budget: Math.max(0, Number(form.tokenBudget) || 0),
     },
   });
   form.scheduled = Boolean(saved.schedule_enabled);
   form.everyMinutes = saved.schedule_minutes || form.everyMinutes;
   form.nextAt = saved.schedule_next_at || "";
+  form.tokenBudget = saved.schedule_token_budget || 0;
+  form.tokenUsed = saved.schedule_token_used || 0;
   await desk.refresh();
   return saved;
 }
-async function startRun() {
+async function prepareConfirm(action) {
   if (!runForm.value?.message?.trim()) {
     desk.error.value = "请填写问题";
     return;
@@ -387,7 +399,23 @@ async function startRun() {
     desk.error.value = "定时间隔至少 1 分钟";
     return;
   }
-  if (runForm.value.scheduled) {
+  desk.error.value = "";
+  try {
+    estimate.value = await api(`/api/workflows/${runForm.value.id}/run-estimate`);
+    pendingAction.value = action;
+    confirmOpen.value = true;
+  } catch (err) {
+    desk.error.value = err.message;
+  }
+}
+async function startRun() {
+  await prepareConfirm(runForm.value?.scheduled ? "schedule" : "run");
+}
+async function confirmRun() {
+  confirmOpen.value = false;
+  const action = pendingAction.value;
+  pendingAction.value = "";
+  if (action === "schedule") {
     try {
       const saved = await saveSchedule(true);
       runOutput.value = `已按每 ${saved.schedule_minutes} 分钟执行，下次 ${saved.schedule_next_at || "稍后"}`;
@@ -403,6 +431,14 @@ async function startRun() {
     return;
   }
   await play(runForm.value.id, runForm.value.message.trim(), runForm.value.nodes.map(nodePayload));
+}
+async function publish(row) {
+  try {
+    await api(`/api/workflows/${row.id}/publish`, { method: "POST" });
+    await desk.refresh();
+  } catch (err) {
+    desk.error.value = err.message;
+  }
 }
 async function control(row, action) {
   desk.error.value = "";
@@ -451,6 +487,19 @@ onMounted(async () => {
     desk.error.value = err.message;
   }
   await desk.refresh();
+  const openId = Number(route.query.open || 0);
+  if (openId) {
+    const row = desk.pageData.value.items.find((item) => item.id === openId);
+    if (row) openRun(row);
+    else {
+      try {
+        const detail = await api(`/api/workflows/${openId}`);
+        openRun(detail);
+      } catch (err) {
+        desk.error.value = err.message;
+      }
+    }
+  }
 });
 watch(() => route.query.usable_space, () => desk.refresh());
 </script>
@@ -467,7 +516,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
     :rows="desk.pageData.value.items"
     :total="desk.pageData.value.total"
     :query="desk.query"
-    :exact-fields="[{ value: 'name', label: '名称' }, { value: 'status', label: '状态' }]"
+    :exact-fields="[{ value: 'name', label: '名称' }, { value: 'status', label: '状态' }, { value: 'release', label: '发布' }]"
     :error="desk.error.value"
     :selected="desk.selected.value"
     @update:selected="desk.selected.value = $event"
@@ -480,6 +529,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
   >
     <template #extra="{ row }">
       <button class="ghost" type="button" @click="openRun(row)">执行</button>
+      <button v-if="row.release !== 'published'" class="ghost" type="button" @click="publish(row)">发布</button>
       <button class="ghost" type="button" @click="control(row, 'pause')">暂停</button>
       <button class="ghost" type="button" @click="control(row, 'stop')">停止</button>
       <button class="ghost" type="button" @click="control(row, 'resume')">继续</button>
@@ -497,6 +547,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
       </select>
     </label>
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用。停用后不能执行，也不能继续。</label>
+    <p class="sub">当前为{{ form.release === "published" ? "已发布" : "草稿" }}。改节点保存后会回到草稿，需再点「发布」后操作者才能执行。</p>
     <p v-if="form.mode === 'autonomous'" class="sub">调度者会阅读问题，以及每个节点上写的提示词和职责，再决定拆开交给谁。</p>
     <p v-if="form.legacy" class="sub">这份工作流还是旧的意图节点。拖入智能体并保存后，改为智能体之间流转。</p>
     <div class="flow">
@@ -574,10 +625,12 @@ watch(() => route.query.usable_space, () => desk.refresh());
     </template>
   </Dialog>
   <Dialog wide :open="runOpen" mode="run" :title="runForm?.name || '执行'" @close="runOpen = false">
+    <p class="sub">{{ runForm?.release === "published" ? "已发布" : "草稿（操作者需发布后才能执行）" }}</p>
     <label class="field"><span>问题</span><textarea v-model="runForm.message" rows="3" placeholder="这次要完成的问题" /></label>
-    <label class="check"><input type="checkbox" v-model="runForm.scheduled" /> 定时执行。勾选后按间隔重复这次的问题和节点配置，不立即开工。</label>
+    <label class="check"><input type="checkbox" v-model="runForm.scheduled" /> 定时执行。勾选后按间隔重复这次的问题和节点配置，不立即开工。需已发布。</label>
     <label v-if="runForm?.scheduled" class="field"><span>间隔（分钟）</span><input v-model.number="runForm.everyMinutes" type="number" min="1" step="1" /></label>
-    <p v-if="runForm?.scheduled && runForm.nextAt" class="sub">下次执行 {{ runForm.nextAt }}</p>
+    <label v-if="runForm?.scheduled" class="field"><span>定时 token 上限（0 不限）</span><input v-model.number="runForm.tokenBudget" type="number" min="0" step="1" /></label>
+    <p v-if="runForm?.scheduled" class="sub">已用 {{ countText(runForm.tokenUsed || 0) }} token<template v-if="runForm.nextAt"> · 下次 {{ runForm.nextAt }}</template></p>
     <section v-for="node in runForm?.nodes || []" :key="node.id" class="node-setup">
       <p class="kicker">{{ agentName(node.agent_id) }}</p>
       <label class="field"><span>提示词</span><textarea v-model="node.prompt" rows="4" placeholder="会按本次任务自动填写，也可以再改" /></label>
@@ -600,7 +653,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
       </div>
     </section>
     <template #footer>
-      <button class="btn" type="button" :disabled="running" @click="startRun">{{ running ? "运行中" : (runForm?.scheduled ? "保存定时" : "开始执行") }}</button>
+      <button class="btn" type="button" :disabled="running" @click="startRun">{{ running ? "运行中" : (runForm?.scheduled ? "确认定时" : "确认执行") }}</button>
       <div v-if="liveLogs.length" class="live-log">
         <article v-for="(line, index) in liveLogs" :key="index" class="log-line">
           <strong>{{ line.event }}</strong>
@@ -617,6 +670,22 @@ watch(() => route.query.usable_space, () => desk.refresh());
           </template>
         </article>
       </div>
+    </template>
+  </Dialog>
+  <Dialog :open="confirmOpen" mode="view" :title="pendingAction === 'schedule' ? '确认定时' : '确认执行'" @close="confirmOpen = false">
+    <p class="sub">请确认将使用的模型与费用参考，再开工。</p>
+    <p class="sub">部门剩余 token {{ countText(estimate?.space_token_remaining || 0) }} / {{ countText(estimate?.space_token_budget || 0) }}</p>
+    <p class="sub">费用参考约 {{ moneyText(estimate?.estimated_cost_hint || 0) }}（按每节点约 1千入+1千出 token，单价为元/百万 token）</p>
+    <ul class="sub" v-if="estimate?.agents?.length">
+      <li v-for="item in estimate.agents" :key="`${item.node_id}-${item.agent_id}`">
+        {{ item.agent_name }} · {{ item.model_name }}
+        <template v-if="item.version != null"> · v{{ item.version }}</template>
+        · 入 {{ moneyText(item.price_in) }}/百万 · 出 {{ moneyText(item.price_out) }}/百万
+      </li>
+    </ul>
+    <template #footer>
+      <button class="btn" type="button" :disabled="running" @click="confirmRun">确认</button>
+      <button class="ghost" type="button" @click="confirmOpen = false">取消</button>
     </template>
   </Dialog>
 </template>

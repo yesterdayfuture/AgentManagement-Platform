@@ -49,6 +49,7 @@ def _workflow_dict(db, row: Workflow) -> dict:
         "name": row.name,
         "agent_id": row.agent_id,
         "status": row.status,
+        "release": row.release or "draft",
         "enabled": bool(row.enabled),
         "origin": row.origin or "department",
         "definition": definition,
@@ -60,13 +61,48 @@ def _workflow_dict(db, row: Workflow) -> dict:
         "schedule_message": row.schedule_message or "",
         "schedule_nodes": load(row.schedule_nodes_json, []),
         "schedule_next_at": stamp(row.schedule_next_at) if row.schedule_next_at else "",
+        "schedule_token_budget": int(row.schedule_token_budget or 0),
+        "schedule_token_used": int(row.schedule_token_used or 0),
         "created_at": stamp(row.created_at),
         **_attribution(db, row.created_by, row.space_id),
     }
 
 
+def _run_stop_reason(status: str, error: str = "") -> str:
+    return {
+        "completed": "正常结束",
+        "limited": "达到轮次上限",
+        "paused": "已暂停",
+        "stopped": "已停止",
+        "failed": error or "执行失败",
+        "blocked": "已熔断",
+        "denied": "网关拒绝",
+        "suspended": "待审批",
+        "cancelled": "已取消",
+        "running": "执行中",
+    }.get(status, status or "")
+
+
 def _run_dict(db, row: WorkflowRun) -> dict:
     workflow = db.get(Workflow, row.workflow_id)
+    logs = load(row.log_json, [])
+    tool_count = sum(1 for item in logs if isinstance(item, dict) and item.get("event") == "工具")
+    cost = 0.0
+    tokens = 0
+    version = None
+    stop_reason = _run_stop_reason(row.status)
+    if row.trace_id:
+        trace = db.get(Trace, row.trace_id)
+        if trace is not None:
+            cost = round(float(trace.cost or 0), 6)
+            tokens = int(trace.tokens_in or 0) + int(trace.tokens_out or 0)
+            stop_reason = _run_stop_reason(row.status or trace.status, trace.error or "")
+            if trace.version_id:
+                ver = db.get(AgentVersion, trace.version_id)
+                if ver is not None:
+                    version = ver.number
+            if not tool_count:
+                tool_count = db.query(TraceStep).filter_by(trace_id=trace.id, kind="execute").count()
     return {
         "id": row.id,
         "workflow_id": row.workflow_id,
@@ -79,10 +115,70 @@ def _run_dict(db, row: WorkflowRun) -> dict:
         "output": row.output_text,
         "cursor": row.cursor,
         "duration_ms": row.duration_ms,
-        "logs": load(row.log_json, []),
+        "logs": logs,
         "files": sorted(project_files(row)),
+        "cost": cost,
+        "tokens": tokens,
+        "tool_count": tool_count,
+        "version": version,
+        "stop_reason": stop_reason,
         "started_at": stamp(row.started_at),
         "finished_at": stamp(row.finished_at),
+    }
+
+
+def _can_run_release(ctx, row: Workflow) -> None:
+    """操作者只能执行已发布图；构建者与管理员可测草稿。"""
+    release = row.release or "draft"
+    if release == "published":
+        return
+    if ctx.role in {"builder", "admin"} or is_platform(ctx.user):
+        return
+    raise HTTPException(403, "操作者只能执行已发布的工作流，请先由构建者发布")
+
+
+def _estimate_workflow(db, ctx, row: Workflow) -> dict:
+    definition = load(row.definition_json, {})
+    nodes = [node for node in (definition.get("nodes") or []) if node.get("type") == "agent" or node.get("agent_id")]
+    agents = []
+    hint_cost = 0.0
+    for node in nodes:
+        agent = db.get(Agent, int(node.get("agent_id") or 0))
+        if agent is None:
+            continue
+        version = _latest(db, agent.id)
+        model = db.get(ModelEndpoint, version.model_id) if version and version.model_id else None
+        if model is not None:
+            # 与 gateway.cost_parts 一致：单价为元/百万 token；参考按每节点 1千入 + 1千出。
+            hint_cost += (1000 * float(model.price_in or 0) + 1000 * float(model.price_out or 0)) / 1_000_000
+        agents.append(
+            {
+                "node_id": node.get("id") or "",
+                "agent_id": agent.id,
+                "agent_name": agent.name,
+                "version": version.number if version else None,
+                "model_id": model.id if model else None,
+                "model_name": model.name if model else "按任务自动选",
+                "price_in": model.price_in if model else 0,
+                "price_out": model.price_out if model else 0,
+                "quota_remaining": None
+                if not model or not (model.quota_limit or 0)
+                else round(max(0, model.quota_limit - (model.quota_used or 0)), 6),
+            }
+        )
+    space = db.get(Space, row.space_id) or ctx.space
+    return {
+        "workflow_id": row.id,
+        "name": row.name,
+        "release": row.release or "draft",
+        "agents": agents,
+        "estimated_cost_hint": round(hint_cost, 6),
+        "space_token_budget": int(space.token_budget or 0),
+        "space_token_used": int(space.token_used or 0),
+        "space_token_remaining": max(0, int(space.token_budget or 0) - int(space.token_used or 0)),
+        "schedule_token_budget": int(row.schedule_token_budget or 0),
+        "schedule_token_used": int(row.schedule_token_used or 0),
+        "note": "费用按元/百万 token 估算，每节点按约 1千入+1千出；实际以执行为准。",
     }
 
 
@@ -111,7 +207,7 @@ def list_workflows(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = De
         desk,
         order=Workflow.id.desc(),
         text=[Workflow.name, Workflow.status],
-        exact={"name": Workflow.name, "status": Workflow.status},
+        exact={"name": Workflow.name, "status": Workflow.status, "release": Workflow.release},
         time_col=Workflow.created_at,
     )
 
@@ -123,6 +219,9 @@ def create_workflow(body: WorkflowIn, ctx=Depends(get_context), db=Depends(get_d
     if not body.definition.get("nodes"):
         raise HTTPException(400, "工作流没有节点")
     origin = "platform" if is_platform(ctx.user) else "department"
+    release = (body.release or "draft").strip()
+    if release not in {"draft", "published"}:
+        raise HTTPException(400, "发布状态只能是 draft 或 published")
     row = Workflow(
         space_id=agent.space_id,
         origin=origin,
@@ -130,6 +229,7 @@ def create_workflow(body: WorkflowIn, ctx=Depends(get_context), db=Depends(get_d
         name=body.name,
         definition_json=dump(body.definition),
         enabled=body.enabled,
+        release=release,
         created_by=ctx.user.id,
     )
     db.add(row)
@@ -156,12 +256,47 @@ def patch_workflow(workflow_id: int, body: WorkflowPatch, ctx=Depends(get_contex
         if not body.definition.get("nodes"):
             raise HTTPException(400, "工作流没有节点")
         row.definition_json = dump(body.definition)
+        if (row.release or "draft") == "published":
+            row.release = "draft"
+    if body.release is not None:
+        release = body.release.strip()
+        if release not in {"draft", "published"}:
+            raise HTTPException(400, "发布状态只能是 draft 或 published")
+        row.release = release
+    if body.schedule_token_budget is not None:
+        row.schedule_token_budget = max(0, int(body.schedule_token_budget))
     if any(item is not None for item in (body.schedule_enabled, body.schedule_minutes, body.schedule_message, body.schedule_nodes)):
-        _apply_schedule(row, body)
+        _apply_schedule(db, row, body)
     return _workflow_dict(db, row)
 
 
-def _apply_schedule(row: Workflow, body: WorkflowPatch) -> None:
+@router.post("/api/workflows/{workflow_id}/publish")
+def publish_workflow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    require(ctx, "builder")
+    row = _load_workflow(db, ctx, workflow_id, write=True)
+    definition = load(row.definition_json, {})
+    if not definition.get("nodes"):
+        raise HTTPException(400, "工作流没有节点，不能发布")
+    row.release = "published"
+    audit(db, ctx.space.id, ctx.user.username, "workflow.publish", row.name)
+    return _workflow_dict(db, row)
+
+
+@router.get("/api/workflows/{workflow_id}/run-estimate")
+def run_estimate(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    require(ctx, "operator")
+    row = _load_workflow(db, ctx, workflow_id)
+    return _estimate_workflow(db, ctx, row)
+
+
+@router.get("/api/workflows/{workflow_id}")
+def get_workflow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    require(ctx, "viewer")
+    row = _load_workflow(db, ctx, workflow_id)
+    return _workflow_dict(db, row)
+
+
+def _apply_schedule(db, row: Workflow, body: WorkflowPatch) -> None:
     """打开定时后，按间隔重复执行这次填写的问题和节点配置。"""
     enabled = row.schedule_enabled if body.schedule_enabled is None else body.schedule_enabled
     minutes = int(row.schedule_minutes or 0) if body.schedule_minutes is None else int(body.schedule_minutes)
@@ -172,6 +307,14 @@ def _apply_schedule(row: Workflow, body: WorkflowPatch) -> None:
             raise HTTPException(400, "定时执行需要填写问题")
         if minutes < 1:
             raise HTTPException(400, "定时间隔至少 1 分钟")
+        if (row.release or "draft") != "published":
+            raise HTTPException(400, "请先发布工作流，再开启定时")
+        space = db.get(Space, row.space_id)
+        if space is not None and space.token_used >= space.token_budget:
+            raise HTTPException(409, "部门 token 额度已用尽，不能开启定时")
+        budget = int(row.schedule_token_budget or 0)
+        if budget > 0 and int(row.schedule_token_used or 0) >= budget:
+            raise HTTPException(409, "定时 token 额度已用尽，请提高上限或清零用量后再开启")
         row.schedule_enabled = True
         row.schedule_minutes = minutes
         row.schedule_message = str(message).strip()
@@ -298,6 +441,7 @@ def run_flow(workflow_id: int, body: RunIn, request: Request, ctx=Depends(get_co
     row = _load_workflow(db, ctx, workflow_id)
     if not row.enabled:
         raise HTTPException(409, "工作流未启用")
+    _can_run_release(ctx, row)
     definition = _merge_node_setup(load(row.definition_json, {}), body.nodes) if body.nodes else None
     if body.stream:
         return _stream_workflow(request, ctx, row.id, body, definition)

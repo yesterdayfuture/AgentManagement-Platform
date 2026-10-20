@@ -195,7 +195,7 @@ watch(() => route.query.space_id, () => members.refresh());
       <label class="field"><span>脱敏字段，顿号分隔</span><input v-model="form.mask" /></label>
       <label class="field"><span>隔离维度</span><input v-model="form.isolation" /></label>
       <label class="field"><span>记忆保留天数</span><input v-model.number="form.retention_days" type="number" /></label>
-      <label class="field"><span>令牌额度</span><input v-model.number="form.token_budget" type="number" /></label>
+      <label class="field"><span>token 额度</span><input v-model.number="form.token_budget" type="number" /></label>
     </template>
     <template v-else>
       <p>{{ form.action }} · {{ form.actor }}</p>

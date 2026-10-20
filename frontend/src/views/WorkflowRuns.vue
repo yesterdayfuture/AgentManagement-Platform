@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "../api";
 import { renderMarkdown } from "../markdown";
-import { durationText, prettyJson } from "../format";
+import { countText, durationText, moneyText, prettyJson } from "../format";
 import { useDesk, when } from "../useDesk";
 import Desk from "../components/Desk.vue";
 import Dialog from "../components/Dialog.vue";
@@ -17,6 +17,10 @@ const columns = [
   { key: "workflow_name", label: "工作流" },
   { key: "message", label: "问题", format: (value) => brief(value) },
   { key: "status", label: "状态", format: (value) => statusText(value) },
+  { key: "stop_reason", label: "停止原因", format: (value) => value || "—" },
+  { key: "tokens", label: "token", format: (value) => (value ? countText(value) : "—") },
+  { key: "cost", label: "花费", format: (value) => (value ? moneyText(value) : "—") },
+  { key: "tool_count", label: "工具", format: (value) => (value ? String(value) : "—") },
   { key: "environment", label: "环境" },
   { key: "duration_ms", label: "总耗时", format: (value) => duration(value) },
   { key: "actor", label: "执行人" },
@@ -146,9 +150,14 @@ onMounted(() => {
   />
   <Dialog wide :open="open" mode="view" :title="detail?.workflow_name || '执行详情'" @close="open = false">
     <p class="sub" v-if="detail">
-      {{ statusText(detail.status) }} · {{ detail.environment }} · 总耗时 {{ duration(detail.duration_ms) }} · {{ detail.actor || "—" }}
+      {{ statusText(detail.status) }} · {{ detail.stop_reason || "—" }} · {{ detail.environment }} · 总耗时 {{ duration(detail.duration_ms) }} · {{ detail.actor || "—" }}
+    </p>
+    <p class="sub" v-if="detail">
+      <template v-if="detail.version != null">版本 v{{ detail.version }} · </template>
+      工具 {{ detail.tool_count || 0 }} · token {{ countText(detail.tokens || 0) }} · 花费 {{ moneyText(detail.cost || 0) }}
     </p>
     <p class="sub" v-if="detail">开始 {{ detail.started_at || "—" }} · 结束 {{ detail.finished_at || "仍在进行" }}</p>
+    <p class="sub" v-if="detail?.trace_id"><router-link :to="`/traces/${detail.trace_id}`">查看轨迹</router-link> · <router-link :to="`/workflows?open=${detail.workflow_id}&task=${encodeURIComponent(detail.message || '')}`">原工作流</router-link></p>
     <label class="field"><span>问题</span><textarea :value="detail?.message || ''" readonly rows="4" /></label>
     <p class="kicker">最终输出</p>
     <div class="md" v-html="markdown(detail?.output || '')"></div>

@@ -2041,6 +2041,10 @@ def test_workflow_schedule_runs_saved_question(client, app):
     )
     assert created.status_code == 200, created.text
     flow_id = created.json()["id"]
+    assert created.json()["release"] == "draft"
+    published = client.post(f"/api/workflows/{flow_id}/publish", headers=headers)
+    assert published.status_code == 200, published.text
+    assert published.json()["release"] == "published"
     scheduled = client.patch(
         f"/api/workflows/{flow_id}",
         headers=headers,
@@ -2049,6 +2053,7 @@ def test_workflow_schedule_runs_saved_question(client, app):
             "schedule_minutes": 15,
             "schedule_message": "只回复已收到",
             "schedule_nodes": [{"agent_id": agent_id, "node_id": "a", "prompt": "只回复已收到", "tool_names": [], "knowledge_ids": [], "mcp_ids": []}],
+            "schedule_token_budget": 100000,
         },
     )
     assert scheduled.status_code == 200, scheduled.text
@@ -2096,12 +2101,22 @@ def test_chat_workflow_stays_out_until_approved(client, monkeypatch):
     assert "入职交接" in drafted.json()["messages"][-1]["content"]
     listed = client.get("/api/workflows", headers=headers, params={"page": 1, "q": "入职交接"})
     assert listed.json()["total"] == 0
+    renamed = client.patch(
+        f"/api/approvals/{approval_id}",
+        headers=headers,
+        json={"name": "入职交接修订", "definition": drafted.json()["workflow_draft"]["definition"]},
+    )
+    assert renamed.status_code == 200, renamed.text
+    assert renamed.json()["payload"]["name"] == "入职交接修订"
     decided = client.post(f"/api/approvals/{approval_id}/decision", headers=headers, json={"decision": "approved", "channel": "web", "comment": "核对通过"})
     assert decided.status_code == 200, decided.text
     assert decided.json()["workflow_id"]
-    again = client.get("/api/workflows", headers=headers, params={"page": 1, "q": "入职交接"})
+    again = client.get("/api/workflows", headers=headers, params={"page": 1, "q": "入职交接修订"})
     assert again.json()["total"] == 1
-    assert again.json()["items"][0]["name"] == "入职交接"
+    assert again.json()["items"][0]["name"] == "入职交接修订"
+    assert again.json()["items"][0]["release"] == "published"
+    assert drafted.json()["workflow_draft"]["task"]
+    assert drafted.json()["messages"][-1].get("approval_id") == approval_id
 
 
 def test_skill_zip_reads_markdown(client):

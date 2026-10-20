@@ -76,17 +76,75 @@ def _brief(db, row: ChatSession, snippet: str = "", viewer_id: int | None = None
     }
 
 
-def _message_dict(row: ChatMessage) -> dict:
-    return {
+def _stop_reason(row: ChatMessage, trace: Trace | None) -> str:
+    if row.limited or (trace and trace.status == "limited"):
+        return "达到轮次上限，可继续执行"
+    status = (row.status or (trace.status if trace else "") or "").strip()
+    if status == "paused":
+        return "待审批"
+    if status == "cancelled":
+        return "已取消"
+    if status == "denied":
+        return "网关拒绝"
+    if status == "blocked":
+        return "已熔断"
+    if status == "failed":
+        return (trace.error if trace and trace.error else "") or "执行失败"
+    if status == "completed":
+        return "正常结束"
+    if status == "running":
+        return "执行中"
+    return status or ""
+
+
+def _message_dict(db, row: ChatMessage) -> dict:
+    tools = load(row.tool_calls_json, [])
+    data = {
         "id": row.id,
         "role": row.role,
         "content": row.content,
         "trace_id": row.trace_id,
-        "tool_calls": load(row.tool_calls_json, []),
+        "tool_calls": tools,
+        "tool_count": len(tools),
         "status": row.status,
         "limited": row.limited,
+        "cost": 0,
+        "tokens": 0,
+        "version": None,
+        "stop_reason": "",
+        "approval_id": None,
+        "approval_status": "",
+        "workflow_id": None,
+        "workflow_draft": None,
         "created_at": stamp(row.created_at),
     }
+    if not row.trace_id:
+        return data
+    trace = db.get(Trace, row.trace_id)
+    if trace is not None:
+        data["cost"] = round(float(trace.cost or 0), 6)
+        data["tokens"] = int(trace.tokens_in or 0) + int(trace.tokens_out or 0)
+        data["status"] = data["status"] or trace.status
+        if trace.version_id:
+            version = db.get(AgentVersion, trace.version_id)
+            if version is not None:
+                data["version"] = version.number
+        data["stop_reason"] = _stop_reason(row, trace)
+    approval = db.query(Approval).filter_by(trace_id=row.trace_id).order_by(Approval.id.desc()).first()
+    if approval is not None:
+        payload = load(approval.payload_json, {})
+        data["approval_id"] = approval.id
+        data["approval_status"] = approval.status
+        data["workflow_id"] = payload.get("workflow_id")
+        if approval.tool_name == "工作流":
+            data["workflow_draft"] = {
+                "name": payload.get("name") or "",
+                "summary": payload.get("summary") or "",
+                "task": payload.get("task") or "",
+                "definition": payload.get("definition") or {},
+                "status": approval.status,
+            }
+    return data
 
 
 @router.get("/api/chats")
@@ -137,7 +195,7 @@ def get_chat(session_id: str, ctx=Depends(get_context), db=Depends(get_db)):
     row = _load_session(db, ctx, session_id)
     messages = db.query(ChatMessage).filter_by(session_id=row.id).order_by(ChatMessage.id.asc()).all()
     data = _brief(db, row, viewer_id=ctx.user.id)
-    data["messages"] = [_message_dict(item) for item in messages]
+    data["messages"] = [_message_dict(db, item) for item in messages]
     return data
 
 
@@ -216,7 +274,7 @@ def _save_turn(db, row: ChatSession, text: str, result: dict, viewer_id: int) ->
     db.flush()
     messages = db.query(ChatMessage).filter_by(session_id=row.id).order_by(ChatMessage.id.asc()).all()
     data = _brief(db, row, viewer_id=viewer_id)
-    data["messages"] = [_message_dict(item) for item in messages]
+    data["messages"] = [_message_dict(db, item) for item in messages]
     data["result"] = {
         "trace_id": result.get("trace_id") or "",
         "status": result.get("status") or "",
@@ -428,6 +486,7 @@ def propose_workflow(session_id: str, body: ChatMessageIn, ctx=Depends(get_conte
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     draft["task"] = text
+    draft["chat_session_id"] = row.id
     trace = Trace(
         id=uuid.uuid4().hex,
         space_id=space.id,
@@ -458,7 +517,7 @@ def propose_workflow(session_id: str, body: ChatMessageIn, ctx=Depends(get_conte
     output = (
         f"已按任务起草工作流「{draft['name']}」，尚未加入工作流管理。\n\n"
         f"{draft['summary']}\n\n"
-        f"请到审批中心核对节点和连线。审批单 #{approval.id} 通过后，才会出现在工作流列表。"
+        f"可在审批中心改名或调整节点后再通过。审批单 #{approval.id} 通过后，才会以已发布状态出现在工作流列表。"
     )
     saved = _save_turn(
         db,

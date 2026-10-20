@@ -86,7 +86,7 @@
 
 ## 执行：`_run_autonomous`
 
-同文件。`run_workflow` 在空间令牌未超限、且 `definition.kind == "autonomous"` 时进入它。
+同文件。`run_workflow` 在空间 token 额度未超限、且 `definition.kind == "autonomous"` 时进入它。操作者执行前工作流须为已发布（`release=published`）；构建者可测草稿。
 
 1. 只保留 `type == "agent"` 的节点。没有这种节点时拒绝，提示「工作流没有可调度的智能体」。
 2. `_entry_node` 取调度者：`entry` 在节点里就用它，否则用没有入边的节点。
@@ -141,6 +141,8 @@
 - 日志事件是「调用」。
 
 要把固定流转改成自主调度，不需要换节点类型。把 `kind` 改成 `autonomous`，并保证 `entry` 是调度者。已保存的固定步骤工作流保持 `kind` 为 `agents` 时，行为不变。
+
+若工作流是从「模型问答 → 生成工作流」起草的，模型输入与审批流程见 [ask-workflow.md](ask-workflow.md)。
 
 ## 想让规划更智能时改哪里
 

@@ -64,12 +64,28 @@ def _model_dict(db, row: ModelEndpoint) -> dict:
     }
 
 
-def _store_key(db, ctx, name: str, api_key: str) -> int:
-    row = Secret(space_id=ctx.space.id, name=f"{name}-key", ciphertext=encrypt(api_key), created_by=ctx.user.id)
+def _store_key(db, ctx, name: str, api_key: str, space_id: int | None = None) -> int:
+    """密钥落在模型所属部门；平台模型没有部门时记入当前查看的部门保险库。"""
+    home = space_id if space_id is not None else ctx.space.id
+    row = Secret(space_id=home, name=f"{name}-key", ciphertext=encrypt(api_key), created_by=ctx.user.id)
     db.add(row)
     db.flush()
-    audit(db, ctx.space.id, ctx.user.username, "secret.create", row.name)
+    audit(db, home, ctx.user.username, "secret.create", row.name)
     return row.id
+
+
+def _drop_orphan_secret(db, secret_id: int | None) -> None:
+    """密钥被替换后，若没有模型或 MCP 再引用，则删掉，避免孤儿密文。"""
+    if not secret_id:
+        return
+    if db.query(ModelEndpoint).filter_by(secret_id=secret_id).count():
+        return
+    if db.query(McpServer).filter_by(secret_id=secret_id).count():
+        return
+    row = db.get(Secret, secret_id)
+    if row is not None:
+        audit(db, row.space_id, "system", "secret.delete", row.name, "替换后清理")
+        db.delete(row)
 
 
 def _load_model(db, ctx, model_id: int, write: bool = False) -> ModelEndpoint:
@@ -98,10 +114,10 @@ def list_models(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Depen
 @router.post("/api/models")
 def create_model(body: ModelIn, ctx=Depends(get_context), db=Depends(get_db)):
     require(ctx, "builder")
+    space_id, origin = _own(ctx)
     secret_id = body.secret_id
     if body.api_key.strip():
-        secret_id = _store_key(db, ctx, body.name, body.api_key.strip())
-    space_id, origin = _own(ctx)
+        secret_id = _store_key(db, ctx, body.name, body.api_key.strip(), space_id=space_id)
     row = ModelEndpoint(
         space_id=space_id,
         origin=origin,
@@ -137,7 +153,10 @@ def patch_model(model_id: int, body: ModelPatch, ctx=Depends(get_context), db=De
     if body.task_types is not None:
         row.task_types_json = dump(body.task_types)
     if body.api_key and body.api_key.strip():
-        row.secret_id = _store_key(db, ctx, row.name, body.api_key.strip())
+        old_secret = row.secret_id
+        row.secret_id = _store_key(db, ctx, row.name, body.api_key.strip(), space_id=row.space_id)
+        db.flush()
+        _drop_orphan_secret(db, old_secret)
     if body.quota_limit is not None and body.quota_limit != (row.quota_limit or 0):
         require(ctx, "admin")
         row.quota_limit = max(0, body.quota_limit)
@@ -148,9 +167,12 @@ def patch_model(model_id: int, body: ModelPatch, ctx=Depends(get_context), db=De
 def _drop_model(db, ctx, model_id: int) -> None:
     require(ctx, "builder")
     row = _load_model(db, ctx, model_id, write=True)
+    old_secret = row.secret_id
     audit(db, ctx.space.id, ctx.user.username, "model.delete", row.name)
     drop_resource(db, "model", row.id)
     db.delete(row)
+    db.flush()
+    _drop_orphan_secret(db, old_secret)
 
 
 @router.get("/api/models/{model_id}/calls")

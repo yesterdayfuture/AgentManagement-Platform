@@ -288,6 +288,7 @@ class WorkflowIn(BaseModel):
     agent_id: int
     definition: dict
     enabled: bool = True
+    release: str = "draft"
 
 
 class DecisionIn(BaseModel):
@@ -364,12 +365,14 @@ class WorkflowPatch(BaseModel):
     name: str | None = None
     agent_id: int | None = None
     status: str | None = None
+    release: str | None = None
     definition: dict | None = None
     enabled: bool | None = None
     schedule_enabled: bool | None = None
     schedule_minutes: int | None = None
     schedule_message: str | None = None
     schedule_nodes: list[dict] | None = None
+    schedule_token_budget: int | None = None
 
 
 class MemoryPatch(BaseModel):
@@ -400,4 +403,6 @@ class SecretPatch(BaseModel):
 
 class ApprovalPatch(BaseModel):
     comment: str | None = None
+    name: str | None = None
+    definition: dict | None = None
 

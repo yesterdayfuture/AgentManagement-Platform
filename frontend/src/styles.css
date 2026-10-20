@@ -369,9 +369,12 @@ pre { max-width: 100%; overflow: auto; background: #f4f7fb; border-radius: 6px; 
 .ask-turn.user { align-self: flex-end; background: #eef3fb; }
 .ask-turn.assistant { align-self: flex-start; background: #fff; box-shadow: inset 3px 0 0 var(--copper); }
 .ask-user-text { margin: 6px 0 0; white-space: pre-wrap; }
-.ask-turn-actions { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.ask-turn-actions { display: flex; gap: 10px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
 .ask-tools { margin-top: 8px; }
 .ask-tools summary { cursor: pointer; }
+.ask-meta { margin: 8px 0 0; font-size: 12px; color: var(--muted, #6b7280); }
+.ask-draft { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; background: #fafbfc; }
+.ask-draft-edit { margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; display: grid; gap: 8px; }
 .ask-composer { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); flex-shrink: 0; }
 .ask-composer .ask-mode[aria-pressed="true"] { background: var(--copper); border-color: var(--copper); color: #fff; }
 .ask-composer .ask-mode[aria-pressed="true"]:hover { background: #1d53c9; border-color: #1d53c9; color: #fff; }

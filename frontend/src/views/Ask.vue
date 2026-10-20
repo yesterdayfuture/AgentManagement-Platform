@@ -2,8 +2,9 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api, stream } from "../api";
-import { durationText, prettyJson } from "../format";
+import { countText, durationText, moneyText, prettyJson } from "../format";
 import { renderMarkdown } from "../markdown";
+import Dialog from "../components/Dialog.vue";
 
 const sessions = ref([]);
 const agents = ref([]);
@@ -26,6 +27,8 @@ const selecting = ref(false);
 const picked = ref([]);
 const logEl = ref(null);
 const route = useRoute();
+const editingDraft = ref(null);
+const draftSaving = ref(false);
 
 const canSend = computed(() => ["operator", "builder", "admin"].includes(role.value));
 const pinnedSessions = computed(() => sessions.value.filter((item) => item.pinned));
@@ -147,6 +150,59 @@ function onComposerKey(event) {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
     send(false);
+  }
+}
+function metaLine(item) {
+  if (item.role !== "assistant" || item.pending) return "";
+  const parts = [];
+  if (item.version != null) parts.push(`版本 v${item.version}`);
+  if (item.tool_count) parts.push(`工具 ${item.tool_count}`);
+  else if (item.tool_calls?.length) parts.push(`工具 ${item.tool_calls.length}`);
+  if (item.tokens) parts.push(`token ${countText(item.tokens)}`);
+  if (item.cost) parts.push(`花费 ${moneyText(item.cost)}`);
+  if (item.stop_reason) parts.push(item.stop_reason);
+  return parts.join(" · ");
+}
+function beginEditDraft(item) {
+  const draft = item.workflow_draft || {};
+  const definition = draft.definition || {};
+  editingDraft.value = {
+    approval_id: item.approval_id,
+    name: draft.name || "",
+    kind: definition.kind || "agents",
+    nodesText: JSON.stringify(definition.nodes || [], null, 2),
+    edgesText: JSON.stringify(definition.edges || [], null, 2),
+  };
+}
+function closeDraftEdit() {
+  editingDraft.value = null;
+}
+async function saveDraftEdit() {
+  if (!editingDraft.value?.approval_id) return;
+  draftSaving.value = true;
+  error.value = "";
+  try {
+    const nodes = JSON.parse(editingDraft.value.nodesText || "[]");
+    const edges = JSON.parse(editingDraft.value.edgesText || "[]");
+    if (!Array.isArray(nodes) || !nodes.length) throw new Error("至少保留一个节点");
+    await api(`/api/approvals/${editingDraft.value.approval_id}`, {
+      method: "PATCH",
+      body: {
+        name: editingDraft.value.name,
+        definition: {
+          kind: editingDraft.value.kind === "autonomous" ? "autonomous" : "agents",
+          entry: nodes[0]?.id || "n1",
+          nodes,
+          edges: Array.isArray(edges) ? edges : [],
+        },
+      },
+    });
+    closeDraftEdit();
+    if (activeId.value) await openSession(activeId.value);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    draftSaving.value = false;
   }
 }
 async function removeSession(id) {
@@ -338,6 +394,7 @@ onUnmounted(() => document.removeEventListener("click", closeMenu));
           <div v-if="item.role === 'assistant'" class="md" v-html="renderMarkdown(item.content)"></div>
           <span v-if="item.pending" class="ask-caret" aria-hidden="true"></span>
           <p v-if="item.role === 'user'" class="ask-user-text">{{ item.content }}</p>
+          <p v-if="metaLine(item)" class="ask-meta">{{ metaLine(item) }}</p>
           <div v-if="item.tool_calls?.length" class="ask-tools">
             <details v-for="(call, index) in item.tool_calls" :key="index">
               <summary>{{ call.name }} · {{ durationText(call.latency_ms) }}</summary>
@@ -347,12 +404,33 @@ onUnmounted(() => document.removeEventListener("click", closeMenu));
               <pre class="tool-io">{{ call.output || "—" }}</pre>
             </details>
           </div>
+          <div v-if="item.workflow_draft" class="ask-draft">
+            <p class="kicker">工作流草案 · {{ item.approval_status === "pending" ? "待审批" : item.approval_status }}</p>
+            <p class="sub">{{ item.workflow_draft.name }} · {{ item.workflow_draft.summary }}</p>
+            <div class="ask-turn-actions">
+              <button v-if="item.approval_status === 'pending'" class="ghost" type="button" @click.stop="beginEditDraft(item)">改草案</button>
+              <router-link v-if="item.approval_id" :to="`/approvals`">去审批 #{{ item.approval_id }}</router-link>
+              <router-link v-if="item.workflow_id" :to="{ path: '/workflows', query: { open: String(item.workflow_id), task: item.workflow_draft.task || '' } }">打开工作流</router-link>
+            </div>
+          </div>
           <div class="ask-turn-actions" v-if="item.role === 'assistant'">
             <button class="ghost" type="button" @click="copyText(item.content)">复制</button>
             <router-link v-if="item.trace_id" :to="`/traces/${item.trace_id}`">查看轨迹</router-link>
           </div>
         </article>
       </div>
+      <Dialog v-if="editingDraft" wide :open="true" mode="edit" :title="`编辑草案 #${editingDraft.approval_id}`" @close="closeDraftEdit" @submit="saveDraftEdit">
+        <label class="field"><span>名称</span><input v-model="editingDraft.name" /></label>
+        <label class="field"><span>执行方式</span>
+          <select v-model="editingDraft.kind">
+            <option value="agents">固定步骤</option>
+            <option value="autonomous">自主调度</option>
+          </select>
+        </label>
+        <label class="field"><span>节点 JSON</span><textarea v-model="editingDraft.nodesText" rows="10" /></label>
+        <label class="field"><span>连线 JSON</span><textarea v-model="editingDraft.edgesText" rows="5" /></label>
+        <p v-if="draftSaving" class="sub">保存中…</p>
+      </Dialog>
       <footer class="ask-composer">
         <p v-if="!canSend" class="sub">只读账号可以查看和搜索会话，不能发起问答。</p>
         <div class="row">

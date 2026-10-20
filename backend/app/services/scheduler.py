@@ -64,7 +64,7 @@ def tick(factory) -> int:
 def _run_due(db, workflow_id: int) -> bool:
     from app.api.routers.workflows import _merge_node_setup
     from app.api.schemas import NodeSetupIn
-    from app.models import ContextPolicy, Membership, Space, User, Workflow, WorkflowRun
+    from app.models import ContextPolicy, Membership, Space, Trace, User, Workflow, WorkflowRun
     from app.services.grants import is_platform
     from app.services.runtime import _DEFINITION, run_workflow
     from app.util import load
@@ -74,6 +74,20 @@ def _run_due(db, workflow_id: int) -> bool:
         return False
     minutes = max(1, int(row.schedule_minutes or 1))
     row.schedule_next_at = datetime.utcnow() + timedelta(minutes=minutes)
+    if (row.release or "draft") != "published":
+        row.schedule_enabled = False
+        db.commit()
+        return False
+    space = db.get(Space, row.space_id)
+    if space is not None and space.token_used >= space.token_budget:
+        row.schedule_enabled = False
+        db.commit()
+        return False
+    budget = int(row.schedule_token_budget or 0)
+    if budget > 0 and int(row.schedule_token_used or 0) >= budget:
+        row.schedule_enabled = False
+        db.commit()
+        return False
     active = (
         db.query(WorkflowRun)
         .filter(WorkflowRun.workflow_id == row.id, WorkflowRun.status.in_(["running", "paused"]))
@@ -83,7 +97,6 @@ def _run_due(db, workflow_id: int) -> bool:
         db.commit()
         return False
     user = db.get(User, int(row.created_by or 0))
-    space = db.get(Space, row.space_id)
     policy = db.query(ContextPolicy).filter_by(space_id=row.space_id).one_or_none()
     if user is None or space is None or policy is None or not (row.schedule_message or "").strip():
         db.commit()
@@ -97,7 +110,7 @@ def _run_due(db, workflow_id: int) -> bool:
     db.commit()
     token = _DEFINITION.set(definition)
     try:
-        run_workflow(
+        result = run_workflow(
             db,
             row,
             user=user,
@@ -107,6 +120,19 @@ def _run_due(db, workflow_id: int) -> bool:
             role=role,
             policy=policy,
         )
+        used = 0
+        trace_id = (result or {}).get("trace_id") or ""
+        if trace_id:
+            trace = db.get(Trace, trace_id)
+            if trace is not None:
+                used = int(trace.tokens_in or 0) + int(trace.tokens_out or 0)
+        if used:
+            fresh = db.get(Workflow, workflow_id)
+            if fresh is not None:
+                fresh.schedule_token_used = int(fresh.schedule_token_used or 0) + used
+                if int(fresh.schedule_token_budget or 0) > 0 and fresh.schedule_token_used >= fresh.schedule_token_budget:
+                    fresh.schedule_enabled = False
+                db.commit()
     finally:
         _DEFINITION.reset(token)
     return True

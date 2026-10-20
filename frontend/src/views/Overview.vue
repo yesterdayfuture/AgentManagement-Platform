@@ -345,7 +345,7 @@ onUnmounted(() => {
           <i v-for="(count, name) in summary.by_environment" :key="name" :style="{ width: `${(count / envTotal) * 100}%` }" :title="`${name} ${count}`"></i>
         </div>
         <div class="environment-legend"><span v-for="(count, name) in summary.by_environment" :key="name"><i></i>{{ name }} · {{ count }}（{{ (count / envTotal * 100).toFixed(1) }}%）</span><span v-if="!Object.keys(summary.by_environment || {}).length">暂无环境数据</span></div>
-        <p class="sub">令牌 {{ countText(summary.tokens) }} · 好评 {{ summary.positive_feedback_rate ?? "—" }}</p>
+        <p class="sub">token {{ countText(summary.tokens) }} · 好评 {{ summary.positive_feedback_rate ?? "—" }}</p>
         <div class="system-controls" v-if="system">
           <span v-for="(on, key) in system.controls" :key="key"><i :class="{ on }"></i>{{ key }} · {{ on ? "生效" : "关闭" }}</span>
         </div>

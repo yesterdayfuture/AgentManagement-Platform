@@ -92,7 +92,7 @@ def execute_agent(
 ) -> dict:
     """跑一个智能体。depth 用来限制转交只发生一层，避免子智能体再转交。"""
     if space.token_used >= space.token_budget:
-        raise GateError("quota", "空间令牌额度已用尽")
+        raise GateError("quota", "空间 token 额度已用尽")
     started = time.perf_counter()
     prior = _prior_dialogue(db, space, agent, history or [], resume_trace_id, policy)
     masked, notes = apply_context_policy(message, policy)
@@ -1057,7 +1057,7 @@ def _delegate(db, trace, version, user, space, message, environment, project_id,
 
 
 def _approve_workflow(db, approval, trace, payload: dict, channel: str, actor: str, space_id: int) -> dict:
-    """审批通过后才把草案写成工作流。拒绝不会进工作流列表。"""
+    """审批通过后才把草案写成已发布工作流。拒绝不会进工作流列表。"""
     from app.models import Workflow
     from app.services.grants import grant
 
@@ -1072,14 +1072,18 @@ def _approve_workflow(db, approval, trace, payload: dict, channel: str, actor: s
         name=(payload.get("name") or "未命名工作流")[:120],
         definition_json=dump(definition),
         enabled=True,
+        release="published",
         created_by=trace.user_id,
     )
     db.add(row)
     db.flush()
     grant(db, space_id, "workflow", row.id)
+    payload = dict(payload)
+    payload["workflow_id"] = row.id
+    approval.payload_json = dump(payload)
     approval.status = "approved"
     trace.status = "completed"
-    trace.output_text = f"已加入工作流「{row.name}」"
+    trace.output_text = f"已加入工作流「{row.name}」并发布"
     _step(db, trace, "approval", name=channel, output_text=f"通过并加入工作流 #{row.id}")
     audit(db, space_id, actor, "approval.approve", "工作流", row.name)
     return {"status": trace.status, "output": trace.output_text, "workflow_id": row.id}

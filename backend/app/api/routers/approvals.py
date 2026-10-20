@@ -53,17 +53,38 @@ def list_approvals(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = De
 
 
 def _approval_dict(row: Approval) -> dict:
+    payload = load(row.payload_json, {})
     return {
         "id": row.id,
         "trace_id": row.trace_id,
         "agent_id": row.agent_id,
         "tool_name": row.tool_name,
-        "payload": load(row.payload_json, {}),
+        "payload": payload,
+        "chat_session_id": payload.get("chat_session_id") or "",
+        "workflow_id": payload.get("workflow_id"),
+        "task": payload.get("task") or "",
         "status": row.status,
         "channel": row.channel,
         "comment": row.comment,
         "created_at": stamp(row.created_at),
     }
+
+
+def _refresh_draft_summary(db, payload: dict) -> dict:
+    """改名或改节点后重算摘要，方便审批列表一眼看懂。"""
+    definition = payload.get("definition") or {}
+    nodes = definition.get("nodes") or []
+    names = []
+    for node in nodes:
+        agent = db.get(Agent, int(node.get("agent_id") or 0))
+        label = (agent.name if agent else None) or node.get("agent_name") or node.get("name") or f"智能体 {node.get('agent_id')}"
+        names.append(str(label))
+    kind = definition.get("kind") or payload.get("kind") or "agents"
+    mode = "自主调度" if kind == "autonomous" else "固定步骤"
+    summary = f"{mode} · {' → '.join(names)}" if names else mode
+    payload["summary"] = summary
+    payload["kind"] = kind
+    return payload
 
 
 @router.post("/api/approvals/{approval_id}/decision")
@@ -99,12 +120,37 @@ def inbound(body: InboundIn, db=Depends(get_db), x_channel_secret: str | None = 
 
 @router.patch("/api/approvals/{approval_id}")
 def patch_approval(approval_id: int, body: ApprovalPatch, ctx=Depends(get_context), db=Depends(get_db)):
+    """待审的工作流草案可改名、改节点；通过后才写入工作流列表。"""
     require(ctx, "operator")
     row = db.get(Approval, approval_id)
     if row is None or row.space_id != ctx.space.id:
         raise HTTPException(404, "审批不存在")
     if body.comment is not None:
         row.comment = body.comment
+    drafting = body.name is not None or body.definition is not None
+    if drafting:
+        if row.tool_name != "工作流":
+            raise HTTPException(400, "只有工作流草案可以改节点")
+        if row.status != "pending":
+            raise HTTPException(400, "已结束的审批不能再改草案")
+        payload = load(row.payload_json, {})
+        if body.name is not None:
+            name = body.name.strip()
+            if not name:
+                raise HTTPException(400, "名称不能为空")
+            payload["name"] = name[:120]
+        if body.definition is not None:
+            nodes = body.definition.get("nodes") or []
+            if not nodes:
+                raise HTTPException(400, "工作流草案没有节点")
+            payload["definition"] = body.definition
+            payload["kind"] = body.definition.get("kind") or payload.get("kind") or "agents"
+        payload = _refresh_draft_summary(db, payload)
+        row.payload_json = dump(payload)
+        row.comment = payload.get("summary") or row.comment
+        trace = db.get(Trace, row.trace_id)
+        if trace is not None:
+            trace.output_text = payload.get("summary") or trace.output_text
     return _approval_dict(row)
 
 

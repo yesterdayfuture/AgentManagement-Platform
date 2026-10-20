@@ -273,7 +273,11 @@ class Memory(Base):
 
 
 class Workflow(Base):
-    """工作流。definition_json 的 kind 决定固定连线还是自主拆任务。enabled 为假时不能执行。"""
+    """工作流。definition_json 的 kind 决定固定连线还是自主拆任务。enabled 为假时不能执行。
+
+    release 区分草稿与已发布：操作者只能执行已发布图；构建者可测草稿。
+    schedule_token_budget 为定时累计令牌上限，0 表示不另设上限（仍受部门额度约束）。
+    """
     __tablename__ = "workflows"
     id: Mapped[int] = mapped_column(primary_key=True)
     space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id"))
@@ -281,12 +285,15 @@ class Workflow(Base):
     name: Mapped[str] = mapped_column(String(120))
     definition_json: Mapped[str] = mapped_column(Text, default="{}")
     status: Mapped[str] = mapped_column(String(20), default="active")
+    release: Mapped[str] = mapped_column(String(20), default="draft")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     schedule_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     schedule_minutes: Mapped[int] = mapped_column(Integer, default=0)
     schedule_message: Mapped[str] = mapped_column(Text, default="")
     schedule_nodes_json: Mapped[str] = mapped_column(Text, default="[]")
     schedule_next_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    schedule_token_budget: Mapped[int] = mapped_column(Integer, default=0)
+    schedule_token_used: Mapped[int] = mapped_column(Integer, default=0)
     origin: Mapped[str] = mapped_column(String(20), default="department")
     created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime | None] = mapped_column(DateTime, default=now)

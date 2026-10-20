@@ -665,7 +665,7 @@ def _run_autonomous(db, workflow: Workflow, *, user, space, message: str, enviro
 def run_workflow(db, workflow: Workflow, *, user, space, message: str, environment: str, role: str, policy, pause_after: int | None = None, resume: WorkflowRun | None = None) -> dict:
     """按定义种类分发。自主调度优先于智能体连线图，因为自主图的节点类型也是 agent。"""
     if space.token_used >= space.token_budget:
-        raise GateError("quota", "空间令牌额度已用尽")
+        raise GateError("quota", "空间 token 额度已用尽")
     definition = _definition_of(workflow)
     if definition.get("kind") == "autonomous":
         return _run_autonomous(
