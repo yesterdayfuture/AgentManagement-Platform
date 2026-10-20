@@ -1,8 +1,23 @@
+import katex from "katex";
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function renderTex(tex, displayMode) {
+  try {
+    return katex.renderToString(tex.trim(), {
+      displayMode,
+      throwOnError: false,
+      strict: "ignore",
+      trust: false,
+    });
+  } catch {
+    return `<code>${escapeHtml(tex.trim())}</code>`;
+  }
 }
 
 function inline(value) {
@@ -20,8 +35,33 @@ function table(rows) {
   return `<table><thead><tr>${head}</tr></thead><tbody>${rest}</tbody></table>`;
 }
 
-export function renderMarkdown(source) {
-  const text = String(source || "").replace(/\r\n/g, "\n");
+function restore(html, slots) {
+  return html.replace(/\uE000(\d+)\uE001/g, (_, index) => slots[Number(index)] || "");
+}
+
+function extractMath(source) {
+  const slots = [];
+  const stash = (html) => {
+    const key = `\uE000${slots.length}\uE001`;
+    slots.push(html);
+    return key;
+  };
+  let text = source;
+
+  // Keep fenced code away from math parsing.
+  text = text.replace(/```([^\n`]*)\n([\s\S]*?)```/g, (_, lang, code) =>
+    stash(`<pre><code>${escapeHtml(code.replace(/\n$/, ""))}</code></pre>`),
+  );
+
+  text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => stash(renderTex(tex, true)));
+  text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => stash(renderTex(tex, true)));
+  text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => stash(renderTex(tex, false)));
+  text = text.replace(/(?<![\\$])\$([^$\n]+?)\$(?!\$)/g, (_, tex) => stash(renderTex(tex, false)));
+
+  return { text, slots };
+}
+
+function renderBlocks(text) {
   const blocks = [];
   const lines = text.split("\n");
   let index = 0;
@@ -31,15 +71,9 @@ export function renderMarkdown(source) {
       index += 1;
       continue;
     }
-    if (line.startsWith("```")) {
-      const code = [];
+    if (/^---+$/.test(line.trim())) {
+      blocks.push("<hr>");
       index += 1;
-      while (index < lines.length && !lines[index].startsWith("```")) {
-        code.push(escapeHtml(lines[index]));
-        index += 1;
-      }
-      index += 1;
-      blocks.push(`<pre><code>${code.join("\n")}</code></pre>`);
       continue;
     }
     if (line.trim().startsWith("|")) {
@@ -76,12 +110,36 @@ export function renderMarkdown(source) {
       blocks.push(`<ol>${items.join("")}</ol>`);
       continue;
     }
+    if (line.includes("\uE000") && !line.replace(/\uE000\d+\uE001/g, "").trim()) {
+      blocks.push(line.trim());
+      index += 1;
+      continue;
+    }
     const paragraph = [];
-    while (index < lines.length && lines[index].trim() && !lines[index].startsWith("```") && !lines[index].trim().startsWith("|") && !/^#{1,3}\s+/.test(lines[index]) && !/^\s*[-*]\s+/.test(lines[index]) && !/^\s*\d+\.\s+/.test(lines[index])) {
-      paragraph.push(lines[index]);
+    while (
+      index < lines.length &&
+      lines[index].trim() &&
+      !/^---+$/.test(lines[index].trim()) &&
+      !lines[index].trim().startsWith("|") &&
+      !/^#{1,3}\s+/.test(lines[index]) &&
+      !/^\s*[-*]\s+/.test(lines[index]) &&
+      !/^\s*\d+\.\s+/.test(lines[index])
+    ) {
+      const current = lines[index];
+      if (current.includes("\uE000") && !current.replace(/\uE000\d+\uE001/g, "").trim()) {
+        break;
+      }
+      paragraph.push(current);
       index += 1;
     }
-    blocks.push(`<p>${inline(paragraph.join("\n")).replace(/\n/g, "<br>")}</p>`);
+    if (paragraph.length) {
+      blocks.push(`<p>${inline(paragraph.join("\n")).replace(/\n/g, "<br>")}</p>`);
+    }
   }
   return blocks.join("");
+}
+
+export function renderMarkdown(source) {
+  const { text, slots } = extractMath(String(source || "").replace(/\r\n/g, "\n"));
+  return restore(renderBlocks(text), slots);
 }

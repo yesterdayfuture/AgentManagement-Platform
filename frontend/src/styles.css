@@ -200,6 +200,9 @@ td.version-actions { overflow: visible; text-overflow: clip; white-space: normal
 .md code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
 .md table { width: 100%; border-collapse: collapse; margin: 8px 0; }
 .md th, .md td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+.md .katex-display { margin: 12px 0; overflow-x: auto; overflow-y: hidden; }
+.md .katex { font-size: 1.05em; }
 .md-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
 .tabs { display: flex; gap: 5px; margin: 18px 0; padding: 4px; background: #e7edf6; border-radius: 8px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
 .tabs .ghost { border-color: transparent; background: transparent; color: var(--muted); min-height: 32px; }
