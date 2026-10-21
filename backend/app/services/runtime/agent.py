@@ -99,6 +99,21 @@ def execute_agent(
     if not masked and not prior:
         raise GateError("denied", "请填写输入")
     version = _overlay(pick_version(db, agent, user.id, environment), setup)
+    if getattr(agent, "kind", "local") == "remote":
+        from app.services.runtime.remote import execute_remote
+
+        return execute_remote(
+            db,
+            agent=agent,
+            version=version,
+            user=user,
+            space=space,
+            message=masked or "继续上一段对话",
+            environment=environment,
+            history=prior,
+            credential=credential,
+            started=started,
+        )
     trace = Trace(
         id=uuid.uuid4().hex,
         space_id=space.id,

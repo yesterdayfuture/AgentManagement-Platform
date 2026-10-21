@@ -234,7 +234,16 @@ def _ensure_columns(engine) -> None:
     """
     additions = {
         "users": [("is_platform_admin", "INTEGER")],
-        "agents": [("created_by", "INTEGER")],
+        "agents": [
+            ("created_by", "INTEGER"),
+            ("kind", "VARCHAR(20)"),
+            ("remote_protocol", "VARCHAR(20)"),
+            ("remote_endpoint", "VARCHAR(400)"),
+            ("remote_secret_id", "INTEGER"),
+            ("remote_timeout_ms", "INTEGER"),
+            ("remote_health_url", "VARCHAR(400)"),
+            ("remote_health_method", "VARCHAR(10)"),
+        ],
         "memories": [("created_by", "INTEGER")],
         "memberships": [("created_at", "DATETIME")],
         "model_endpoints": [("created_at", "DATETIME"), ("quota_limit", "FLOAT"), ("quota_used", "FLOAT"), ("origin", "VARCHAR(20)"), ("created_by", "INTEGER")],
@@ -312,6 +321,12 @@ def _ensure_columns(engine) -> None:
         ("eval_runs", "metrics_json"): "'[]'",
         ("traces", "dialogue_json"): "'[]'",
         ("chat_sessions", "pinned"): "0",
+        ("agents", "kind"): "'local'",
+        ("agents", "remote_protocol"): "''",
+        ("agents", "remote_endpoint"): "''",
+        ("agents", "remote_timeout_ms"): "30000",
+        ("agents", "remote_health_url"): "''",
+        ("agents", "remote_health_method"): "'GET'",
     }
     with engine.begin() as conn:
         for table, columns in additions.items():

@@ -22,7 +22,7 @@ from app.paging import Desk, apply_desk, desk_params, finish, finish_rows, stamp
 from app.services.grants import drop_resource, grant, ids_for, is_platform, replace_grants, visible_ids
 from app.security import channel_secret, hash_password, issue_token, sign_sso, verify_password
 from app.services.builtins import detail_of
-from app.services.gateway import GateError
+from app.services.gateway import GateError, _CHAT_EMIT
 from app.services.mcp_client import McpError, call_tool, connect
 from app.services.ingest import IngestError, extract_text, split_text, strategy_catalog, suggest_strategy
 from app.services.retrieval import index_document, search_knowledge
@@ -124,8 +124,10 @@ def _save_version(
     """每次修改智能体都新写一个版本，旧版本留着给发布和回滚。
 
     调用方必须传入 model_id 和 mcp_ids。省略补丁时由 patch_agent 先沿用上一版，再传进来。
+    远程智能体不跑本机评测，草稿直接记为评测通过，便于发布。
     """
     latest = _latest(db, agent.id)
+    remote = getattr(agent, "kind", "local") == "remote"
     if latest and latest.status == "draft":
         latest.system_prompt = prompt
         latest.tool_ids_json = dump(tool_ids)
@@ -133,7 +135,7 @@ def _save_version(
         latest.model_id = model_id
         latest.mcp_ids_json = dump(mcp_ids or [])
         latest.skill_ids_json = dump(skill_ids or [])
-        latest.eval_passed = False
+        latest.eval_passed = True if remote else False
         return latest
     number = (latest.number + 1) if latest else 1
     version = AgentVersion(
@@ -146,11 +148,56 @@ def _save_version(
         mcp_ids_json=dump(mcp_ids or []),
         skill_ids_json=dump(skill_ids or []),
         status="draft",
-        eval_passed=False,
+        eval_passed=bool(remote),
     )
     db.add(version)
     db.flush()
     return version
+
+
+def _store_remote_token(db, ctx, agent: Agent, token: str) -> int | None:
+    token = (token or "").strip()
+    if not token:
+        return agent.remote_secret_id
+    space_id = agent.space_id or ctx.space.id
+    if agent.remote_secret_id:
+        secret = db.get(Secret, agent.remote_secret_id)
+        if secret:
+            secret.ciphertext = encrypt(token)
+            return secret.id
+    row = Secret(space_id=space_id, name=f"{agent.key}-remote", ciphertext=encrypt(token), created_by=ctx.user.id)
+    db.add(row)
+    db.flush()
+    return row.id
+
+
+def _apply_remote_fields(
+    db,
+    ctx,
+    agent: Agent,
+    *,
+    protocol: str,
+    endpoint: str,
+    token: str | None,
+    timeout_ms: int | None,
+    health_url: str | None = None,
+    health_method: str | None = None,
+) -> None:
+    from app.services.runtime.remote import validate_health_fields, validate_remote_fields
+
+    protocol = (protocol or "").strip()
+    endpoint = (endpoint or "").strip()
+    validate_remote_fields(protocol=protocol, endpoint=endpoint)
+    agent.remote_protocol = protocol
+    agent.remote_endpoint = endpoint
+    if timeout_ms is not None:
+        agent.remote_timeout_ms = max(1000, int(timeout_ms))
+    if token is not None:
+        agent.remote_secret_id = _store_remote_token(db, ctx, agent, token)
+    if health_url is not None or health_method is not None:
+        url = health_url if health_url is not None else (agent.remote_health_url or "")
+        method = health_method if health_method is not None else (agent.remote_health_method or "GET")
+        agent.remote_health_url, agent.remote_health_method = validate_health_fields(url=url, method=method)
 
 
 def _agent_brief(db, agent: Agent) -> dict:
@@ -158,12 +205,21 @@ def _agent_brief(db, agent: Agent) -> dict:
     gray = db.get(AgentVersion, agent.gray_version_id) if agent.gray_version_id else None
     latest = _latest(db, agent.id)
     model = db.get(ModelEndpoint, latest.model_id) if latest and latest.model_id else None
+    kind = getattr(agent, "kind", None) or "local"
     return {
         "id": agent.id,
         "space_id": agent.space_id,
         "name": agent.name,
         "key": agent.key,
         "workload_id": agent.workload_id,
+        "kind": kind,
+        "remote_protocol": getattr(agent, "remote_protocol", None) or "",
+        "remote_endpoint": getattr(agent, "remote_endpoint", None) or "",
+        "remote_timeout_ms": getattr(agent, "remote_timeout_ms", None) or 30000,
+        "remote_health_url": getattr(agent, "remote_health_url", None) or "",
+        "remote_health_method": getattr(agent, "remote_health_method", None) or "GET",
+        "has_remote_token": bool(getattr(agent, "remote_secret_id", None)),
+        "description": (latest.system_prompt if latest else "") if kind == "remote" else "",
         "status": agent.status,
         "require_plan": agent.require_plan,
         "gray_percent": agent.gray_percent,
@@ -200,28 +256,49 @@ def create_agent(body: AgentIn, ctx=Depends(get_context), db=Depends(get_db)):
     existing = existing.filter(Agent.space_id.is_(None)) if space_id is None else existing.filter_by(space_id=space_id)
     if existing.one_or_none():
         raise HTTPException(400, "智能体标识已存在")
+    kind = (body.kind or "local").strip() or "local"
+    if kind not in {"local", "remote"}:
+        raise HTTPException(400, "智能体类型无效")
     agent = Agent(
         space_id=space_id,
         name=body.name,
         key=body.key,
         workload_id="wl_" + uuid.uuid4().hex[:16],
+        kind=kind,
         status="draft",
-        require_plan=body.require_plan,
+        require_plan=body.require_plan if kind == "local" else False,
         created_by=ctx.user.id,
     )
     db.add(agent)
     db.flush()
-    skill_ids = _resolve_skills(db, space_id, body.skill_ids)
-    _save_version(
-        db,
-        agent,
-        _prompt_with_skills(db, body.system_prompt, skill_ids),
-        _resolve_tools(db, space_id, body.tool_names),
-        _resolve_children(db, space_id, body.child_keys),
-        _resolve_model(db, space_id, body.model_id),
-        _resolve_mcp(db, space_id, body.mcp_ids),
-        skill_ids,
-    )
+    if kind == "remote":
+        try:
+            _apply_remote_fields(
+                db,
+                ctx,
+                agent,
+                protocol=body.remote_protocol,
+                endpoint=body.remote_endpoint,
+                token=body.remote_token,
+                timeout_ms=body.remote_timeout_ms,
+                health_url=body.remote_health_url,
+                health_method=body.remote_health_method,
+            )
+        except GateError as exc:
+            raise HTTPException(400, exc.message) from exc
+        _save_version(db, agent, (body.system_prompt or "").strip(), [], [], None, [], [])
+    else:
+        skill_ids = _resolve_skills(db, space_id, body.skill_ids)
+        _save_version(
+            db,
+            agent,
+            _prompt_with_skills(db, body.system_prompt, skill_ids),
+            _resolve_tools(db, space_id, body.tool_names),
+            _resolve_children(db, space_id, body.child_keys),
+            _resolve_model(db, space_id, body.model_id),
+            _resolve_mcp(db, space_id, body.mcp_ids),
+            skill_ids,
+        )
     audit(db, space_id, ctx.user.username, "agent.create", agent.key)
     return _agent_detail(db, agent)
 
@@ -303,8 +380,33 @@ def patch_agent(agent_id: int, body: AgentPatch, ctx=Depends(get_context), db=De
     latest = _latest(db, agent.id)
     if body.name is not None:
         agent.name = body.name
-    if body.require_plan is not None:
+    if body.require_plan is not None and getattr(agent, "kind", "local") != "remote":
         agent.require_plan = body.require_plan
+    if getattr(agent, "kind", "local") == "remote":
+        protocol = body.remote_protocol if body.remote_protocol is not None else agent.remote_protocol
+        endpoint = body.remote_endpoint if body.remote_endpoint is not None else agent.remote_endpoint
+        timeout = body.remote_timeout_ms if body.remote_timeout_ms is not None else agent.remote_timeout_ms
+        token = body.remote_token if "remote_token" in body.model_fields_set else None
+        health_url = body.remote_health_url if "remote_health_url" in body.model_fields_set else None
+        health_method = body.remote_health_method if "remote_health_method" in body.model_fields_set else None
+        try:
+            _apply_remote_fields(
+                db,
+                ctx,
+                agent,
+                protocol=protocol,
+                endpoint=endpoint,
+                token=token,
+                timeout_ms=timeout,
+                health_url=health_url if health_url is not None else agent.remote_health_url,
+                health_method=health_method if health_method is not None else agent.remote_health_method,
+            )
+        except GateError as exc:
+            raise HTTPException(400, exc.message) from exc
+        prompt = body.system_prompt if body.system_prompt is not None else (latest.system_prompt if latest else "")
+        _save_version(db, agent, (prompt or "").strip(), [], [], None, [], [])
+        audit(db, ctx.space.id, ctx.user.username, "agent.patch", agent.key)
+        return _agent_detail(db, agent)
     prompt = body.system_prompt if body.system_prompt is not None else (latest.system_prompt if latest else "")
     tool_ids = (
         _resolve_tools(db, ctx.space.id, body.tool_names)
@@ -342,6 +444,24 @@ def patch_agent(agent_id: int, body: AgentPatch, ctx=Depends(get_context), db=De
     _save_version(db, agent, _prompt_with_skills(db, prompt, skill_ids), tool_ids, child_ids, model_id, mcp_ids, skill_ids)
     audit(db, ctx.space.id, ctx.user.username, "agent.patch", agent.key)
     return _agent_detail(db, agent)
+
+
+@router.post("/api/agents/{agent_id}/remote-complete")
+def remote_complete(agent_id: int, body: RemoteCompleteIn, request: Request, db=Depends(get_db)):
+    """远程异步回调。鉴权用回调令牌，不走登录会话。"""
+    from app.services.runtime.remote import complete_remote_trace
+
+    agent = db.get(Agent, agent_id)
+    if agent is None or getattr(agent, "kind", "local") != "remote":
+        raise HTTPException(404, "远程智能体不存在")
+    header = request.headers.get("authorization") or ""
+    token = header.split(" ", 1)[1].strip() if header.lower().startswith("bearer ") else ""
+    if not token:
+        raise HTTPException(401, "缺少回调令牌")
+    try:
+        return complete_remote_trace(db, agent=agent, token=token, body=body)
+    except GateError as exc:
+        raise HTTPException(403 if exc.status == "denied" else 400, exc.message) from exc
 
 
 def _publish(agent: Agent, version: AgentVersion, space: Space, percent: int) -> None:
@@ -479,8 +599,74 @@ def promote_version(agent_id: int, number: int, body: PromoteIn, ctx=Depends(get
     return _agent_detail(db, agent)
 
 
+def _stream_agent_run(request: Request, ctx, agent_id: int, body: RunIn, credential: str):
+    """本地智能体试运行的 SSE。默认非流式走同步接口；勾选 stream 时按片段推送。"""
+    factory = request.app.state.session_factory
+    user_id = ctx.user.id
+    space_id = ctx.space.id
+    role = ctx.role
+    events: queue.Queue = queue.Queue()
+
+    def worker() -> None:
+        session = factory()
+        emitted = {"n": 0}
+
+        def sink(event):
+            if event.get("type") == "delta":
+                emitted["n"] += 1
+            events.put(event)
+
+        token = _CHAT_EMIT.set(sink)
+        try:
+            user = session.get(User, user_id)
+            space = session.get(Space, space_id)
+            policy = session.query(ContextPolicy).filter_by(space_id=space_id).one()
+            agent = session.get(Agent, agent_id)
+            result = execute_agent(
+                session,
+                agent=agent,
+                user=user,
+                space=space,
+                message=body.message,
+                environment=body.environment,
+                project_id=body.project_id,
+                role=role,
+                credential=credential,
+                policy=policy,
+                history=[item.model_dump() for item in body.history],
+                resume_trace_id=body.resume_trace_id,
+            )
+            output = result.get("output") or ""
+            if not emitted["n"]:
+                for index in range(0, max(len(output), 1), 12):
+                    events.put({"type": "delta", "text": output[index : index + 12]})
+                    time.sleep(0.012)
+            session.commit()
+            events.put({"type": "done", "result": result})
+        except GateError as exc:
+            session.rollback()
+            events.put({"type": "error", "message": exc.message, "status": exc.status})
+        except Exception as exc:
+            session.rollback()
+            events.put({"type": "error", "message": str(exc)})
+        finally:
+            _CHAT_EMIT.reset(token)
+            session.close()
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    def generate():
+        while True:
+            item = events.get()
+            yield f"data: {dump(item)}\n\n"
+            if item.get("type") in {"done", "error"}:
+                break
+
+    return StreamingResponse(generate(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 @router.post("/api/agents/{agent_id}/run")
-def run_agent(agent_id: int, body: RunIn, ctx=Depends(get_context), db=Depends(get_db)):
+def run_agent(agent_id: int, body: RunIn, request: Request, ctx=Depends(get_context), db=Depends(get_db)):
     require(ctx, "operator")
     _check_env(body.environment)
     agent = _load_agent(db, ctx, agent_id)
@@ -491,6 +677,10 @@ def run_agent(agent_id: int, body: RunIn, ctx=Depends(get_context), db=Depends(g
         credential = "exchanged"
     if not body.message.strip() and not body.resume_trace_id:
         raise HTTPException(400, "请填写输入")
+    if body.stream:
+        if getattr(agent, "kind", "local") == "remote":
+            raise HTTPException(400, "远程智能体不支持流式输出")
+        return _stream_agent_run(request, ctx, agent.id, body, credential)
     try:
         return execute_agent(
             db,

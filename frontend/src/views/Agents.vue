@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { api, session } from "../api";
 import { useDesk, when } from "../useDesk";
@@ -23,7 +23,12 @@ const mcpCatalog = ref({});
 const columns = computed(() => [
   { key: "name", label: "名称" },
   { key: "key", label: "标识" },
-  { key: "model_name", label: "模型", format: (value) => value || "自动" },
+  {
+    key: "kind",
+    label: "类型",
+    format: (_value, row) => (row.kind === "remote" ? `远程 · ${row.remote_protocol || "—"}` : "本地"),
+  },
+  { key: "model_name", label: "模型", format: (value, row) => (row.kind === "remote" ? "—" : value || "自动") },
   { key: "status", label: "状态" },
   { key: "stable_version", label: "稳定版", format: (value) => (value ? `v${value}` : "—") },
   ...(platform.value
@@ -37,9 +42,37 @@ const columns = computed(() => [
 
 function empty() {
   const home = spaces.value[0]?.id || "";
-  return { id: null, name: "", key: "", system_prompt: "你是业务助手。金额交给计算器。", require_plan: true, tool_names: ["calculator"], model_id: "", mcp_ids: [], skill_ids: [], space_id: home };
+  return {
+    id: null,
+    name: "",
+    key: "",
+    kind: "local",
+    system_prompt: "你是业务助手。金额交给计算器。",
+    require_plan: true,
+    tool_names: ["calculator"],
+    model_id: "",
+    mcp_ids: [],
+    skill_ids: [],
+    space_id: home,
+    remote_protocol: "http_sync",
+    remote_endpoint: "",
+    remote_token: "",
+    remote_timeout_ms: 30000,
+    remote_health_url: "",
+    remote_health_method: "GET",
+    has_remote_token: false,
+  };
 }
+const isRemote = computed(() => form.value?.kind === "remote");
 form.value = empty();
+watch(
+  () => form.value?.kind,
+  (kind, prev) => {
+    if (mode.value !== "create" || !form.value || kind === prev) return;
+    if (kind === "remote") form.value.system_prompt = "";
+    else if (!(form.value.system_prompt || "").trim()) form.value.system_prompt = "你是业务助手。金额交给计算器。";
+  },
+);
 function asList(payload) {
   return Array.isArray(payload) ? payload : payload?.items || [];
 }
@@ -67,6 +100,7 @@ async function prepare(row, nextMode) {
         id: detail.id,
         name: detail.name,
         key: detail.key,
+        kind: detail.kind || "local",
         system_prompt: latest?.system_prompt || "",
         require_plan: detail.require_plan,
         tool_names: latest?.tools || [],
@@ -79,12 +113,19 @@ async function prepare(row, nextMode) {
         creator: detail.creator || "",
         workload_id: detail.workload_id,
         status: detail.status,
+        remote_protocol: detail.remote_protocol || "http_sync",
+        remote_endpoint: detail.remote_endpoint || "",
+        remote_token: "",
+        remote_timeout_ms: detail.remote_timeout_ms || 30000,
+        remote_health_url: detail.remote_health_url || "",
+        remote_health_method: detail.remote_health_method || "GET",
+        has_remote_token: Boolean(detail.has_remote_token),
       }
     : empty();
   await loadModels(form.value.space_id);
   keepGrantedModel();
   mode.value = nextMode;
-  if (nextMode !== "view") await syncGuide();
+  if (nextMode !== "view" && form.value.kind !== "remote") await syncGuide();
   open.value = true;
 }
 function currentGuide() {
@@ -148,9 +189,27 @@ async function toggleMcp(id) {
   writeGuide();
 }
 function payload() {
+  if (form.value.kind === "remote") {
+    return {
+      name: form.value.name,
+      key: form.value.key,
+      kind: "remote",
+      system_prompt: form.value.system_prompt || "",
+      remote_protocol: form.value.remote_protocol,
+      remote_endpoint: form.value.remote_endpoint,
+      remote_timeout_ms: Number(form.value.remote_timeout_ms) || 30000,
+      remote_health_url: form.value.remote_health_url || "",
+      remote_health_method: form.value.remote_health_method || "GET",
+      ...(form.value.remote_token ? { remote_token: form.value.remote_token } : mode.value === "create" ? { remote_token: "" } : {}),
+      ...(platform.value && mode.value === "create"
+        ? { space_id: form.value.space_id ? Number(form.value.space_id) : null, unassigned: !form.value.space_id }
+        : {}),
+    };
+  }
   return {
     name: form.value.name,
     key: form.value.key,
+    kind: "local",
     require_plan: form.value.require_plan,
     model_id: form.value.model_id || null,
     mcp_ids: form.value.mcp_ids,
@@ -208,36 +267,67 @@ onMounted(async () => {
     <p v-else-if="platform && form.department" class="sub">部门 {{ form.department }} · 创建者 {{ form.creator || "—" }}</p>
     <label class="field"><span>名称</span><input v-model="form.name" /></label>
     <label class="field"><span>标识</span><input v-model="form.key" :disabled="mode !== 'create'" /></label>
-    <label class="field"><span>提示词</span><textarea v-model="form.system_prompt" rows="12" /></label>
-    <p class="sub">勾选工具、MCP 或技能后，介绍会写进提示词末尾。工具和 MCP 在「可用工具」一段，技能在「可用技能」一段，并随勾选变化。这两段之前的文字会保留。保存会写入最新草稿。</p>
-    <label class="field"><span>模型</span>
-      <select v-model="form.model_id">
-        <option value="">按任务自动选择</option>
-        <option v-for="model in models" :key="model.id" :value="model.id">{{ model.name }} · {{ model.model }}</option>
+    <label class="field"><span>类型</span>
+      <select v-model="form.kind" :disabled="mode !== 'create'">
+        <option value="local">本地 · 本机运行</option>
+        <option value="remote">远程 · 转发到外部智能体</option>
       </select>
     </label>
-    <p v-if="droppedModel" class="sub">{{ droppedModel }} 不在当前部门的可用范围内，已改为按任务自动选择。保存后生效。</p>
-    <label class="check"><input type="checkbox" v-model="form.require_plan" /> 高风险先规划再审批</label>
-    <p class="sub">可用工具</p>
-    <div class="checks">
-      <label v-for="tool in tools.filter((item) => item.review_status === 'approved')" :key="tool.id" class="check">
-        <input type="checkbox" :checked="form.tool_names.includes(tool.name)" @change="toggle(tool.name)" /> {{ tool.name }}
+    <template v-if="isRemote">
+      <label class="field"><span>协议</span>
+        <select v-model="form.remote_protocol">
+          <option value="http_sync">同步 HTTP</option>
+          <option value="http_async">异步 HTTP</option>
+          <option value="a2a">A2A（JSON-RPC SendMessage）</option>
+        </select>
       </label>
-    </div>
-    <p class="sub">可用 MCP 服务</p>
-    <div class="checks">
-      <label v-for="server in servers" :key="server.id" class="check">
-        <input type="checkbox" :checked="form.mcp_ids.includes(server.id)" @change="toggleMcp(server.id)" /> {{ server.name }}
+      <label class="field"><span>远端地址</span><input v-model="form.remote_endpoint" placeholder="http://127.0.0.1:8765/run/sync" /></label>
+      <label class="field"><span>访问令牌</span><input v-model="form.remote_token" :placeholder="form.has_remote_token ? '已配置，留空则不改' : '可选 Bearer 令牌'" /></label>
+      <label class="field"><span>超时毫秒</span><input v-model.number="form.remote_timeout_ms" type="number" min="1000" /></label>
+      <label class="field"><span>健康探测（可选）</span>
+        <div class="row" style="gap: 8px; align-items: center">
+          <select v-model="form.remote_health_method" style="width: 96px">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+          </select>
+          <input v-model="form.remote_health_url" placeholder="例如 http://127.0.0.1:18765/health，留空则总览仅显示基本信息" style="flex: 1" />
+        </div>
       </label>
-      <p v-if="!servers.length" class="sub">还没有 MCP 服务。到工具页添加连接。</p>
-    </div>
-    <p class="sub">可用技能</p>
-    <div class="checks">
-      <label v-for="skill in skills" :key="skill.id" class="check">
-        <input type="checkbox" :checked="form.skill_ids.includes(skill.id)" @change="toggleSkill(skill.id)" /> {{ skill.name }}
+      <label class="field"><span>简介</span><textarea v-model="form.system_prompt" rows="5" placeholder="向本平台用户说明：这个远程智能体做什么、有哪些工具/能力、适用场景等" /></label>
+      <p class="sub">简介会出现在问答选型与总览卡片上。远程智能体不挂本机工具、技能、MCP 和模型。未填健康探测时，总览标成「无法实时监测」，只展示简介与连接信息。</p>
+    </template>
+    <template v-else>
+      <label class="field"><span>提示词</span><textarea v-model="form.system_prompt" rows="12" /></label>
+      <p class="sub">勾选工具、MCP 或技能后，介绍会写进提示词末尾。工具和 MCP 在「可用工具」一段，技能在「可用技能」一段，并随勾选变化。这两段之前的文字会保留。保存会写入最新草稿。</p>
+      <label class="field"><span>模型</span>
+        <select v-model="form.model_id">
+          <option value="">按任务自动选择</option>
+          <option v-for="model in models" :key="model.id" :value="model.id">{{ model.name }} · {{ model.model }}</option>
+        </select>
       </label>
-      <p v-if="!skills.length" class="sub">还没有技能。到技能页添加说明和脚本。</p>
-    </div>
+      <p v-if="droppedModel" class="sub">{{ droppedModel }} 不在当前部门的可用范围内，已改为按任务自动选择。保存后生效。</p>
+      <label class="check"><input type="checkbox" v-model="form.require_plan" /> 高风险先规划再审批</label>
+      <p class="sub">可用工具</p>
+      <div class="checks">
+        <label v-for="tool in tools.filter((item) => item.review_status === 'approved')" :key="tool.id" class="check">
+          <input type="checkbox" :checked="form.tool_names.includes(tool.name)" @change="toggle(tool.name)" /> {{ tool.name }}
+        </label>
+      </div>
+      <p class="sub">可用 MCP 服务</p>
+      <div class="checks">
+        <label v-for="server in servers" :key="server.id" class="check">
+          <input type="checkbox" :checked="form.mcp_ids.includes(server.id)" @change="toggleMcp(server.id)" /> {{ server.name }}
+        </label>
+        <p v-if="!servers.length" class="sub">还没有 MCP 服务。到工具页添加连接。</p>
+      </div>
+      <p class="sub">可用技能</p>
+      <div class="checks">
+        <label v-for="skill in skills" :key="skill.id" class="check">
+          <input type="checkbox" :checked="form.skill_ids.includes(skill.id)" @change="toggleSkill(skill.id)" /> {{ skill.name }}
+        </label>
+        <p v-if="!skills.length" class="sub">还没有技能。到技能页添加说明和脚本。</p>
+      </div>
+    </template>
     <p v-if="mode === 'view'" class="sub">身份 {{ form.workload_id }} · {{ form.status }}</p>
   </Dialog>
 </template>

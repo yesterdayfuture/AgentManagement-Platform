@@ -2271,3 +2271,179 @@ def test_workflow_run_archive_collects_project_files(client, monkeypatch):
         names = set(bundle.namelist())
         assert names == {"backend/app/main.py", "frontend/src/main.js"}
         assert b"students" in bundle.read("backend/app/main.py")
+
+
+def test_remote_agent_http_sync_async_and_a2a(client, monkeypatch):
+    import json
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    monkeypatch.setenv("LIMEN_PUBLIC_BASE", "http://testserver")
+    pending = []
+
+    class Remote(BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            return
+
+        def _json(self, code, body):
+            raw = json.dumps(body).encode()
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+        def do_GET(self):
+            if self.path.endswith("/health"):
+                self._json(200, {"ok": True})
+                return
+            if self.path.endswith("agent-card.json"):
+                self._json(
+                    200,
+                    {
+                        "name": "demo",
+                        "description": "d",
+                        "version": "1",
+                        "url": f"http://127.0.0.1:{server.server_port}/a2a",
+                        "capabilities": {},
+                    },
+                )
+            else:
+                self._json(404, {})
+
+        def do_POST(self):
+            length = int(self.headers.get("Content-Length") or 0)
+            body = json.loads(self.rfile.read(length).decode() or "{}")
+            if self.path.endswith("/sync"):
+                self._json(200, {"output": f"sync:{body.get('message')}", "status": "completed", "tokens": 4})
+                return
+            if self.path.endswith("/async"):
+                pending.append(body)
+                self._json(202, {"accepted": True})
+                return
+            if self.path.endswith("/a2a"):
+                text = body["params"]["message"]["parts"][0]["text"]
+                self._json(
+                    200,
+                    {
+                        "jsonrpc": "2.0",
+                        "id": body.get("id"),
+                        "result": {"message": {"role": "agent", "parts": [{"kind": "text", "text": f"a2a:{text}"}]}},
+                    },
+                )
+                return
+            self._json(404, {})
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Remote)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{server.server_port}"
+    headers, _space = auth(client, "builder")
+
+    sync = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "远程同步",
+            "key": "remote-sync-test",
+            "kind": "remote",
+            "remote_protocol": "http_sync",
+            "remote_endpoint": f"{base}/sync",
+            "remote_token": "t",
+        },
+    )
+    assert sync.status_code == 200, sync.text
+    assert sync.json()["kind"] == "remote"
+    assert sync.json()["versions"][-1]["tools"] == []
+    bare = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "远程无探测",
+            "key": "remote-no-health",
+            "kind": "remote",
+            "system_prompt": "演示简介：回声助手",
+            "remote_protocol": "http_sync",
+            "remote_endpoint": f"{base}/sync",
+            "remote_token": "t",
+        },
+    )
+    assert bare.status_code == 200, bare.text
+    client.post(f"/api/agents/{bare.json()['id']}/publish", headers=headers, json={"gray_percent": 100})
+    board = client.get("/api/observability/agents", headers=headers).json()
+    card = next(item for item in board["items"] if item["key"] == "remote-no-health")
+    assert card["live_monitor"] is False
+    assert card["pulse"] == "unmonitored"
+    assert "简介" in card["description"] or "回声" in card["description"]
+    healthy = client.patch(
+        f"/api/agents/{bare.json()['id']}",
+        headers=headers,
+        json={"remote_health_url": f"{base}/health", "remote_health_method": "GET"},
+    )
+    assert healthy.status_code == 200, healthy.text
+    from app.services.runtime import remote as remote_mod
+
+    remote_mod._HEALTH_CACHE.pop(bare.json()["id"], None)
+    board2 = client.get("/api/observability/agents", headers=headers).json()
+    card2 = next(item for item in board2["items"] if item["key"] == "remote-no-health")
+    assert card2["live_monitor"] is True
+    assert card2["health_ok"] is True
+
+    client.post(f"/api/agents/{sync.json()['id']}/publish", headers=headers, json={"gray_percent": 100})
+    ran = client.post(f"/api/agents/{sync.json()['id']}/run", headers=headers, json={"message": "甲", "environment": "test"})
+    assert ran.status_code == 200, ran.text
+    assert ran.json()["status"] == "completed"
+    assert "sync:甲" in ran.json()["output"]
+
+    async_agent = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "远程异步",
+            "key": "remote-async-test",
+            "kind": "remote",
+            "remote_protocol": "http_async",
+            "remote_endpoint": f"{base}/async",
+            "remote_token": "t",
+        },
+    )
+    assert async_agent.status_code == 200, async_agent.text
+    client.post(f"/api/agents/{async_agent.json()['id']}/publish", headers=headers, json={"gray_percent": 100})
+    waiting = client.post(
+        f"/api/agents/{async_agent.json()['id']}/run",
+        headers=headers,
+        json={"message": "乙", "environment": "test"},
+    )
+    assert waiting.status_code == 200, waiting.text
+    assert waiting.json()["status"] == "waiting"
+    assert pending, "远端未收到异步请求"
+    job = pending[-1]
+    path = job["callback_url"].replace("http://testserver", "")
+    done = client.post(
+        path,
+        headers={"Authorization": f"Bearer {job['callback_token']}"},
+        json={"trace_id": job["trace_id"], "output": f"async:{job.get('message')}", "status": "completed", "tokens": 6},
+    )
+    assert done.status_code == 200, done.text
+    final = client.get(f"/api/traces/{waiting.json()['trace_id']}", headers=headers).json()
+    assert final.get("status") == "completed", final
+    assert "async:乙" in (final.get("output") or "")
+
+    a2a = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "远程A2A",
+            "key": "remote-a2a-test",
+            "kind": "remote",
+            "remote_protocol": "a2a",
+            "remote_endpoint": base,
+            "remote_token": "t",
+        },
+    )
+    assert a2a.status_code == 200, a2a.text
+    client.post(f"/api/agents/{a2a.json()['id']}/publish", headers=headers, json={"gray_percent": 100})
+    a2a_run = client.post(f"/api/agents/{a2a.json()['id']}/run", headers=headers, json={"message": "丙", "environment": "test"})
+    assert a2a_run.status_code == 200, a2a_run.text
+    assert a2a_run.json()["status"] == "completed"
+    assert "a2a:丙" in a2a_run.json()["output"]
+    server.shutdown()

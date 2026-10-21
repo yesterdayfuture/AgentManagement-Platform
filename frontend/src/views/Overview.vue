@@ -91,6 +91,8 @@ const skillboxState = computed(() => ({ running: "运行中", exited: "已退出
 const skillJobs = computed(() => skillbox.value?.jobs || []);
 const agentFilters = [
   { value: "all", label: "全部" },
+  { value: "local", label: "本地" },
+  { value: "remote", label: "远程" },
   { value: "running", label: "执行中" },
   { value: "attention", label: "需关注" },
   { value: "ready", label: "可服务" },
@@ -108,6 +110,8 @@ const flowFilters = [
 const agentCards = computed(() => {
   const rows = agentBoard.value?.items || [];
   if (agentFilter.value === "all") return rows;
+  if (agentFilter.value === "local") return rows.filter((item) => (item.kind || "local") !== "remote");
+  if (agentFilter.value === "remote") return rows.filter((item) => item.kind === "remote");
   if (agentFilter.value === "running") return rows.filter((item) => item.running > 0);
   if (agentFilter.value === "attention") return rows.filter((item) => item.attention);
   return rows.filter((item) => item.pulse === agentFilter.value);
@@ -158,7 +162,8 @@ function versionText(item) {
   return "尚无版本";
 }
 function openAgent(item) {
-  router.push(item.href || `/agents/${item.id}`);
+  const path = item.href || `/agents/${item.id}`;
+  if (router.currentRoute.value.path !== path) router.push(path);
 }
 function openFlow(item) {
   router.push(item.href || `/workflows?open=${item.id}`);
@@ -394,6 +399,8 @@ onUnmounted(() => {
       <div class="monitor-toolbar">
         <div class="agent-monitor-stats" v-if="agentBoard" aria-live="polite">
           <span><b>{{ agentBoard.total || 0 }}</b> 总数</span>
+          <span><b>{{ agentBoard.local || 0 }}</b> 本地</span>
+          <span><b>{{ agentBoard.remote || 0 }}</b> 远程</span>
           <span><b>{{ agentBoard.running || 0 }}</b> 执行中</span>
           <span><b>{{ agentBoard.ready || 0 }}</b> 可服务</span>
           <span><b>{{ agentBoard.attention || 0 }}</b> 需关注</span>
@@ -448,35 +455,46 @@ onUnmounted(() => {
             </div>
           </header>
           <p v-if="!cardOpen(agentExpanded, item)" class="agent-compact">
-            {{ versionText(item) }} · {{ item.model_name }} · 调用 {{ countText(item.calls) }}
+            <template v-if="item.live_monitor === false">{{ item.kind === "remote" ? `远程 · ${item.remote_protocol || "—"}` : versionText(item) }} · 仅基本信息</template>
+            <template v-else>{{ versionText(item) }} · {{ item.model_name }} · 调用 {{ countText(item.calls) }}</template>
             <template v-if="item.alerts?.length"> · {{ item.alerts[0] }}</template>
           </p>
           <template v-else>
-            <p v-if="item.duty" class="agent-duty" :title="item.duty">{{ item.duty }}</p>
-            <p class="agent-version">{{ versionText(item) }} · {{ item.model_name }}</p>
-            <div class="agent-caps">
-              <span>工具 {{ item.tool_count }}</span>
-              <span>技能 {{ item.skill_count }}</span>
-              <span>MCP {{ item.mcp_count }}</span>
-            </div>
-            <dl class="agent-metrics">
-              <div><dt>窗口调用</dt><dd class="mono">{{ countText(item.calls) }}</dd></div>
-              <div><dt>成功率</dt><dd class="mono">{{ successText(item.success_rate) }}</dd></div>
-              <div><dt>花费</dt><dd class="mono">{{ moneyText(item.cost) }}</dd></div>
-              <div><dt>token</dt><dd class="mono">{{ countText(item.tokens) }}</dd></div>
-              <div><dt>均耗时</dt><dd class="mono">{{ item.calls ? durationText(item.latency_ms) : "—" }}</dd></div>
-              <div><dt>失败</dt><dd class="mono">{{ item.failed || 0 }}</dd></div>
-            </dl>
-            <p class="agent-last" v-if="item.last_at">
-              最近 {{ agentStatusText(item.last_status) }} · {{ whenShort(item.last_at) }}
-              <template v-if="item.last_input"> · {{ item.last_input }}</template>
+            <p v-if="item.duty" class="agent-duty" :title="item.description || item.duty">{{ item.duty }}</p>
+            <p class="agent-version">
+              <template v-if="item.kind === 'remote'">远程 · {{ item.remote_protocol || "—" }} · {{ versionText(item) }}</template>
+              <template v-else>{{ versionText(item) }} · {{ item.model_name }}</template>
             </p>
-            <p class="agent-last" v-else>窗口内尚无调用</p>
+            <template v-if="item.live_monitor === false">
+              <p class="sub agent-basic-only">未配置健康探测，无法实时监测。这里只展示简介与连接类型。</p>
+              <p v-if="item.description" class="agent-description">{{ item.description }}</p>
+            </template>
+            <template v-else>
+              <div class="agent-caps" v-if="item.kind !== 'remote'">
+                <span>工具 {{ item.tool_count }}</span>
+                <span>技能 {{ item.skill_count }}</span>
+                <span>MCP {{ item.mcp_count }}</span>
+              </div>
+              <p v-else-if="item.health_detail" class="sub">健康 {{ item.health_ok ? "正常" : "异常" }} · {{ item.health_detail }}<template v-if="item.health_latency_ms"> · {{ item.health_latency_ms }} ms</template></p>
+              <dl class="agent-metrics">
+                <div><dt>窗口调用</dt><dd class="mono">{{ countText(item.calls) }}</dd></div>
+                <div><dt>成功率</dt><dd class="mono">{{ successText(item.success_rate) }}</dd></div>
+                <div><dt>花费</dt><dd class="mono">{{ moneyText(item.cost) }}</dd></div>
+                <div><dt>token</dt><dd class="mono">{{ countText(item.tokens) }}</dd></div>
+                <div><dt>均耗时</dt><dd class="mono">{{ item.calls ? durationText(item.latency_ms) : "—" }}</dd></div>
+                <div><dt>失败</dt><dd class="mono">{{ item.failed || 0 }}</dd></div>
+              </dl>
+              <p class="agent-last" v-if="item.last_at">
+                最近 {{ agentStatusText(item.last_status) }} · {{ whenShort(item.last_at) }}
+                <template v-if="item.last_input"> · {{ item.last_input }}</template>
+              </p>
+              <p class="agent-last" v-else>窗口内尚无调用</p>
+            </template>
             <ul v-if="item.alerts?.length" class="agent-alerts">
               <li v-for="(note, index) in item.alerts" :key="index">{{ note }}</li>
             </ul>
             <footer class="agent-card-foot" @click.stop>
-              <span class="sub">进入智能体配置</span>
+              <router-link class="ghost" :to="item.href || `/agents/${item.id}`">进入智能体配置</router-link>
               <router-link class="ghost" :to="item.traces_href">轨迹</router-link>
               <router-link v-if="item.pending_approvals" class="ghost" to="/approvals">审批 {{ item.pending_approvals }}</router-link>
               <router-link v-if="item.last_trace_id" class="ghost" :to="`/traces/${item.last_trace_id}`">最近一次</router-link>
@@ -591,7 +609,7 @@ onUnmounted(() => {
               <li v-for="(note, index) in item.alerts" :key="index">{{ note }}</li>
             </ul>
             <footer class="agent-card-foot" @click.stop>
-              <span class="sub">打开工作流</span>
+              <router-link class="ghost" :to="item.href || `/workflows?open=${item.id}`">打开工作流</router-link>
               <router-link class="ghost" :to="item.runs_href">执行记录</router-link>
               <router-link v-if="item.last_run_id" class="ghost" :to="`/workflow-runs?workflow_id=${item.id}`">最近一次</router-link>
             </footer>

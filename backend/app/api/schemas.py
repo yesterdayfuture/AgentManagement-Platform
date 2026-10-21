@@ -77,6 +77,7 @@ class PolicyIn(BaseModel):
 class AgentIn(BaseModel):
     name: str
     key: str
+    kind: str = "local"
     system_prompt: str = ""
     require_plan: bool = True
     tool_names: list[str] = Field(default_factory=list)
@@ -86,6 +87,12 @@ class AgentIn(BaseModel):
     skill_ids: list[int] = Field(default_factory=list)
     space_id: int | None = None
     unassigned: bool = False
+    remote_protocol: str = ""
+    remote_endpoint: str = ""
+    remote_token: str = ""
+    remote_timeout_ms: int = 30000
+    remote_health_url: str = ""
+    remote_health_method: str = "GET"
 
 
 class AgentPatch(BaseModel):
@@ -97,6 +104,21 @@ class AgentPatch(BaseModel):
     model_id: int | None = None
     mcp_ids: list[int] | None = None
     skill_ids: list[int] | None = None
+    remote_protocol: str | None = None
+    remote_endpoint: str | None = None
+    remote_token: str | None = None
+    remote_timeout_ms: int | None = None
+    remote_health_url: str | None = None
+    remote_health_method: str | None = None
+
+
+class RemoteCompleteIn(BaseModel):
+    trace_id: str
+    output: str = ""
+    status: str = "completed"
+    tokens: int = 0
+    cost: float = 0
+    error: str = ""
 
 
 class PublishIn(BaseModel):

@@ -53,7 +53,9 @@
 
 ## 与真正执行的关系
 
-起草只决定「谁按什么顺序参与」。各节点执行时的提示词、工具、知识库和技能，在工作流画布或「执行」对话框里配置；定时执行还会检查已发布状态、部门 token 额度和可选的定时 token 上限。见主文档 README 的「工作流」一节与 [autonomous-agent.md](autonomous-agent.md)。
+起草只决定「谁按什么顺序参与」。各节点执行时的提示词、工具、知识库和技能，在工作流画布或「执行」对话框里配置；定时执行还会检查已发布状态、部门 token 额度和可选的定时 token 上限。见主文档 [README](../README.md) / [README.en.md](../README.en.md) 的「工作流」一节与 [autonomous-agent.md](autonomous-agent.md)。
+
+执行时可勾选流式输出（默认关闭）：`POST /api/workflows/{id}/run` 传 `stream=true` 时以 SSE 推送节点进度与本地模型 `delta`；定时任务不走流式。智能体工作室对本地智能体同样支持可选流式试运行（`POST /api/agents/{id}/run`，`stream` 默认 `false`）。
 
 ## 相关接口
 
@@ -64,3 +66,4 @@
 | POST | `/api/approvals/{id}/decision` | 通过则入库并发布；拒绝则不入库 |
 | GET | `/api/workflows/{id}/run-estimate` | 执行前模型与费用参考 |
 | POST | `/api/workflows/{id}/publish` | 草稿发布 |
+| POST | `/api/workflows/{id}/run` | 执行；`stream` 默认 `false`，为 `true` 时 SSE |

@@ -23,7 +23,7 @@ from app.services.grants import drop_resource, grant, ids_for, is_platform, repl
 from app.security import channel_secret, hash_password, issue_token, sign_sso, verify_password
 from app.services.artifacts import project_files, project_zip
 from app.services.builtins import detail_of
-from app.services.gateway import GateError
+from app.services.gateway import GateError, _CHAT_EMIT
 from app.services.mcp_client import McpError, call_tool, connect
 from app.services.ingest import IngestError, extract_text, split_text, strategy_catalog, suggest_strategy
 from app.services.retrieval import index_document, search_knowledge
@@ -393,6 +393,17 @@ def _stream_workflow(request: Request, ctx, workflow_id: int, body: RunIn, defin
         session = factory()
         def_token = _DEFINITION.set(definition)
         emit_token = _EMIT.set(events.put)
+
+        def chat_sink(event):
+            kind = event.get("type")
+            if kind == "delta":
+                events.put({"event": "delta", "text": event.get("text") or "", "status": "running", "output": "", "input": "", "agent": "", "node": "", "ms": 0})
+            elif kind == "tool":
+                events.put({"event": "模型工具", "tool": event.get("name") or "", "status": "running", "output": "", "input": "", "agent": "", "node": "", "ms": 0})
+            elif kind == "reset":
+                events.put({"event": "reset", "status": "running", "output": "", "input": "", "agent": "", "node": "", "ms": 0})
+
+        chat_token = _CHAT_EMIT.set(chat_sink)
         try:
             user = session.get(User, user_id)
             space = session.get(Space, space_id)
@@ -420,6 +431,7 @@ def _stream_workflow(request: Request, ctx, workflow_id: int, body: RunIn, defin
         finally:
             _DEFINITION.reset(def_token)
             _EMIT.reset(emit_token)
+            _CHAT_EMIT.reset(chat_token)
             session.close()
 
     threading.Thread(target=worker, daemon=True).start()

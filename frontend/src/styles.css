@@ -348,6 +348,18 @@ pre { max-width: 100%; overflow: auto; background: #f4f7fb; border-radius: 6px; 
 .agent-card[data-pulse="running"]::before { background: var(--copper); }
 .agent-card[data-pulse="offline"]::before { background: #94a2b5; }
 .agent-card[data-pulse="draft"]::before { background: #d39425; }
+.agent-card[data-pulse="unmonitored"]::before { background: #94a2b5; }
+.agent-card[data-pulse="unhealthy"]::before { background: #c44b5a; }
+.agent-description {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted, #5b6573);
+  max-height: 7.5em;
+  overflow: auto;
+}
+.agent-basic-only { margin: 0 0 6px; }
 .agent-card.attention { border-color: #efc3c9; }
 .agent-card.live { box-shadow: 0 0 0 1px #2864e822; }
 .agent-card:hover, .agent-card:focus-visible {
@@ -382,6 +394,10 @@ pre { max-width: 100%; overflow: auto; background: #f4f7fb; border-radius: 6px; 
 .agent-pulse[data-pulse="offline"] { color: #687b93; }
 .agent-pulse[data-pulse="draft"] { color: #a56b12; background: #fff7e8; border-color: #f0dfb4; }
 .agent-pulse[data-pulse="draft"] i { background: #d39425; }
+.agent-pulse[data-pulse="unmonitored"] { color: #687b93; background: #f1f4f8; border-color: #d5dde8; }
+.agent-pulse[data-pulse="unmonitored"] i { background: #94a2b5; }
+.agent-pulse[data-pulse="unhealthy"] { color: #a13342; background: #fdecee; border-color: #f0c4ca; }
+.agent-pulse[data-pulse="unhealthy"] i { background: #c44b5a; }
 @keyframes agent-pulse {
   0% { box-shadow: 0 0 0 0 #2864e855; }
   70% { box-shadow: 0 0 0 8px #2864e800; }

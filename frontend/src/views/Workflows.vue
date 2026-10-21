@@ -20,6 +20,7 @@ const mode = ref("create");
 const form = ref(blank());
 const selectedId = ref("");
 const runMessage = ref("写一篇目前agent技术调研报告");
+const testStream = ref(false);
 const runOutput = ref("");
 const liveLogs = ref([]);
 const running = ref(false);
@@ -277,14 +278,51 @@ function nodePayload(node) {
     skill_ids: node.skill_ids || [],
   };
 }
-async function play(id, message, nodes) {
+async function play(id, message, nodes, wantStream = false) {
   running.value = true;
   liveLogs.value = [];
   runOutput.value = "";
   try {
-    await stream(`/api/workflows/${id}/run`, { message, environment: "test", stream: true, nodes }, (event) => {
-      liveLogs.value = [...liveLogs.value, event];
-    });
+    if (wantStream) {
+      await stream(`/api/workflows/${id}/run`, { message, environment: "test", stream: true, nodes }, (event) => {
+        if (event.event === "delta") {
+          runOutput.value += event.text || "";
+          return;
+        }
+        if (event.event === "reset") {
+          runOutput.value = "";
+          return;
+        }
+        if (event.event === "完成") {
+          runOutput.value = event.output || runOutput.value;
+        }
+        if (event.event === "错误") {
+          runOutput.value = event.output || "执行失败";
+        }
+        if (event.event !== "delta" && event.event !== "reset") {
+          liveLogs.value = [...liveLogs.value, event];
+        }
+      });
+    } else {
+      const result = await api(`/api/workflows/${id}/run`, {
+        method: "POST",
+        body: { message, environment: "test", stream: false, nodes },
+      });
+      runOutput.value = result.output || "";
+      liveLogs.value = [
+        {
+          event: "完成",
+          status: result.status,
+          output: result.output,
+          run_id: result.run_id,
+          duration_ms: result.duration_ms,
+          input: message,
+          agent: "",
+          node: "",
+          ms: result.duration_ms,
+        },
+      ];
+    }
     await desk.refresh();
   } catch (err) {
     desk.error.value = err.message;
@@ -342,6 +380,7 @@ async function openRun(row) {
     release: row.release || "draft",
     mode: definition.kind === "autonomous" ? "autonomous" : "agents",
     filling: true,
+    stream: false,
     scheduled: Boolean(row.schedule_enabled),
     everyMinutes: row.schedule_minutes || 60,
     nextAt: row.schedule_next_at || "",
@@ -430,7 +469,7 @@ async function confirmRun() {
     desk.error.value = err.message;
     return;
   }
-  await play(runForm.value.id, runForm.value.message.trim(), runForm.value.nodes.map(nodePayload));
+  await play(runForm.value.id, runForm.value.message.trim(), runForm.value.nodes.map(nodePayload), Boolean(runForm.value.stream));
 }
 async function publish(row) {
   try {
@@ -471,7 +510,7 @@ async function testFlow() {
       await fillNode(node);
       nodes.push(nodePayload(node));
     }
-    await play(form.value.id, runMessage.value, nodes);
+    await play(form.value.id, runMessage.value, nodes, Boolean(testStream.value));
   } catch (err) {
     runOutput.value = err.message;
   }
@@ -603,6 +642,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
     <template #footer>
       <div class="row">
         <label class="field"><span>在线测试</span><input v-model="runMessage" /></label>
+        <label class="check"><input type="checkbox" v-model="testStream" /> 流式输出</label>
         <button class="ghost" type="button" :disabled="running" @click="testFlow">运行测试</button>
       </div>
       <div v-if="liveLogs.length" class="live-log">
@@ -627,6 +667,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
   <Dialog wide :open="runOpen" mode="run" :title="runForm?.name || '执行'" @close="runOpen = false">
     <p class="sub">{{ runForm?.release === "published" ? "已发布" : "草稿（操作者需发布后才能执行）" }}</p>
     <label class="field"><span>问题</span><textarea v-model="runForm.message" rows="3" placeholder="这次要完成的问题" /></label>
+    <label class="check"><input type="checkbox" v-model="runForm.stream" :disabled="runForm.scheduled" /> 流式输出（默认关闭；定时执行时不可用）</label>
     <label class="check"><input type="checkbox" v-model="runForm.scheduled" /> 定时执行。勾选后按间隔重复这次的问题和节点配置，不立即开工。需已发布。</label>
     <label v-if="runForm?.scheduled" class="field"><span>间隔（分钟）</span><input v-model.number="runForm.everyMinutes" type="number" min="1" step="1" /></label>
     <label v-if="runForm?.scheduled" class="field"><span>定时 token 上限（0 不限）</span><input v-model.number="runForm.tokenBudget" type="number" min="0" step="1" /></label>
@@ -654,6 +695,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
     </section>
     <template #footer>
       <button class="btn" type="button" :disabled="running" @click="startRun">{{ running ? "运行中" : (runForm?.scheduled ? "确认定时" : "确认执行") }}</button>
+      <p v-if="runOutput" class="sub">{{ runOutput }}</p>
       <div v-if="liveLogs.length" class="live-log">
         <article v-for="(line, index) in liveLogs" :key="index" class="log-line">
           <strong>{{ line.event }}</strong>

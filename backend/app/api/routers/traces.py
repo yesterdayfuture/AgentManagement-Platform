@@ -49,7 +49,7 @@ def list_traces(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Depen
     names = {space.id: space.name for space in db.query(Space).all()}
 
     def brief(row):
-        data = _trace_brief(row)
+        data = _trace_brief(db, row)
         data["department"] = names.get(row.space_id, "")
         return data
 
@@ -65,11 +65,20 @@ def list_traces(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Depen
     )
 
 
-def _trace_brief(row: Trace) -> dict:
+def _trace_brief(db, row: Trace) -> dict:
+    agent = db.get(Agent, row.agent_id) if row.agent_id else None
+    workflow = db.get(Workflow, row.workflow_id) if row.workflow_id else None
+    kind = (getattr(agent, "kind", None) or "local") if agent else ""
+    protocol = (getattr(agent, "remote_protocol", None) or "") if agent else ""
     return {
         "id": row.id,
         "agent_id": row.agent_id,
+        "agent_name": agent.name if agent else "",
+        "agent_key": agent.key if agent else "",
+        "agent_kind": kind,
+        "remote_protocol": protocol,
         "workflow_id": row.workflow_id,
+        "workflow_name": workflow.name if workflow else "",
         "environment": row.environment,
         "status": row.status,
         "input": row.input_text,
@@ -89,7 +98,7 @@ def get_trace(trace_id: str, ctx=Depends(get_context), db=Depends(get_db)):
         raise HTTPException(404, "轨迹不存在")
     steps = db.query(TraceStep).filter_by(trace_id=row.id).order_by(TraceStep.idx.asc()).all()
     hops = db.query(DelegationHop).filter_by(trace_id=row.id).order_by(DelegationHop.seq.asc()).all()
-    data = _trace_brief(row)
+    data = _trace_brief(db, row)
     data["citations"] = load(row.citations_json, [])
     data["error"] = row.error
     data["steps"] = [
@@ -317,7 +326,7 @@ def _agent_pulse(db, agent: Agent, traces: list[Trace], pending: int) -> dict:
     )
     model = db.get(ModelEndpoint, latest.model_id) if latest and latest.model_id else None
     space = db.get(Space, agent.space_id) if agent.space_id else None
-    running = [row for row in traces if row.status == "running"]
+    running = [row for row in traces if row.status in {"running", "waiting"}]
     finished = [row for row in traces if row.status in {"completed", "failed", "denied", "cancelled", "blocked"}]
     completed = [row for row in finished if row.status == "completed"]
     failed = [row for row in traces if row.status in {"failed", "denied", "blocked"}]
@@ -334,9 +343,28 @@ def _agent_pulse(db, agent: Agent, traces: list[Trace], pending: int) -> dict:
             or (stable is None and latest.status == "draft")
         )
     )
+    kind = getattr(agent, "kind", None) or "local"
+    protocol = getattr(agent, "remote_protocol", None) or ""
+    health = {
+        "live_monitor": True,
+        "health": "local",
+        "health_ok": True,
+        "health_detail": "",
+        "health_latency_ms": 0,
+    }
+    if kind == "remote":
+        from app.services.runtime.remote import probe_remote_health
+
+        health = probe_remote_health(db, agent)
     if agent.status == "offline":
         pulse = "offline"
         pulse_label = "已下线"
+    elif kind == "remote" and not health.get("live_monitor"):
+        pulse = "unmonitored"
+        pulse_label = "无法实时监测"
+    elif kind == "remote" and health.get("health") == "fail":
+        pulse = "unhealthy"
+        pulse_label = "健康异常"
     elif running:
         pulse = "running"
         pulse_label = f"执行中 · {len(running)}"
@@ -352,11 +380,15 @@ def _agent_pulse(db, agent: Agent, traces: list[Trace], pending: int) -> dict:
     alerts = []
     if agent.status == "offline":
         alerts.append("已下线，操作者不可用")
+    if kind == "remote" and not health.get("live_monitor"):
+        alerts.append("未配置健康探测，仅显示基本信息")
+    if kind == "remote" and health.get("health") == "fail":
+        alerts.append(health.get("health_detail") or "健康探测失败")
     if draft_ahead and agent.status == "published":
         alerts.append("有未发布草稿")
     if pending:
         alerts.append(f"{pending} 条待审批")
-    if failed:
+    if failed and (kind != "remote" or health.get("live_monitor")):
         alerts.append(f"窗口内失败 {len(failed)} 次")
     if model and (model.quota_limit or 0) > 0:
         remain = max(0, model.quota_limit - (model.quota_used or 0))
@@ -365,39 +397,54 @@ def _agent_pulse(db, agent: Agent, traces: list[Trace], pending: int) -> dict:
     tool_count = len(load(latest.tool_ids_json, [])) if latest else 0
     skill_count = len(load(latest.skill_ids_json, [])) if latest else 0
     mcp_count = len(load(latest.mcp_ids_json, [])) if latest else 0
-    duty = ((latest.system_prompt if latest else "") or "").strip().split("\n", 1)[0][:72]
+    intro = ((latest.system_prompt if latest else "") or "").strip()
+    if kind == "remote":
+        duty = intro.split("\n", 1)[0][:120] if intro else f"远程 · {protocol or '未配置'}"
+    else:
+        duty = intro.split("\n", 1)[0][:72] if intro else ""
+    live_monitor = bool(health.get("live_monitor", True))
     return {
         "id": agent.id,
         "name": agent.name,
         "key": agent.key,
         "space_id": agent.space_id,
         "department": space.name if space else "平台",
+        "kind": kind,
+        "remote_protocol": protocol,
+        "remote_endpoint": getattr(agent, "remote_endpoint", None) or "",
+        "remote_health_url": getattr(agent, "remote_health_url", None) or "",
+        "live_monitor": live_monitor,
+        "health": health.get("health") or "",
+        "health_ok": health.get("health_ok"),
+        "health_detail": health.get("health_detail") or "",
+        "health_latency_ms": health.get("health_latency_ms") or 0,
         "status": agent.status,
         "pulse": pulse,
         "pulse_label": pulse_label,
-        "running": len(running),
+        "running": len(running) if live_monitor else 0,
         "stable_version": stable.number if stable else None,
         "latest_version": latest.number if latest else None,
         "draft_ahead": draft_ahead,
         "model_id": model.id if model else None,
-        "model_name": model.name if model else "按任务自动选",
+        "model_name": ("远程" if kind == "remote" else (model.name if model else "按任务自动选")),
         "tool_count": tool_count,
         "skill_count": skill_count,
         "mcp_count": mcp_count,
         "duty": duty,
-        "calls": len(traces),
-        "cost": cost,
-        "tokens": tokens,
-        "latency_ms": latency,
-        "success_rate": success_rate,
-        "failed": len(failed),
+        "description": intro if kind == "remote" else "",
+        "calls": len(traces) if live_monitor else 0,
+        "cost": cost if live_monitor else 0,
+        "tokens": tokens if live_monitor else 0,
+        "latency_ms": latency if live_monitor else 0,
+        "success_rate": success_rate if live_monitor else None,
+        "failed": len(failed) if live_monitor else 0,
         "pending_approvals": pending,
         "alerts": alerts,
         "attention": bool(alerts),
-        "last_at": stamp(last.created_at) if last and last.created_at else "",
-        "last_status": last.status if last else "",
-        "last_input": ((last.input_text if last else "") or "").strip()[:72],
-        "last_trace_id": last.id if last else "",
+        "last_at": stamp(last.created_at) if live_monitor and last and last.created_at else "",
+        "last_status": last.status if live_monitor and last else "",
+        "last_input": ((last.input_text if last else "") or "").strip()[:72] if live_monitor else "",
+        "last_trace_id": last.id if live_monitor and last else "",
         "href": f"/agents/{agent.id}",
         "traces_href": f"/traces?exact_field=agent_id&exact={agent.id}",
     }
@@ -467,6 +514,8 @@ def agent_monitor(
         "running": sum(1 for item in items if item["running"]),
         "attention": sum(1 for item in items if item["attention"]),
         "ready": sum(1 for item in items if item["pulse"] == "ready"),
+        "local": sum(1 for item in items if (item.get("kind") or "local") != "remote"),
+        "remote": sum(1 for item in items if item.get("kind") == "remote"),
         "items": items,
     }
 

@@ -81,6 +81,8 @@ class Agent(Base):
     """智能体身份。提示词和能力在版本表里。stable_version_id / gray_version_id 决定线上走哪一版。
 
     space_id 为空表示没有分配部门，只有平台管理员能在问答里使用。
+    kind=local 在本机 execute_agent 跑工具循环；kind=remote 按 remote_protocol 转发到远端。
+    remote_protocol 为 http_sync / http_async / a2a。
     """
     __tablename__ = "agents"
     __table_args__ = (UniqueConstraint("space_id", "key", name="uq_agent_key"),)
@@ -89,6 +91,13 @@ class Agent(Base):
     name: Mapped[str] = mapped_column(String(120))
     key: Mapped[str] = mapped_column(String(80))
     workload_id: Mapped[str] = mapped_column(String(64), unique=True)
+    kind: Mapped[str] = mapped_column(String(20), default="local")
+    remote_protocol: Mapped[str] = mapped_column(String(20), default="")
+    remote_endpoint: Mapped[str] = mapped_column(String(400), default="")
+    remote_secret_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    remote_timeout_ms: Mapped[int] = mapped_column(Integer, default=30000)
+    remote_health_url: Mapped[str] = mapped_column(String(400), default="")
+    remote_health_method: Mapped[str] = mapped_column(String(10), default="GET")
     status: Mapped[str] = mapped_column(String(20), default="draft")
     require_plan: Mapped[bool] = mapped_column(Boolean, default=True)
     stable_version_id: Mapped[int | None] = mapped_column(Integer, nullable=True)

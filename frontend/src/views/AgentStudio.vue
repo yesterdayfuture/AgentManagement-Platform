@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Dialog from "../components/Dialog.vue";
-import { api } from "../api";
+import { api, stream } from "../api";
 import { countText, moneyText, prettyJson, durationText } from "../format";
 import { applyGuide, guideText } from "../toolGuide";
 
@@ -14,8 +14,15 @@ const mcpCatalog = ref({});
 const mcpIds = ref([]);
 const prompt = ref("");
 const selected = ref([]);
+const remoteProtocol = ref("http_sync");
+const remoteEndpoint = ref("");
+const remoteToken = ref("");
+const remoteTimeout = ref(30000);
+const remoteHealthUrl = ref("");
+const remoteHealthMethod = ref("GET");
 const message = ref("计算 19*7");
 const environment = ref("test");
+const useStream = ref(false);
 const thread = ref([]);
 const resumeTraceId = ref("");
 const running = ref(false);
@@ -24,6 +31,7 @@ const notice = ref("");
 const gray = ref(0);
 const viewed = ref(null);
 const latest = computed(() => agent.value?.versions?.at(-1) || null);
+const isRemote = computed(() => agent.value?.kind === "remote");
 
 async function load() {
   agent.value = await api(`/api/agents/${route.params.id}`);
@@ -33,6 +41,12 @@ async function load() {
   prompt.value = current?.system_prompt || "";
   selected.value = current?.tools || [];
   mcpIds.value = current?.mcp_ids || [];
+  remoteProtocol.value = agent.value.remote_protocol || "http_sync";
+  remoteEndpoint.value = agent.value.remote_endpoint || "";
+  remoteToken.value = "";
+  remoteTimeout.value = agent.value.remote_timeout_ms || 30000;
+  remoteHealthUrl.value = agent.value.remote_health_url || "";
+  remoteHealthMethod.value = agent.value.remote_health_method || "GET";
   gray.value = agent.value.gray_percent || 0;
 }
 const mcpLoads = {};
@@ -102,10 +116,18 @@ async function save() {
   error.value = "";
   notice.value = "";
   try {
-    await api(`/api/agents/${route.params.id}`, {
-      method: "PATCH",
-      body: { system_prompt: prompt.value, tool_names: selected.value },
-    });
+    const body = isRemote.value
+      ? {
+          system_prompt: prompt.value,
+          remote_protocol: remoteProtocol.value,
+          remote_endpoint: remoteEndpoint.value,
+          remote_timeout_ms: Number(remoteTimeout.value) || 30000,
+          remote_health_url: remoteHealthUrl.value || "",
+          remote_health_method: remoteHealthMethod.value || "GET",
+          ...(remoteToken.value ? { remote_token: remoteToken.value } : {}),
+        }
+      : { system_prompt: prompt.value, tool_names: selected.value };
+    await api(`/api/agents/${route.params.id}`, { method: "PATCH", body });
     await load();
     notice.value = `已写入 v${latest.value?.number}。线上仍是 ${agent.value.stable_version ? `v${agent.value.stable_version}` : "未发布"}。测试环境试运行用的是正在编辑的这一版。`;
   } catch (err) {
@@ -148,22 +170,64 @@ async function run(continuing = false) {
   }
   error.value = "";
   running.value = true;
+  const history = resumeTraceId.value
+    ? []
+    : thread.value.map((item) => ({ role: item.role, content: item.content }));
+  const body = {
+    message: text,
+    environment: environment.value,
+    history,
+    resume_trace_id: resumeTraceId.value,
+    stream: Boolean(useStream.value && !isRemote.value),
+  };
   try {
-    const payload = await api(`/api/agents/${route.params.id}/run`, {
-      method: "POST",
-      body: {
-        message: text,
-        environment: environment.value,
-        history: resumeTraceId.value
-          ? []
-          : thread.value.map((item) => ({ role: item.role, content: item.content })),
-        resume_trace_id: resumeTraceId.value,
-      },
-    });
     if (text) {
       thread.value.push({ role: "user", content: text });
       message.value = "";
     }
+    if (body.stream) {
+      thread.value.push({
+        role: "assistant",
+        content: "",
+        pending: true,
+        activity: "",
+        toolCalls: [],
+        status: "running",
+        version: null,
+        cost: 0,
+        tokens: 0,
+      });
+      // 必须改数组里的响应式对象；直接改 push 前的 plain object 不会触发界面刷新
+      const live = thread.value[thread.value.length - 1];
+      await stream(`/api/agents/${route.params.id}/run`, body, (event) => {
+        if (event.type === "reset") live.content = "";
+        if (event.type === "delta") {
+          live.content += event.text || "";
+          live.activity = "";
+        }
+        if (event.type === "tool") live.activity = `正在调用 ${event.name}`;
+        if (event.type === "error") throw new Error(event.message || "执行失败");
+        if (event.type === "done" && event.result) {
+          const payload = event.result;
+          live.pending = false;
+          live.content = payload.output || live.content;
+          live.traceId = payload.trace_id;
+          live.limited = Boolean(payload.limited);
+          live.toolCalls = payload.tool_calls || [];
+          live.status = payload.status;
+          live.version = payload.version;
+          live.cost = payload.cost;
+          live.tokens = payload.tokens;
+          live.activity = "";
+          resumeTraceId.value = payload.limited ? payload.trace_id : "";
+        }
+      });
+      return;
+    }
+    const payload = await api(`/api/agents/${route.params.id}/run`, {
+      method: "POST",
+      body,
+    });
     thread.value.push({
       role: "assistant",
       content: payload.output,
@@ -178,6 +242,14 @@ async function run(continuing = false) {
     resumeTraceId.value = payload.limited ? payload.trace_id : "";
   } catch (err) {
     error.value = err.message;
+    if (body.stream) {
+      const last = thread.value[thread.value.length - 1];
+      if (last?.pending) thread.value.pop();
+      if (text && thread.value.at(-1)?.role === "user" && thread.value.at(-1)?.content === text) {
+        thread.value.pop();
+        message.value = text;
+      }
+    }
   } finally {
     running.value = false;
   }
@@ -190,7 +262,8 @@ async function run(continuing = false) {
     <div>
       <h1 v-if="agent">{{ agent.name }}</h1>
       <h1 v-else>工作室</h1>
-      <p class="sub" v-if="agent">上方编辑的是最新一版。勾选工具后，提示词末尾的「可用工具」会跟着变化。标成「线上」的版本才接正式流量。工作负载 {{ agent.workload_id }} · {{ agent.status }}</p>
+      <p class="sub" v-if="agent && isRemote">远程智能体 · {{ agent.remote_protocol }}。工具与技能由远端自行提供，本机只转发与记轨迹。工作负载 {{ agent.workload_id }} · {{ agent.status }}</p>
+      <p class="sub" v-else-if="agent">上方编辑的是最新一版。勾选工具后，提示词末尾的「可用工具」会跟着变化。标成「线上」的版本才接正式流量。工作负载 {{ agent.workload_id }} · {{ agent.status }}</p>
       <p class="sub" v-else>这里是单个智能体的运行页，不是列表。</p>
     </div>
     <router-link class="ghost" to="/agents">返回列表</router-link>
@@ -200,14 +273,39 @@ async function run(continuing = false) {
   <div class="grid-2" v-if="agent">
     <div class="sheet">
       <h2>配置</h2>
-      <label class="field"><span>系统提示词</span><textarea v-model="prompt" /></label>
-      <p class="sub">勾选或取消工具后，上面的提示词会立即改写「可用工具」一段。这段之前的文字会保留。点保存草稿后才写入版本。</p>
-      <div class="checks">
-        <label v-for="tool in tools" :key="tool.id" class="check">
-          <input type="checkbox" :checked="selected.includes(tool.name)" @change="toggle(tool.name)" />
-          {{ tool.name }}
+      <template v-if="isRemote">
+        <label class="field"><span>协议</span>
+          <select v-model="remoteProtocol">
+            <option value="http_sync">同步 HTTP</option>
+            <option value="http_async">异步 HTTP</option>
+            <option value="a2a">A2A</option>
+          </select>
         </label>
-      </div>
+        <label class="field"><span>远端地址</span><input v-model="remoteEndpoint" /></label>
+        <label class="field"><span>访问令牌</span><input v-model="remoteToken" :placeholder="agent.has_remote_token ? '已配置，留空则不改' : '可选'" /></label>
+        <label class="field"><span>超时毫秒</span><input v-model.number="remoteTimeout" type="number" min="1000" /></label>
+        <label class="field"><span>健康探测（可选）</span>
+          <div class="row" style="gap: 8px; align-items: center">
+            <select v-model="remoteHealthMethod" style="width: 96px">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+            <input v-model="remoteHealthUrl" placeholder="留空则总览无法实时监测" style="flex: 1" />
+          </div>
+        </label>
+        <label class="field"><span>简介</span><textarea v-model="prompt" rows="5" placeholder="向本平台用户介绍职责、工具与适用场景" /></label>
+        <p class="sub">简介给选型与总览使用。异步协议会先返回 waiting；A2A 可填 RPC 地址或根地址（读 Agent Card）。</p>
+      </template>
+      <template v-else>
+        <label class="field"><span>系统提示词</span><textarea v-model="prompt" /></label>
+        <p class="sub">勾选或取消工具后，上面的提示词会立即改写「可用工具」一段。这段之前的文字会保留。点保存草稿后才写入版本。</p>
+        <div class="checks">
+          <label v-for="tool in tools" :key="tool.id" class="check">
+            <input type="checkbox" :checked="selected.includes(tool.name)" @change="toggle(tool.name)" />
+            {{ tool.name }}
+          </label>
+        </div>
+      </template>
       <p class="sub" v-if="latest">正在编辑 v{{ latest.number }}（{{ latest.status }}，评测 {{ latest.eval_passed ? "通过" : "未过" }}）。线上是 {{ agent.stable_version ? `v${agent.stable_version}` : "还没有" }}{{ agent.gray_version ? `，灰度是 v${agent.gray_version}（${agent.gray_percent}%）` : "" }}。试运行选 test 用正在编辑的版本，选 prod 用线上版本，命中灰度时走灰度版本。</p>
       <p class="sub">「调整灰度」只改当前灰度版本的流量比例。「恢复」只把已下线的智能体重新接上现在的线上版本。要换成某一版，在版本表里点「设为线上」。</p>
       <div class="row" style="margin-top: 14px">
@@ -233,7 +331,7 @@ async function run(continuing = false) {
           <col />
           <col class="ver-ops" />
         </colgroup>
-        <thead><tr><th>#</th><th>位置</th><th>状态</th><th>评测</th><th>提示词</th><th>操作</th></tr></thead>
+        <thead><tr><th>#</th><th>位置</th><th>状态</th><th>评测</th><th>{{ isRemote ? "简介" : "提示词" }}</th><th>操作</th></tr></thead>
         <tbody>
           <tr v-for="version in agent.versions" :key="version.id" :class="{ 'version-live': version.number === agent.stable_version }">
             <td>v{{ version.number }}</td>
@@ -258,7 +356,9 @@ async function run(continuing = false) {
         <select v-model="environment"><option>test</option><option>staging</option><option>prod</option></select>
       </label>
       <label class="field"><span>输入</span><textarea v-model="message" placeholder="输入问题。再次执行时会带上当前对话。" /></label>
-      <p class="sub">一次执行最多 20 轮。如果最后一轮仍是工具调用，会停在上限，可以继续执行，已有对话和工具结果会一起送入。</p>
+      <label v-if="!isRemote" class="check"><input type="checkbox" v-model="useStream" /> 流式输出（默认关闭，勾选后边生成边显示）</label>
+      <p class="sub" v-if="isRemote">远程调用会记入轨迹。异步协议若返回 waiting，可到轨迹页等待回调完成后再看结果。</p>
+      <p class="sub" v-else>一次执行最多 20 轮。如果最后一轮仍是工具调用，会停在上限，可以继续执行，已有对话和工具结果会一起送入。</p>
       <div class="row">
         <button class="btn" type="button" :disabled="running" @click="run(false)">{{ running ? "运行中" : "执行" }}</button>
         <button class="ghost" type="button" :disabled="running || !resumeTraceId" @click="run(true)">继续执行</button>
@@ -268,7 +368,8 @@ async function run(continuing = false) {
       <div v-if="thread.length" class="dialogue">
         <article v-for="(item, index) in thread" :key="index" class="bubble" :class="[item.role, { limited: item.limited }]">
           <p class="kicker">{{ item.role === "user" ? "输入" : "回答" }}</p>
-          <p v-if="item.role === 'assistant'" class="sub" :title="`${item.cost} 元 · ${item.tokens || 0} token`">状态 {{ item.status }} · v{{ item.version }} · 费用 {{ moneyText(item.cost) }} · {{ countText(item.tokens || 0) }} token</p>
+          <p v-if="item.role === 'assistant' && !item.pending" class="sub" :title="`${item.cost} 元 · ${item.tokens || 0} token`">状态 {{ item.status }} · v{{ item.version }} · 费用 {{ moneyText(item.cost) }} · {{ countText(item.tokens || 0) }} token</p>
+          <p v-if="item.pending" class="sub">{{ item.activity || "生成中…" }}</p>
           <p class="bubble-text">{{ item.content }}</p>
           <article v-for="(call, callIndex) in item.toolCalls || []" :key="callIndex" class="tool-call">
             <strong>{{ call.name }}</strong>
