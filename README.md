@@ -40,6 +40,7 @@ docs/builtin-tools.md                       如何新增一个内置工具
 docs/skills.md                              技能说明、压缩包、授权和容器执行
 docs/ask-workflow.md                        问答生成工作流：提示词与完整模型输入
 docs/autonomous-agent.md                    自主调度工作流
+docs/remote-async-agent.md                  用 Python + FastAPI 开发远程异步智能体
 docs/images/                                控制台截图
 README.md / README.en.md                    中英文主文档（页首互相切换）
 ```
@@ -198,7 +199,7 @@ npm run dev
 
 远程智能体不挂本机工具、技能、MCP。**简介**写给本平台用户看（职责、远端工具与适用场景），新建时默认为空；会出现在总览与选型处。可选填 **健康探测**（GET/POST）；未填时总览标「无法实时监测」，只显示基本信息。异步回调地址由环境变量 `LIMEN_PUBLIC_BASE`（默认 `http://127.0.0.1:8000`）拼出。
 
-演示脚本 `scripts/remote_agent_demo.py` 会从本库读取 `deepseek_pro`（或名称含 deepseek 的接入点）配置，拉起同步/异步 HTTP 与 A2A 三种远端，并在平台登记对应简介后试跑。长期驻留用 `--serve`。
+演示脚本 `scripts/remote_agent_demo.py` 会从本库读取 `deepseek_pro`（或名称含 deepseek 的接入点）配置，拉起同步/异步 HTTP 与 A2A 三种远端，并在平台登记对应简介后试跑。长期驻留用 `--serve`。用 Python + FastAPI 从零接远程异步协议，见 [docs/remote-async-agent.md](docs/remote-async-agent.md)。
 
 ![智能体列表。每个智能体绑定模型、部门和版本。](docs/images/agents.png)
 

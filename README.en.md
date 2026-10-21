@@ -40,6 +40,7 @@ docs/builtin-tools.md                       How to add a built-in tool
 docs/skills.md                              Skills, zip packs, grants, container exec
 docs/ask-workflow.md                        Ask → draft workflow prompts and model input
 docs/autonomous-agent.md                    Autonomous scheduling workflows
+docs/remote-async-agent.md                  Build a remote async agent with Python + FastAPI
 docs/images/                                Console screenshots
 README.md / README.en.md                    Chinese / English docs (switch links at top)
 ```
@@ -198,7 +199,7 @@ With streaming on, the UI grows as tokens arrive; if the model path does not emi
 
 Remote agents do not attach local tools, skills, or MCP. **Introduction** text is for LIMEN users (role, remote tools, fit); empty by default; shown on overview and picker. Optional **health probe** (GET/POST); without it overview shows “cannot monitor live”. Callback base URL from `LIMEN_PUBLIC_BASE` (default `http://127.0.0.1:8000`).
 
-Demo script `scripts/remote_agent_demo.py` reads `deepseek_pro` (or a deepseek-named endpoint) from the DB, starts sync/async HTTP and A2A remotes, registers introductions, and smoke-runs. Use `--serve` to keep them up.
+Demo script `scripts/remote_agent_demo.py` reads `deepseek_pro` (or a deepseek-named endpoint) from the DB, starts sync/async HTTP and A2A remotes, registers introductions, and smoke-runs. Use `--serve` to keep them up. Step-by-step guide for a Python + FastAPI remote async agent: [docs/remote-async-agent.md](docs/remote-async-agent.md).
 
 ![Agent list. Each agent binds model, department, and versions.](docs/images/agents.png)
 
