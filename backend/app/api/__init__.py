@@ -9,12 +9,12 @@ from fastapi import APIRouter
 
 from app.api.routers import (
     agents, approvals, audit, auth, chat, conversations, evals, knowledge, ledger, memories,
-    models, org, sandbox, secrets, skills, system, tools, traces, workflows,
+    models, org, sandbox, secrets, sensitive_words, skills, system, tools, traces, workflows,
 )
 
 router = APIRouter()
 for _module in (
     system, auth, org, models, tools, secrets, agents, ledger, knowledge,
-    memories, skills, workflows, approvals, traces, evals, audit, sandbox, chat, conversations,
+    memories, sensitive_words, skills, workflows, approvals, traces, evals, audit, sandbox, chat, conversations,
 ):
     router.include_router(_module.router)

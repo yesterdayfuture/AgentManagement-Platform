@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 
 from app.models import ModelEndpoint, RateBucket, Tool
 from app.services.grants import ids_for
+from app.services.sensitive import SensitiveHit, find_hit, stop_message
 from app.services.vault import decrypt
 from app.util import load
 
@@ -106,10 +107,16 @@ def complete(db, model: ModelEndpoint | None, system_prompt: str, message: str, 
         usage = response.usage
         tokens_in = usage.prompt_tokens if usage else max(1, len(message) // 4)
         tokens_out = usage.completion_tokens if usage else max(1, len(text) // 4)
+        hit = find_hit(text)
+        if hit:
+            return SensitiveHit(hit, prefix=text).message, model.name, False, (tokens_in, tokens_out)
         return text, model.name, False, (tokens_in, tokens_out)
     except Exception:
         fallback = True
         text = rules_reply(system_prompt, message, memories, citations)
+        hit = find_hit(text)
+        if hit:
+            return SensitiveHit(hit, prefix=text).message, model.name, fallback, _usage(message, text)
         return text, model.name, fallback, _usage(message, text)
 
 
@@ -174,13 +181,17 @@ def _parse_tool_arguments(raw: str):
 
 
 def _stream_completion(client, payload: dict):
-    """把模型正文按片段推给问答页。出现函数调用后不再把正文当回答往外推。"""
+    """把模型正文按片段推给问答页。出现函数调用后不再把正文当回答往外推。
+
+    流式过程中累积正文并做敏感词监测；命中则保留已推片段，追加停止说明并抛出 SensitiveHit。
+    """
     streamed = client.chat.completions.create(**payload, stream=True, stream_options={"include_usage": True})
     parts = []
     slots = {}
     tokens_in = None
     tokens_out = None
     pushed = False
+    shown = ""
     for chunk in streamed:
         usage = getattr(chunk, "usage", None)
         if usage:
@@ -206,8 +217,14 @@ def _stream_completion(client, payload: dict):
         if delta.content:
             parts.append(delta.content)
             if not slots:
+                shown += delta.content
                 chat_emit({"type": "delta", "text": delta.content})
                 pushed = True
+                hit = find_hit(shown)
+                if hit:
+                    notice = f"\n{stop_message(hit)}"
+                    chat_emit({"type": "delta", "text": notice})
+                    raise SensitiveHit(hit, prefix=shown)
     text = "".join(parts)
     calls = [
         {"id": slot["id"] or f"call-{index}", "name": slot["name"], "arguments": _parse_tool_arguments(slot["arguments"])}
@@ -223,6 +240,12 @@ def _stream_completion(client, payload: dict):
     if calls and pushed:
         chat_emit({"type": "reset"})
     joined = text or ""
+    if not calls:
+        hit = find_hit(joined)
+        if hit:
+            if pushed:
+                chat_emit({"type": "delta", "text": f"\n{stop_message(hit)}"})
+            raise SensitiveHit(hit, prefix=joined)
     return joined, calls, tokens_in if tokens_in is not None else _usage("", joined)[0], tokens_out if tokens_out is not None else _usage("", joined)[1]
 
 
@@ -236,6 +259,18 @@ def complete_with_tools(db, model: ModelEndpoint | None, messages: list[dict], t
     key = _model_key(db, model)
     if model is None or model.provider == "rules" or not key:
         text = rules_reply("", last_user, [], [])
+        hit = find_hit(text)
+        if hit:
+            notice = SensitiveHit(hit, prefix=text).message
+            return {
+                "text": notice,
+                "tool_calls": [],
+                "model_name": name,
+                "fallback": True,
+                "usage": _usage(last_user, text),
+                "sensitive": True,
+                "sensitive_word": hit,
+            }
         return {"text": text, "tool_calls": [], "model_name": name, "fallback": True, "usage": _usage(last_user, text)}
     try:
         from openai import OpenAI
@@ -266,7 +301,31 @@ def complete_with_tools(db, model: ModelEndpoint | None, messages: list[dict], t
             usage = response.usage
             tokens_in = usage.prompt_tokens if usage else _usage(last_user, text)[0]
             tokens_out = usage.completion_tokens if usage else _usage(last_user, text)[1]
+            if not calls:
+                hit = find_hit(text)
+                if hit:
+                    notice = SensitiveHit(hit, prefix=text).message
+                    return {
+                        "text": notice,
+                        "tool_calls": [],
+                        "model_name": name,
+                        "fallback": False,
+                        "usage": (tokens_in, tokens_out),
+                        "sensitive": True,
+                        "sensitive_word": hit,
+                    }
         return {"text": text, "tool_calls": calls, "model_name": name, "fallback": False, "usage": (tokens_in, tokens_out)}
+    except SensitiveHit as exc:
+        usage = _usage(last_user, exc.message)
+        return {
+            "text": exc.message,
+            "tool_calls": [],
+            "model_name": name,
+            "fallback": False,
+            "usage": usage,
+            "sensitive": True,
+            "sensitive_word": exc.word,
+        }
     except Exception as exc:
         detail = f"{exc.__class__.__name__}: {exc}"[:500]
         return {"text": "", "tool_calls": [], "model_name": name, "fallback": True, "usage": _usage(last_user, detail), "error": detail}

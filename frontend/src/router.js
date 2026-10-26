@@ -15,6 +15,7 @@ import TraceDetail from "./views/TraceDetail.vue";
 import Evals from "./views/Evals.vue";
 import Memories from "./views/Memories.vue";
 import Skills from "./views/Skills.vue";
+import SensitiveWords from "./views/SensitiveWords.vue";
 import Governance from "./views/Governance.vue";
 import Departments from "./views/Departments.vue";
 import Ask from "./views/Ask.vue";
@@ -38,6 +39,7 @@ const router = createRouter({
     { path: "/evals", component: Evals },
     { path: "/memories", component: Memories },
     { path: "/skills", component: Skills },
+    { path: "/sensitive-words", component: SensitiveWords },
     { path: "/governance", component: Governance },
     { path: "/departments", component: Departments },
     { path: "/ask", component: Ask },

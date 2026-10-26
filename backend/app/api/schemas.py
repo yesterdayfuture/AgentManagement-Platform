@@ -305,6 +305,21 @@ class MemoryImport(BaseModel):
     items: list[MemoryIn]
 
 
+class SensitiveWordIn(BaseModel):
+    name: str
+    words: list[str] = Field(default_factory=list)
+    words_text: str = ""
+    enabled: bool = True
+    space_id: int | None = None
+
+
+class SensitiveWordPatch(BaseModel):
+    name: str | None = None
+    words: list[str] | None = None
+    words_text: str | None = None
+    enabled: bool | None = None
+
+
 class WorkflowIn(BaseModel):
     name: str
     agent_id: int

@@ -281,6 +281,18 @@ class Memory(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
+class SensitiveWordList(Base):
+    """敏感词清单。一条记录的 words_json 可含多个词；启用后对问答/智能体/工作流的输入与输出监测。"""
+    __tablename__ = "sensitive_word_lists"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id"))
+    name: Mapped[str] = mapped_column(String(120))
+    words_json: Mapped[str] = mapped_column(Text, default="[]")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
 class Workflow(Base):
     """工作流。definition_json 的 kind 决定固定连线还是自主拆任务。enabled 为假时不能执行。
 

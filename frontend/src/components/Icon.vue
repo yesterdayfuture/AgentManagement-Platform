@@ -14,6 +14,7 @@ const paths = {
   memories: 'M8 3H5v18h3 M16 3h3v18h-3 M9 8h6v8H9z M12 5v3 M12 16v3',
   skills: 'M4 4h10v16H4z M14 8h6v12h-6 M7 8h4 M7 12h4 M7 16h3',
   governance: 'M3 7h18 M3 17h18 M8 4v6 M16 14v6',
+  sensitive: 'M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z M9 12l2 2 4-4',
   departments: 'M4 20V9l8-5 8 5v11 M9 20v-6h6v6',
   logout: 'M9 3H3v18h6 M10 12h11 m-4-4 4 4-4 4',
   ask: 'M4 5h12a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H9l-4 3v-3H4a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z',

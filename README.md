@@ -41,6 +41,7 @@ docs/skills.md                              技能说明、压缩包、授权和
 docs/ask-workflow.md                        问答生成工作流：提示词与完整模型输入
 docs/autonomous-agent.md                    自主调度工作流
 docs/remote-async-agent.md                  用 Python + FastAPI 开发远程异步智能体
+docs/sensitive-words.md                     敏感词清单与输入/输出（含流式）监测
 docs/images/                                控制台截图
 README.md / README.en.md                    中英文主文档（页首互相切换）
 ```
@@ -99,8 +100,9 @@ npm run dev
 11. 调用轨迹：一次运行的步骤和费用；可对质量投票。查看弹层和单页都可以返回
 12. 评测中心
 13. 审批中心：高风险写入，以及问答起草的工作流草案。待审草案可改名、改节点；通过后才入库并发布。可跳回原问答或工作流
-14. 空间治理：成员、密钥、账本、审计，以及上下文屏蔽、脱敏、保留天数和部门 token 额度。新增成员只有平台管理员和部门管理员可以操作
-15. 部门管理：只有平台管理员可以新增和删除部门。部门管理员只能查看和编辑自己管理的部门，并勾选可用模型、工作流、知识库、工具和技能
+14. 敏感词：按部门维护清单，一条可含多个词；启用后监测智能体、工作流与模型问答的输入与输出（含流式）。命中则停止并提示触发的词；流式保留已输出正文再追加说明。见下文与 [docs/sensitive-words.md](docs/sensitive-words.md)
+15. 空间治理：成员、密钥、账本、审计，以及上下文屏蔽、脱敏、保留天数和部门 token 额度。新增成员只有平台管理员和部门管理员可以操作
+16. 部门管理：只有平台管理员可以新增和删除部门。部门管理员只能查看和编辑自己管理的部门，并勾选可用模型、工作流、知识库、工具和技能
 
 ## 模型问答
 
@@ -249,6 +251,24 @@ npm run dev
 旧图仍可运行，节点类型是 `classify`、`tool`、`respond`。`tool` 节点的 `tool` 字段是登记名称，最终也进入 `execute_builtin`。
 
 相关接口还包括：`POST /api/workflows/{id}/run`（`stream` 默认 `false`）、`POST /api/workflows/{id}/publish`、`GET /api/workflows/{id}/run-estimate`；审批侧 `PATCH /api/approvals/{id}` 可在待审时改工作流草案的名称与 `definition`。
+
+## 敏感词
+
+页面在 `/sensitive-words`。按部门维护清单，**一条记录可含多个词**（顿号、逗号或换行分隔），可单独启用或停用。构建者及以上可改；列表对只读开放。
+
+启用后，当前部门所有启用清单合并成词表，在以下路径监测**输入与输出**（流式与非流式相同）：
+
+- 智能体试运行 `POST /api/agents/{id}/run`
+- 工作流执行 `POST /api/workflows/{id}/run`
+- 模型问答 `POST /api/chats/{id}/messages`
+
+| 命中位置 | 行为 |
+|---|---|
+| 输入 | 不调用模型，接口返回拒绝说明 |
+| 输出（非流式） | 结果为已生成正文（若有）+ 停止说明；`status=denied`；工作流不再跑后续节点 |
+| 输出（流式） | **保留**已推送给前端的正文，再追加一行「触发敏感词「…」，已停止输出」；不下发用于清空界面的 `reset`；落库内容与界面一致 |
+
+与空间治理里的禁止词 / 脱敏不同：治理策略改写上下文，敏感词在执行层拦截并结束任务。细节、接口与联调说明见 [docs/sensitive-words.md](docs/sensitive-words.md)。
 
 ## 部门授权
 

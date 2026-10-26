@@ -93,16 +93,66 @@ def execute_agent(
     """跑一个智能体。depth 用来限制转交只发生一层，避免子智能体再转交。"""
     if space.token_used >= space.token_budget:
         raise GateError("quota", "空间 token 额度已用尽")
+    from app.services.sensitive import bind_words, reset_words
+
+    sensitive_token = bind_words(db, space.id)
+    try:
+        return _execute_agent_body(
+            db,
+            agent=agent,
+            user=user,
+            space=space,
+            message=message,
+            environment=environment,
+            project_id=project_id,
+            role=role,
+            depth=depth,
+            credential=credential,
+            policy=policy,
+            setup=setup,
+            history=history,
+            resume_trace_id=resume_trace_id,
+        )
+    finally:
+        reset_words(sensitive_token)
+
+
+def _execute_agent_body(
+    db,
+    *,
+    agent: Agent,
+    user,
+    space,
+    message: str,
+    environment: str,
+    project_id: str = "",
+    role: str,
+    depth: int = 0,
+    credential: str = "user-session",
+    policy=None,
+    setup: dict | None = None,
+    history: list | None = None,
+    resume_trace_id: str = "",
+) -> dict:
+    from app.services.sensitive import find_hit, stop_message
+
     started = time.perf_counter()
     prior = _prior_dialogue(db, space, agent, history or [], resume_trace_id, policy)
     masked, notes = apply_context_policy(message, policy)
     if not masked and not prior:
         raise GateError("denied", "请填写输入")
+    hit = find_hit(masked or "")
+    if hit:
+        raise GateError("denied", stop_message(hit))
+    for turn in prior:
+        hit = find_hit(turn.get("content") or "")
+        if hit:
+            raise GateError("denied", stop_message(hit))
     version = _overlay(pick_version(db, agent, user.id, environment), setup)
     if getattr(agent, "kind", "local") == "remote":
         from app.services.runtime.remote import execute_remote
 
-        return execute_remote(
+        result = execute_remote(
             db,
             agent=agent,
             version=version,
@@ -114,6 +164,11 @@ def execute_agent(
             credential=credential,
             started=started,
         )
+        out = result.get("output") or ""
+        hit = find_hit(out)
+        if hit:
+            result = {**result, "output": stop_message(hit), "status": "denied"}
+        return result
     trace = Trace(
         id=uuid.uuid4().hex,
         space_id=space.id,
@@ -716,6 +771,8 @@ def _close_with_answer(db, trace, model, messages, message, observations):
     shown = result.get("error") or result["text"] or "、".join(item["name"] for item in result["tool_calls"])
     _record_generate(db, trace, model, message, shown, result["usage"], model, fallback=bool(result["fallback"]))
     text = (result["text"] or "").strip()
+    if result.get("sensitive"):
+        return text, "denied"
     if text and not result["fallback"]:
         return text, "completed"
     notes = []
@@ -772,6 +829,9 @@ def _agent_loop(db, trace, agent, version, space, user, message, environment, ro
         result = _facade().complete_with_tools(db, model, messages, specs)
         shown = result.get("error") or result["text"] or "、".join(item["name"] for item in result["tool_calls"])
         _record_generate(db, trace, model, message, shown, result["usage"], model, fallback=bool(result["fallback"]))
+        if result.get("sensitive"):
+            text = (result["text"] or "").strip()
+            return text, "denied", citations
         if result["fallback"]:
             if not used_tool:
                 return "", "fallback", []

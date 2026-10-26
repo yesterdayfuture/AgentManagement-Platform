@@ -11,7 +11,7 @@ const navSource = [
   { label: "工作台", items: [["overview", "运行总览", "/overview"]] },
   { label: "资源管理", items: [["agents", "智能体", "/agents"], ["skills", "技能", "/skills"], ["tools", "工具服务", "/tools"], ["models", "模型管理", "/models"], ["knowledge", "知识库", "/knowledge"], ["memories", "记忆管理", "/memories"]] },
   { label: "编排与观测", items: [["ask", "模型问答", "/ask"], ["workflows", "工作流", "/workflows"], ["runs", "执行记录", "/workflow-runs"], ["traces", "调用轨迹", "/traces"], ["evals", "评测中心", "/evals"]] },
-  { label: "安全与治理", items: [["departments", "部门管理", "/departments"], ["approvals", "审批中心", "/approvals"], ["governance", "空间治理", "/governance"]] },
+  { label: "安全与治理", items: [["departments", "部门管理", "/departments"], ["approvals", "审批中心", "/approvals"], ["sensitive", "敏感词", "/sensitive-words"], ["governance", "空间治理", "/governance"]] },
 ];
 const isDeptAdmin = computed(() => current.value?.role === "admin");
 const navGroups = computed(() => navSource.map((group) => ({

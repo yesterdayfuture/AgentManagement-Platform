@@ -41,6 +41,7 @@ docs/skills.md                              Skills, zip packs, grants, container
 docs/ask-workflow.md                        Ask → draft workflow prompts and model input
 docs/autonomous-agent.md                    Autonomous scheduling workflows
 docs/remote-async-agent.md                  Build a remote async agent with Python + FastAPI
+docs/sensitive-words.md                     Sensitive-word lists and I/O monitoring (incl. streaming)
 docs/images/                                Console screenshots
 README.md / README.en.md                    Chinese / English docs (switch links at top)
 ```
@@ -99,8 +100,9 @@ Left nav is the control plane (resources, orchestration, governance):
 11. Traces: steps and cost; quality votes; return from modal or detail page
 12. Evals
 13. Approvals: high-risk writes and Ask-drafted workflows. Pending drafts can be renamed/edited; only after approval are they stored and published. Jump back to Ask or workflow
-14. Governance: members, secrets, ledger, audit, context policy, retention, department token budget. Only platform/department admins add members
-15. Departments: only platform admin create/delete. Department admins view/edit their departments and grant models, workflows, knowledge, tools, skills
+14. Sensitive words: per-department lists (multiple words per row). When enabled, monitors agent / workflow / Ask input and output (including streaming); on hit, stops and reports the matched word; streaming **keeps** already-shown text then appends the notice. See below and [docs/sensitive-words.md](docs/sensitive-words.md)
+15. Governance: members, secrets, ledger, audit, context policy, retention, department token budget. Only platform/department admins add members
+16. Departments: only platform admin create/delete. Department admins view/edit their departments and grant models, workflows, knowledge, tools, skills
 
 ## Ask
 
@@ -249,6 +251,26 @@ Nodes and the run dialog can change skills for that run. Outputs with `<<<FILE r
 Legacy graphs still run with `classify` / `tool` / `respond` nodes. A `tool` node’s `tool` field is the registered name and ends in `execute_builtin`.
 
 Also: `POST /api/workflows/{id}/run` (`stream` defaults `false`), `POST /api/workflows/{id}/publish`, `GET /api/workflows/{id}/run-estimate`; approvals `PATCH /api/approvals/{id}` can edit pending draft name/`definition`.
+
+## Sensitive words
+
+Page: `/sensitive-words`. Per-department lists; **one row holds many words** (顿号, commas, or newlines), each list can be enabled or disabled. Builders+ may write; viewers may list.
+
+When enabled, all active lists in the current space merge into one vocabulary and monitor **input and output** on:
+
+- Agent trial run `POST /api/agents/{id}/run`
+- Workflow run `POST /api/workflows/{id}/run`
+- Ask `POST /api/chats/{id}/messages`
+
+(streaming and non-streaming alike)
+
+| Hit | Behavior |
+|---|---|
+| Input | No model call; API returns a denial message |
+| Output (non-stream) | Body is generated text (if any) + stop notice; `status=denied`; workflow stops further nodes |
+| Output (stream) | **Keeps** text already pushed to the client, then appends a line `触发敏感词「…」，已停止输出`; does **not** emit a clearing `reset` for this case; persisted content matches the UI |
+
+This is separate from governance deny/mask policies (those rewrite context; sensitive words stop the run). Details and APIs: [docs/sensitive-words.md](docs/sensitive-words.md).
 
 ## Department grants
 

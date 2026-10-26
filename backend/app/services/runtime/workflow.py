@@ -666,6 +666,30 @@ def run_workflow(db, workflow: Workflow, *, user, space, message: str, environme
     """按定义种类分发。自主调度优先于智能体连线图，因为自主图的节点类型也是 agent。"""
     if space.token_used >= space.token_budget:
         raise GateError("quota", "空间 token 额度已用尽")
+    from app.services.sensitive import bind_words, find_hit, reset_words, stop_message
+
+    sensitive_token = bind_words(db, space.id)
+    try:
+        hit = find_hit(message or "")
+        if hit:
+            raise GateError("denied", stop_message(hit))
+        return _run_workflow_body(
+            db,
+            workflow,
+            user=user,
+            space=space,
+            message=message,
+            environment=environment,
+            role=role,
+            policy=policy,
+            pause_after=pause_after,
+            resume=resume,
+        )
+    finally:
+        reset_words(sensitive_token)
+
+
+def _run_workflow_body(db, workflow: Workflow, *, user, space, message: str, environment: str, role: str, policy, pause_after: int | None = None, resume: WorkflowRun | None = None) -> dict:
     definition = _definition_of(workflow)
     if definition.get("kind") == "autonomous":
         return _run_autonomous(
