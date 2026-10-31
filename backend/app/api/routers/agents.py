@@ -635,6 +635,8 @@ def _stream_agent_run(request: Request, ctx, agent_id: int, body: RunIn, credent
                 policy=policy,
                 history=[item.model_dump() for item in body.history],
                 resume_trace_id=body.resume_trace_id,
+                source_kind="agent",
+                source_name=agent.name if agent else "",
             )
             output = result.get("output") or ""
             if not emitted["n"]:
@@ -695,6 +697,8 @@ def run_agent(agent_id: int, body: RunIn, request: Request, ctx=Depends(get_cont
             policy=ctx.policy,
             history=[item.model_dump() for item in body.history],
             resume_trace_id=body.resume_trace_id,
+            source_kind="agent",
+            source_name=agent.name,
         )
     except GateError as exc:
         _raise_gate(exc, db, agent)

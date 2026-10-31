@@ -565,6 +565,462 @@ def test_memory_isolation_export_and_expiry(client):
     assert "马上过期" not in contents
 
 
+def _memory_items(payload):
+    return payload["items"] if isinstance(payload, dict) else payload
+
+
+def test_force_compress_short_dialogue_uses_real_turns(client):
+    """手动压缩短对话时，摘要必须包含真实 user/assistant，而不是空的「【新的对话】」。"""
+    from app.services.context_compress import compress_messages
+
+    factory = client.app.state.session_factory
+    db = factory()
+    try:
+        history = [
+            {"role": "user", "content": "请推荐北京三日游路线"},
+            {"role": "assistant", "content": "可以按故宫、颐和园、长城安排，需要餐饮偏好吗？"},
+        ]
+        packed = compress_messages(db, history, model=None, space_id=1, force=True)
+        assert packed["mode"] == "summary"
+        summary = packed.get("summary") or ""
+        assert "【新的对话】" not in summary or "请推荐北京三日游" in summary
+        assert "无可压缩内容" not in summary
+        assert "请推荐北京三日游" in summary or "故宫" in summary or "三日游" in summary
+        assert packed.get("folded")
+        assert any("请推荐北京三日游路线" in (item.get("content") or "") for item in packed["folded"])
+    finally:
+        db.close()
+
+
+def test_user_profile_merge_dedupes_synonym_lines():
+    """画像合并应去掉「标签：值」与同义整句的重复。"""
+    from app.services.memory_layers import merge_user_profile
+
+    messy = (
+        "身份：平台管理员\n"
+        "所在地：北京\n"
+        "兴趣：美食、逛街\n"
+        "职业：老师\n"
+        "用户偏好沟通简洁明了、按条列出。\n"
+        "用户是平台管理员。\n"
+        "用户所在地为北京。\n"
+        "用户职业是老师。\n"
+        "用户喜欢美食和逛街。"
+    )
+    got = merge_user_profile(messy, [])
+    assert "身份：平台管理员" in got
+    assert "所在地：北京" in got
+    assert "职业：老师" in got
+    assert "兴趣：美食、逛街" in got
+    assert "沟通偏好：" in got
+    assert "用户是平台管理员" not in got
+    assert "用户所在地为北京" not in got
+    assert "用户职业是老师" not in got
+    assert "用户喜欢美食和逛街" not in got
+    # 再合并同义句不应膨胀
+    again = merge_user_profile(got, ["用户是平台管理员。", "身份：平台管理员", "用户喜欢美食和逛街"])
+    assert again.count("平台管理员") == 1
+    assert again.count("北京") == 1
+
+
+def test_task_runs_produce_sourced_memories(client):
+    """问答 / 智能体 / 工作流执行复杂任务后，应分别产生短/长/用户记忆并带来源。"""
+    headers, _space = auth(client, "builder")
+    agent_id = _agent_id(client, headers)
+
+    chat = client.post("/api/chats", headers=headers, json={"agent_id": agent_id, "title": "记忆联调会话"})
+    assert chat.status_code == 200
+    asked = client.post(
+        f"/api/chats/{chat.json()['id']}/messages",
+        headers=headers,
+        json={"message": "我叫张工，偏好表格。请记住以后默认走顺丰。请先确认退款政策。"},
+    )
+    assert asked.status_code == 200, asked.text
+
+    agent_run = client.post(
+        f"/api/agents/{agent_id}/run",
+        headers=headers,
+        json={"message": "我喜欢结论先行。请记住默认结算日是每月25号。计算 3+5", "environment": "test"},
+    )
+    assert agent_run.status_code == 200
+
+    # 工作流节点用无工具智能体；话术避开转账/付款/退款等工具意图词，走纯对话
+    node_a = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "记忆节点甲",
+            "key": "memory-node-a",
+            "system_prompt": "甲已处理完毕。",
+            "require_plan": False,
+            "tool_names": [],
+        },
+    )
+    node_b = client.post(
+        "/api/agents",
+        headers=headers,
+        json={
+            "name": "记忆节点乙",
+            "key": "memory-node-b",
+            "system_prompt": "乙已处理完毕。",
+            "require_plan": False,
+            "tool_names": [],
+        },
+    )
+    assert node_a.status_code == 200 and node_b.status_code == 200, (node_a.text, node_b.text)
+    wf = client.post(
+        "/api/workflows",
+        headers=headers,
+        json={
+            "name": "记忆工作流联调",
+            "agent_id": node_a.json()["id"],
+            "enabled": True,
+            "release": "published",
+            "definition": {
+                "kind": "agents",
+                "entry": "n1",
+                "nodes": [
+                    {"id": "n1", "type": "agent", "agent_id": node_a.json()["id"], "x": 40, "y": 40},
+                    {"id": "n2", "type": "agent", "agent_id": node_b.json()["id"], "x": 240, "y": 40},
+                ],
+                "edges": [{"src": "n1", "dst": "n2"}],
+            },
+        },
+    )
+    assert wf.status_code == 200, wf.text
+    wf_id = wf.json()["id"]
+    wf_name = wf.json()["name"]
+    wf_run = client.post(
+        f"/api/workflows/{wf_id}/run",
+        headers=headers,
+        json={
+            "message": "请叫我李经理，偏好简洁。请记住以后默认先确认需求再答复。请依次处理。",
+            "environment": "test",
+        },
+    )
+    assert wf_run.status_code == 200, wf_run.text
+    assert wf_run.json()["status"] == "completed", wf_run.text
+
+    all_rows = _memory_items(client.get("/api/memories", headers=headers, params={"page_size": 100}).json())
+    by = {(item.get("source_kind"), item.get("kind")) for item in all_rows}
+    # 短期按来源各有一份；长期/用户是账户级画像，同主题冲突会替换（source_kind 记最后写入方）
+    for source in ("chat", "agent", "workflow"):
+        assert (source, "short") in by, f"缺少 {source}/short"
+    assert any(item.get("kind") == "long" for item in all_rows), "缺少长期记忆"
+    assert any(item.get("kind") == "user" for item in all_rows), "缺少用户记忆"
+    assert any(item.get("source_name") == "记忆联调会话" for item in all_rows if item.get("source_kind") == "chat")
+    assert any((item.get("source_name") or "") == wf_name for item in all_rows if item.get("kind") == "short")
+    # 长期/用户应是分句，而不是整段任务复述/任务提问（允许短句包含触发词）
+    for item in all_rows:
+        content = item.get("content") or ""
+        if item.get("kind") in {"long", "user"}:
+            assert "请先确认退款政策" not in content
+            assert "请综合说明" not in content
+            assert not content.lstrip().startswith("【v"), content
+            assert not content.lstrip().startswith("[用户]"), content
+            assert not content.lstrip().startswith("[长期]"), content
+    # 称呼槽位被工作流「李经理」替换后，账户用户记忆应保留最新称呼
+    assert any(item.get("kind") == "user" and "李经理" in (item.get("content") or "") for item in all_rows)
+    assert any(item.get("kind") == "long" and ("顺丰" in (item.get("content") or "") or "结算日" in (item.get("content") or "") or "确认需求" in (item.get("content") or "")) for item in all_rows)
+
+
+def test_short_term_memory_scoped_to_task(client):
+    """短期记忆：仅同 task_id 可见并可注入；跨任务不可见。"""
+    from datetime import datetime, timedelta
+
+    from app.models import Memory
+    from app.services.compress_runtime import inject_memories
+    from app.services.memory_layers import KIND_SHORT, visible_memories
+
+    headers, space = auth(client, "builder")
+    me = client.get("/api/me", headers={"Authorization": headers["Authorization"]}).json()
+    user_id = me["id"]
+    created = client.post("/api/memories", headers=headers, json={"kind": "short", "content": "API短记忆-待绑定任务"})
+    assert created.status_code == 200
+    assert created.json()["kind"] == "short"
+    listed = _memory_items(client.get("/api/memories", headers=headers, params={"kind": "short"}).json())
+    assert any(item["id"] == created.json()["id"] for item in listed)
+
+    factory = client.app.state.session_factory
+    db = factory()
+    try:
+        row = Memory(
+            space_id=space["id"],
+            user_id=user_id,
+            kind=KIND_SHORT,
+            content="短期-任务甲专用",
+            source_kind="agent",
+            source_name="试运行",
+            task_id="task-alpha",
+            created_by=user_id,
+            expires_at=datetime.utcnow() + timedelta(days=7),
+        )
+        db.add(row)
+        db.flush()
+        other = Memory(
+            space_id=space["id"],
+            user_id=user_id,
+            kind=KIND_SHORT,
+            content="短期-任务乙专用",
+            source_kind="agent",
+            source_name="试运行",
+            task_id="task-beta",
+            created_by=user_id,
+            expires_at=datetime.utcnow() + timedelta(days=7),
+        )
+        db.add(other)
+        db.commit()
+
+        alpha = visible_memories(db, space_id=space["id"], user_id=user_id, task_id="task-alpha")
+        beta = visible_memories(db, space_id=space["id"], user_id=user_id, task_id="task-beta")
+        assert any(item.content == "短期-任务甲专用" for item in alpha)
+        assert all(item.content != "短期-任务乙专用" for item in alpha)
+        assert any(item.content == "短期-任务乙专用" for item in beta)
+        assert all(item.content != "短期-任务甲专用" for item in beta)
+
+        injected = inject_memories(
+            db,
+            [{"role": "system", "content": "系统"}],
+            space_id=space["id"],
+            user_id=user_id,
+            task_id="task-alpha",
+        )
+        text = injected[0].get("content") or ""
+        assert "短期-任务甲专用" in text
+        assert "短期-任务乙专用" not in text
+    finally:
+        db.close()
+
+
+def test_long_term_memory_cross_task_and_user_isolation(client):
+    """长期记忆：同用户跨任务可注入；其他用户不可见、不注入。"""
+    headers, _space = auth(client, "builder")
+    other, _ = auth(client, "operator")
+    marker = "长期记忆-跨任务标记-顺丰优先"
+    created = client.post("/api/memories", headers=headers, json={"kind": "long", "content": marker})
+    assert created.status_code == 200
+    assert created.json()["kind"] == "long"
+    assert created.json()["expires_at"] is not None
+
+    rows = _memory_items(client.get("/api/memories", headers=headers, params={"kind": "long"}).json())
+    assert any(item["content"] == marker for item in rows)
+
+    other_rows = _memory_items(client.get("/api/memories", headers=other, params={"kind": "long"}).json())
+    assert all(item["content"] != marker for item in other_rows)
+
+    agent_id = _agent_id(client, headers)
+    mine = client.post(f"/api/agents/{agent_id}/run", headers=headers, json={"message": "你好"})
+    assert mine.status_code == 200
+    assert marker in mine.json()["output"]
+
+    theirs = client.post(f"/api/agents/{agent_id}/run", headers=other, json={"message": "你好"})
+    assert theirs.status_code == 200
+    assert marker not in theirs.json()["output"]
+
+    patched = client.patch(
+        f"/api/memories/{created.json()['id']}",
+        headers=headers,
+        json={"content": marker + "-已更新"},
+    )
+    assert patched.status_code == 200
+    assert patched.json()["content"].endswith("已更新")
+    forbidden = client.patch(
+        f"/api/memories/{created.json()['id']}",
+        headers=other,
+        json={"content": "篡改"},
+    )
+    assert forbidden.status_code in {403, 404}
+
+
+def test_user_memory_owner_only_and_platform_admin(client):
+    """用户记忆：仅本人可见可注入；平台管理员可列表查看；他人详情 404。"""
+    builder, _space = auth(client, "builder")
+    operator, _ = auth(client, "operator")
+    admin, _ = auth(client, "admin")
+    marker = "用户画像-偏好表格输出"
+    created = client.post("/api/memories", headers=builder, json={"kind": "user", "content": marker})
+    assert created.status_code == 200
+    assert created.json()["kind"] == "user"
+    assert created.json()["expires_at"] is None
+
+    mine = _memory_items(client.get("/api/memories", headers=builder, params={"kind": "user"}).json())
+    assert any(item["content"] == marker for item in mine)
+    assert client.get(f"/api/memories/{created.json()['id']}", headers=builder).status_code == 200
+
+    op_list = _memory_items(client.get("/api/memories", headers=operator, params={"kind": "user"}).json())
+    assert all(item["content"] != marker for item in op_list)
+    assert client.get(f"/api/memories/{created.json()['id']}", headers=operator).status_code == 404
+
+    admin_list = _memory_items(client.get("/api/memories", headers=admin, params={"kind": "user"}).json())
+    assert any(item["content"] == marker for item in admin_list)
+
+    agent_id = _agent_id(client, builder)
+    hit = client.post(f"/api/agents/{agent_id}/run", headers=builder, json={"message": "你好"})
+    assert hit.status_code == 200
+    assert marker in hit.json()["output"]
+
+    miss = client.post(f"/api/agents/{agent_id}/run", headers=operator, json={"message": "你好"})
+    assert miss.status_code == 200
+    assert marker not in miss.json()["output"]
+
+
+def test_three_tier_memory_api_and_visibility(client):
+    """三类记忆一并创建与按 kind 过滤（汇总冒烟）。"""
+    builder, _space = auth(client, "builder")
+    short = client.post("/api/memories", headers=builder, json={"kind": "short", "content": "本轮待确认发票号"})
+    long = client.post("/api/memories", headers=builder, json={"kind": "long", "content": "客户默认走顺丰"})
+    user = client.post("/api/memories", headers=builder, json={"kind": "user", "content": "偏好简洁回答"})
+    assert short.status_code == 200 and short.json()["kind"] == "short"
+    assert long.status_code == 200 and long.json()["kind"] == "long"
+    assert user.status_code == 200 and user.json()["kind"] == "user"
+
+    for kind, needle in (("short", "发票号"), ("long", "顺丰"), ("user", "简洁回答")):
+        rows = _memory_items(client.get("/api/memories", headers=builder, params={"kind": kind}).json())
+        assert rows and all(item["kind"] == kind for item in rows)
+        assert any(needle in (item.get("content") or "") for item in rows)
+
+
+def test_three_tier_memory_extract_and_injection(client, monkeypatch):
+    """摘要抽取同时产出三类记忆；短期按 task 隔离，长期与用户跨任务注入。"""
+    import json
+
+    from app.models import Memory
+    from app.services.memory_layers import extract_and_store, memories_for_prompt, visible_memories
+
+    headers, space = auth(client, "builder")
+    other, _ = auth(client, "operator")
+    me = client.get("/api/me", headers={"Authorization": headers["Authorization"]}).json()
+    user_id = me["id"]
+    other_me = client.get("/api/me", headers={"Authorization": other["Authorization"]}).json()
+    other_id = other_me["id"]
+    factory = client.app.state.session_factory
+
+    payload = {
+        "short_term": ["本任务还差一张对账单"],
+        "long_term": ["客户结算日是每月25号"],
+        "user_memory": ["称呼用户为张经理"],
+    }
+
+    def fake_complete(db, model, messages, tools):
+        return {"text": json.dumps(payload, ensure_ascii=False), "tool_calls": [], "fallback": False, "usage": (10, 20)}
+
+    monkeypatch.setattr("app.services.memory_layers.complete_with_tools", fake_complete)
+
+    db = factory()
+    try:
+        summary = extract_and_store(
+            db,
+            space_id=space["id"],
+            user_id=user_id,
+            dialogue=[
+                {"role": "user", "content": "对账做到哪了？"},
+                {"role": "assistant", "content": "还差一张对账单，结算日是25号。"},
+            ],
+            summary_text="讨论对账进度与结算日",
+            prior_summaries=["此前确认走对公转账"],
+            source_kind="chat",
+            source_id="sess-a",
+            source_name="对账会话",
+            task_id="sess-a",
+            agent_id=None,
+            parent_summary_id=None,
+            level=1,
+        )
+        db.commit()
+        summary_id = summary.id
+        produced = json.loads(summary.produced_json)
+        assert produced["short"] and produced["long"] and produced["user"]
+
+        short_row = db.get(Memory, produced["short"][0])
+        long_row = db.get(Memory, produced["long"][0])
+        assert short_row is not None and long_row is not None
+        short_refs = json.loads(short_row.source_refs_json or "{}")
+        short_produced = json.loads(short_row.produced_json or "{}")
+        assert short_refs.get("dialogues")
+        assert any(turn.get("content") == "对账做到哪了？" for turn in short_refs["dialogues"])
+        assert produced["long"][0] in (short_produced.get("long") or [])
+        assert produced["user"][0] in (short_produced.get("user") or [])
+        long_refs = json.loads(long_row.source_refs_json or "{}")
+        assert long_refs.get("dialogues")
+
+        same_task = visible_memories(db, space_id=space["id"], user_id=user_id, task_id="sess-a")
+        kinds = {row.kind for row in same_task}
+        assert {"short", "long", "user"} <= kinds
+        texts = memories_for_prompt(same_task)
+        assert "本任务还差一张对账单" in texts
+        assert "客户结算日是每月25号" in texts
+        assert "张经理" in texts
+
+        other_task = visible_memories(db, space_id=space["id"], user_id=user_id, task_id="sess-b")
+        assert all(row.kind != "short" or row.task_id == "sess-b" for row in other_task)
+        assert any(row.content == "客户结算日是每月25号" for row in other_task)
+        assert any("张经理" in (row.content or "") for row in other_task if row.kind == "user")
+        assert all(row.content != "本任务还差一张对账单" for row in other_task)
+
+        foreign = visible_memories(db, space_id=space["id"], user_id=other_id, task_id="sess-a")
+        assert all(row.content != "客户结算日是每月25号" for row in foreign)
+        assert all("张经理" not in (row.content or "") for row in foreign)
+        user_id_for_detail = produced["user"][0]
+    finally:
+        db.close()
+
+    # 管理界面不再展示内部 summary；详情看启用中的用户画像及其版本
+    detail = client.get(f"/api/memories/{user_id_for_detail}", headers=headers)
+    assert detail.status_code == 200, detail.text
+    body = detail.json()
+    assert body["kind"] == "user"
+    assert body["active"] is True
+    assert "张经理" in (body.get("content") or "")
+    assert body["detail"]["versions"]
+
+    filtered = client.get("/api/memories", headers=headers, params={"kind": "user"}).json()
+    rows = filtered["items"] if isinstance(filtered, dict) else filtered
+    assert any(item["id"] == user_id_for_detail for item in rows)
+    assert all(item.get("kind") != "summary" for item in rows)
+
+    agent_id = _agent_id(client, headers)
+    long_hit = client.post(f"/api/agents/{agent_id}/run", headers=headers, json={"message": "你好"})
+    assert long_hit.status_code == 200
+    injected = long_hit.json()["output"]
+    assert "客户结算日是每月25号" in injected or "张经理" in injected
+
+    db = factory()
+    try:
+        short_row = (
+            db.query(Memory)
+            .filter(Memory.user_id == user_id, Memory.kind == "short", Memory.task_id == "sess-a")
+            .order_by(Memory.id.desc())
+            .first()
+        )
+        assert short_row is not None
+        short_row.task_id = "agent-task-1"
+        short_row.content = "短期标记-仅任务一"
+        db.commit()
+
+        from app.services.compress_runtime import inject_memories
+
+        hit_msgs = inject_memories(
+            db,
+            [{"role": "system", "content": "系统"}],
+            space_id=space["id"],
+            user_id=user_id,
+            task_id="agent-task-1",
+        )
+        miss_msgs = inject_memories(
+            db,
+            [{"role": "system", "content": "系统"}],
+            space_id=space["id"],
+            user_id=user_id,
+            task_id="agent-task-2",
+        )
+        assert "短期标记-仅任务一" in (hit_msgs[0].get("content") or "")
+        assert "短期标记-仅任务一" not in (miss_msgs[0].get("content") or "")
+        assert any(row.content == "短期标记-仅任务一" for row in visible_memories(db, space_id=space["id"], user_id=user_id, task_id="agent-task-1"))
+        assert all(row.content != "短期标记-仅任务一" for row in visible_memories(db, space_id=space["id"], user_id=user_id, task_id="agent-task-2"))
+    finally:
+        db.close()
+
+
 def test_subagent_delegation_sso_and_token_exchange(client):
     headers, space = auth(client, "builder")
     agent_id = _agent_id(client, headers)

@@ -162,6 +162,7 @@ class ModelEndpoint(Base):
     origin: Mapped[str] = mapped_column(String(20), default="department")
     quota_limit: Mapped[float] = mapped_column(Float, default=0)
     quota_used: Mapped[float] = mapped_column(Float, default=0)
+    context_tokens: Mapped[int] = mapped_column(Integer, default=1000000)
     created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime | None] = mapped_column(DateTime, default=now)
 
@@ -267,15 +268,28 @@ class Chunk(Base):
 
 
 class Memory(Base):
-    """短期或长期记忆。读取时按策略里的隔离键过滤，过期记录不再返回。"""
+    """三层记忆（短期 / 长期 / 用户画像）；summary 仅作压缩链路内部节点，管理界面不展示。
+
+    用户画像：每用户一条启用中的画像（active=True），历史版本 active=False，level 为版本号。
+    长期：可多条，同主题更新、新主题新增。短期：按会话/任务可多条。
+    """
     __tablename__ = "memories"
     id: Mapped[int] = mapped_column(primary_key=True)
     space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id"))
     agent_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     project_id: Mapped[str] = mapped_column(String(80), default="")
-    kind: Mapped[str] = mapped_column(String(10), default="short")
+    kind: Mapped[str] = mapped_column(String(20), default="short")
     content: Mapped[str] = mapped_column(Text)
+    source_kind: Mapped[str] = mapped_column(String(20), default="")
+    source_id: Mapped[str] = mapped_column(String(80), default="")
+    source_name: Mapped[str] = mapped_column(String(160), default="")
+    task_id: Mapped[str] = mapped_column(String(80), default="")
+    level: Mapped[int] = mapped_column(Integer, default=0)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    parent_summary_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    source_refs_json: Mapped[str] = mapped_column(Text, default="{}")
+    produced_json: Mapped[str] = mapped_column(Text, default="{}")
     created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)

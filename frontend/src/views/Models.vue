@@ -28,6 +28,7 @@ const columns = computed(() => [
   { key: "price_out", label: "输出单价/百万", format: (value) => moneyText(value) },
   { key: "quota_limit", label: "额度上限", format: (value) => (value ? moneyText(value) : "不限") },
   { key: "quota_used", label: "已用额度", format: (value) => moneyText(value) },
+  { key: "context_tokens", label: "上下文长度", format: (value) => countText(value || 1000000) },
   { key: "enabled", label: "启用", format: (value) => (value ? "是" : "否") },
   ...(platform.value
     ? [
@@ -38,11 +39,11 @@ const columns = computed(() => [
   { key: "created_at", label: "时间", format: when },
 ]);
 function empty() {
-  return { id: null, name: "", provider: "openai", model: "gpt-4o-mini", base_url: "", api_key: "", task_types: "reason", price_in: 2, price_out: 8, priority: 10, enabled: true, quota_limit: 0 };
+  return { id: null, name: "", provider: "openai", model: "gpt-4o-mini", base_url: "", api_key: "", task_types: "reason", price_in: 2, price_out: 8, priority: 10, enabled: true, quota_limit: 0, context_tokens: null };
 }
 function openWith(row, next) {
   form.value = row
-    ? { ...empty(), ...row, task_types: (row.task_types || []).join(","), api_key: "" }
+    ? { ...empty(), ...row, task_types: (row.task_types || []).join(","), api_key: "", context_tokens: row.context_tokens ?? 1000000 }
     : empty();
   mode.value = next;
   open.value = true;
@@ -51,6 +52,13 @@ async function save() {
   const body = { ...form.value, task_types: form.value.task_types.split(",").map((item) => item.trim()).filter(Boolean) };
   if (!body.api_key) delete body.api_key;
   if (mode.value !== "create" && !isAdmin.value) delete body.quota_limit;
+  const rawContext = body.context_tokens;
+  if (rawContext === null || rawContext === undefined || rawContext === "") {
+    if (mode.value === "create") body.context_tokens = 1000000;
+    else delete body.context_tokens;
+  } else {
+    body.context_tokens = Math.max(1024, Number(rawContext) || 1000000);
+  }
   try {
     if (mode.value === "create") await api("/api/models", { method: "POST", body });
     else await api(`/api/models/${form.value.id}`, { method: "PATCH", body });
@@ -119,6 +127,8 @@ watch(() => route.query.usable_space, () => desk.refresh());
       <label class="field"><span>输出单价（每百万 token）</span><input v-model.number="form.price_out" type="number" min="0" step="0.01" /></label>
     </div>
     <label class="field"><span>优先级，数字越小越优先</span><input v-model.number="form.priority" type="number" /></label>
+    <label class="field"><span>上下文最大长度（token）</span><input v-model.number="form.context_tokens" type="number" min="1024" step="1000" placeholder="不填默认 1000000" /></label>
+    <p class="sub">用于长对话压缩阈值（约 80%）。新建不填时按 1000000。</p>
     <label class="field"><span>最大使用额度</span><input v-model.number="form.quota_limit" type="number" min="0" step="0.01" :disabled="mode === 'edit' && !isAdmin" /></label>
     <p class="sub">0 表示不限制。已用 {{ moneyText(form.quota_used || 0) }}，剩余 {{ form.quota_limit ? moneyText(Math.max(0, form.quota_limit - (form.quota_used || 0))) : "不限" }}。</p>
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用</label>

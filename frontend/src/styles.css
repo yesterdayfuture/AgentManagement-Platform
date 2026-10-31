@@ -147,6 +147,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: .65; background-co
 .check { display: flex; gap: 8px; align-items: center; font-size: 12px; overflow-wrap: anywhere; }
 .check input { width: 15px; }
 .veil { position: fixed; inset: 0; background: #0f203b70; backdrop-filter: blur(3px); z-index: 30; display: flex; justify-content: center; padding: 48px 16px 24px; overflow: auto; }
+.veil.nested { z-index: 40; background: #0f203b88; }
 .dialog { position: relative; width: min(720px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: 0 24px 80px #0b1b3540; align-self: flex-start; }
 .dialog.wide { width: min(1120px, 100%); }
 .dialog > h2 { padding-right: 30px; margin-bottom: 24px; font-size: 21px; }
@@ -166,11 +167,12 @@ td.version-actions { overflow: visible; text-overflow: clip; white-space: normal
 .version-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .version-actions .ghost { min-height: 28px; padding: 2px 8px; font-size: 12px; }
 .version-actions .ghost:disabled { opacity: .45; cursor: not-allowed; }
-.flow { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 14px; min-height: 420px; }
-.palette { display: flex; flex-direction: column; gap: 8px; }
+.flow { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 14px; height: min(52vh, 520px); min-height: 420px; align-items: stretch; }
+.palette { display: flex; flex-direction: column; gap: 8px; min-height: 0; height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+.palette > .kicker { position: sticky; top: 0; z-index: 1; margin: 0; padding-bottom: 4px; background: var(--surface); }
 .palette button, .flow-node { border: 1px solid #c6d7ee; border-radius: 7px; background: var(--surface); text-align: left; padding: 10px; cursor: grab; }
-.palette button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.board { position: relative; min-height: 420px; border: 1px solid var(--line); border-radius: 9px; background: radial-gradient(#b7c8df 1px, transparent 1px) #f7faff; background-size: 20px 20px; overflow: hidden; }
+.palette button { flex: 0 0 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board { position: relative; min-height: 0; height: 100%; border: 1px solid var(--line); border-radius: 9px; background: radial-gradient(#b7c8df 1px, transparent 1px) #f7faff; background-size: 20px 20px; overflow: hidden; }
 .wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .wires line { stroke: #5a8ade; stroke-width: 2; pointer-events: stroke; cursor: pointer; }
 .wires .wire-draft { stroke-dasharray: 4 3; pointer-events: none; }
@@ -192,6 +194,9 @@ td.version-actions { overflow: visible; text-overflow: clip; white-space: normal
 .live-log { max-height: 280px; overflow: auto; margin-top: 8px; }
 .node-setup { display: grid; gap: 8px; margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f8fbff; }
 .node-setup .checks { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.node-list { display: grid; gap: 8px; margin: 8px 0 4px; }
+.node-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #f8fbff; }
+.node-card .sub { margin: 4px 0 0; }
 .md { overflow-wrap: anywhere; line-height: 1.7; }
 .md h1, .md h2, .md h3 { margin: 14px 0 6px; line-height: 1.35; }
 .md p { margin: 8px 0; }
@@ -593,9 +598,11 @@ pre { max-width: 100%; overflow: auto; background: #f4f7fb; border-radius: 6px; 
   .dialog { padding: 22px 16px; }
   .veil { padding: 16px 8px; }
   .checks { grid-template-columns: 1fr; }
-  .flow { grid-template-columns: 1fr; }
-  .palette { flex-direction: row; overflow-x: auto; }
+  .flow { grid-template-columns: 1fr; height: auto; min-height: 0; }
+  .palette { flex-direction: row; height: auto; max-height: 140px; overflow-x: auto; overflow-y: hidden; }
+  .palette > .kicker { position: static; flex: 0 0 auto; align-self: center; padding-bottom: 0; }
   .palette button { flex-shrink: 0; max-width: 160px; }
+  .board { height: 420px; }
   .bar-row { grid-template-columns: 85px minmax(0, 1fr) 60px; gap: 8px; }
   .ask-page { grid-template-columns: 1fr; height: auto; max-height: none; overflow: visible; min-height: calc(100vh - 120px); margin: -22px -14px -32px; }
   .ask-gutter { display: none; }

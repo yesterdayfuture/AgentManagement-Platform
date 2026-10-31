@@ -5,13 +5,14 @@ defineProps({
   mode: { type: String, default: "view" },
   wide: Boolean,
   live: Boolean,
+  nested: Boolean,
 });
 const emit = defineEmits(["close", "submit"]);
 const labels = { create: "新增", edit: "编辑", view: "查看", run: "执行" };
 </script>
 
 <template>
-  <div class="veil" v-if="open" @click.self="emit('close')">
+  <div class="veil" :class="{ nested }" v-if="open" @click.self="emit('close')">
     <div class="dialog" :class="{ wide }" role="dialog" aria-modal="true" :aria-label="title">
       <button class="dialog-x" type="button" aria-label="关闭" @click="emit('close')">×</button>
       <p class="kicker">{{ labels[mode] || "记录" }}</p>

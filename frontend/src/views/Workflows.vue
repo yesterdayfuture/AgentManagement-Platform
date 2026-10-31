@@ -18,7 +18,8 @@ const skills = ref([]);
 const open = ref(false);
 const mode = ref("create");
 const form = ref(blank());
-const selectedId = ref("");
+const nodeSetupOpen = ref(false);
+const setupTarget = ref(null);
 const runMessage = ref("写一篇目前agent技术调研报告");
 const testStream = ref(false);
 const runOutput = ref("");
@@ -99,7 +100,7 @@ function openWith(row, next) {
   runOutput.value = "";
   liveLogs.value = [];
   draft.value = null;
-  selectedId.value = "";
+  closeNodeSetup();
   mode.value = next;
   open.value = true;
 }
@@ -120,10 +121,14 @@ async function fillNode(node) {
   if (!Array.isArray(node.skill_ids)) node.skill_ids = [...(latest?.skill_ids || [])];
 }
 async function configure(node) {
-  selectedId.value = node.id;
   await fillNode(node);
+  setupTarget.value = node;
+  nodeSetupOpen.value = true;
 }
-const selected = computed(() => form.value.nodes.find((node) => node.id === selectedId.value) || null);
+function closeNodeSetup() {
+  nodeSetupOpen.value = false;
+  setupTarget.value = null;
+}
 function toggleName(list, name) {
   return list.includes(name) ? list.filter((item) => item !== name) : [...list, name];
 }
@@ -186,6 +191,7 @@ function startWire(node, event) {
   window.addEventListener("pointerup", up);
 }
 function removeNode(id) {
+  if (setupTarget.value?.id === id) closeNodeSetup();
   form.value.nodes = form.value.nodes.filter((node) => node.id !== id);
   form.value.edges = form.value.edges.filter((edge) => edge.src !== id && edge.dst !== id);
 }
@@ -408,6 +414,9 @@ watch(() => runForm.value?.message, () => {
   if (!runForm.value || runForm.value.filling) return;
   applyTaskPrompts();
 });
+watch([open, runOpen], ([editorOpen, runnerOpen]) => {
+  if (!editorOpen && !runnerOpen) closeNodeSetup();
+});
 async function saveSchedule(enabled) {
   const form = runForm.value;
   const saved = await api(`/api/workflows/${form.id}`, {
@@ -587,7 +596,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
     </label>
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用。停用后不能执行，也不能继续。</label>
     <p class="sub">当前为{{ form.release === "published" ? "已发布" : "草稿" }}。改节点保存后会回到草稿，需再点「发布」后操作者才能执行。</p>
-    <p v-if="form.mode === 'autonomous'" class="sub">调度者会阅读问题，以及每个节点上写的提示词和职责，再决定拆开交给谁。</p>
+    <p v-if="form.mode === 'autonomous'" class="sub">规划时系统会固定注入全体成员花名册（调度者 + 下游），调度指令模板不可改；各节点「提示词」只影响花名册中的职责文案与该节点执行时的系统提示。详见 docs/autonomous-agent.md。</p>
     <p v-if="form.legacy" class="sub">这份工作流还是旧的意图节点。拖入智能体并保存后，改为智能体之间流转。</p>
     <div class="flow">
       <div class="palette">
@@ -616,29 +625,6 @@ watch(() => route.query.usable_space, () => desk.refresh());
       {{ edge.src }} → {{ edge.dst }}
       <button class="ghost" type="button" @click="form.edges.splice(index, 1)">去掉</button>
     </p>
-    <section v-if="selected" class="node-setup">
-      <p class="kicker">{{ agentName(selected.agent_id) }}</p>
-      <label class="field"><span>提示词</span><textarea v-model="selected.prompt" rows="3" placeholder="留空则使用智能体自己的提示词" /></label>
-      <p class="sub">工具</p>
-      <div class="checks">
-        <label v-for="tool in tools" :key="tool.id" class="check"><input type="checkbox" :checked="selected.tool_names?.includes(tool.name)" @change="selected.tool_names = toggleName(selected.tool_names || [], tool.name)" /> {{ tool.name }}</label>
-      </div>
-      <p class="sub">知识库</p>
-      <div class="checks">
-        <label v-for="base in bases" :key="base.id" class="check"><input type="checkbox" :checked="selected.knowledge_ids?.includes(base.id)" @change="selected.knowledge_ids = toggleId(selected.knowledge_ids || [], base.id)" /> {{ base.name }}</label>
-        <span v-if="!bases.length" class="sub">这个部门还没有知识库。</span>
-      </div>
-      <p class="sub">MCP 服务</p>
-      <div class="checks">
-        <label v-for="server in mcpServers" :key="server.id" class="check"><input type="checkbox" :checked="selected.mcp_ids?.includes(server.id)" @change="selected.mcp_ids = toggleId(selected.mcp_ids || [], server.id)" /> {{ server.name }}</label>
-        <span v-if="!mcpServers.length" class="sub">这个部门还没有 MCP 服务。</span>
-      </div>
-      <p class="sub">技能</p>
-      <div class="checks">
-        <label v-for="skill in skills" :key="skill.id" class="check"><input type="checkbox" :checked="selected.skill_ids?.includes(skill.id)" @change="selected.skill_ids = toggleId(selected.skill_ids || [], skill.id)" /> {{ skill.name }}</label>
-        <span v-if="!skills.length" class="sub">这个部门还没有技能。</span>
-      </div>
-    </section>
     <template #footer>
       <div class="row">
         <label class="field"><span>在线测试</span><input v-model="runMessage" /></label>
@@ -672,27 +658,17 @@ watch(() => route.query.usable_space, () => desk.refresh());
     <label v-if="runForm?.scheduled" class="field"><span>间隔（分钟）</span><input v-model.number="runForm.everyMinutes" type="number" min="1" step="1" /></label>
     <label v-if="runForm?.scheduled" class="field"><span>定时 token 上限（0 不限）</span><input v-model.number="runForm.tokenBudget" type="number" min="0" step="1" /></label>
     <p v-if="runForm?.scheduled" class="sub">已用 {{ countText(runForm.tokenUsed || 0) }} token<template v-if="runForm.nextAt"> · 下次 {{ runForm.nextAt }}</template></p>
-    <section v-for="node in runForm?.nodes || []" :key="node.id" class="node-setup">
-      <p class="kicker">{{ agentName(node.agent_id) }}</p>
-      <label class="field"><span>提示词</span><textarea v-model="node.prompt" rows="4" placeholder="会按本次任务自动填写，也可以再改" /></label>
-      <p class="sub">工具</p>
-      <div class="checks">
-        <label v-for="tool in tools" :key="tool.id" class="check"><input type="checkbox" :checked="node.tool_names?.includes(tool.name)" @change="node.tool_names = toggleName(node.tool_names || [], tool.name)" /> {{ tool.name }}</label>
-      </div>
-      <p class="sub">知识库</p>
-      <div class="checks">
-        <label v-for="base in bases" :key="base.id" class="check"><input type="checkbox" :checked="node.knowledge_ids?.includes(base.id)" @change="node.knowledge_ids = toggleId(node.knowledge_ids || [], base.id)" /> {{ base.name }}</label>
-      </div>
-      <p class="sub">MCP 服务</p>
-      <div class="checks">
-        <label v-for="server in mcpServers" :key="server.id" class="check"><input type="checkbox" :checked="node.mcp_ids?.includes(server.id)" @change="node.mcp_ids = toggleId(node.mcp_ids || [], server.id)" /> {{ server.name }}</label>
-        <span v-if="!mcpServers.length" class="sub">这个部门还没有 MCP 服务。</span>
-      </div>
-      <p class="sub">技能</p>
-      <div class="checks">
-        <label v-for="skill in skills" :key="skill.id" class="check"><input type="checkbox" :checked="node.skill_ids?.includes(skill.id)" @change="node.skill_ids = toggleId(node.skill_ids || [], skill.id)" /> {{ skill.name }}</label>
-      </div>
-    </section>
+    <p class="kicker">节点配置</p>
+    <div class="node-list">
+      <article v-for="node in runForm?.nodes || []" :key="node.id" class="node-card">
+        <div>
+          <strong>{{ agentName(node.agent_id) }}</strong>
+          <p class="sub">{{ node.id }} · 提示词 {{ (node.prompt || "").trim() ? "已填写" : "待填写" }}</p>
+        </div>
+        <button class="ghost" type="button" @click="configure(node)">配置</button>
+      </article>
+      <p v-if="!(runForm?.nodes || []).length" class="sub">这份工作流还没有节点。</p>
+    </div>
     <template #footer>
       <button class="btn" type="button" :disabled="running" @click="startRun">{{ running ? "运行中" : (runForm?.scheduled ? "确认定时" : "确认执行") }}</button>
       <p v-if="runOutput" class="sub">{{ runOutput }}</p>
@@ -728,6 +704,41 @@ watch(() => route.query.usable_space, () => desk.refresh());
     <template #footer>
       <button class="btn" type="button" :disabled="running" @click="confirmRun">确认</button>
       <button class="ghost" type="button" @click="confirmOpen = false">取消</button>
+    </template>
+  </Dialog>
+  <Dialog
+    nested
+    mode="view"
+    :live="runOpen || mode !== 'view'"
+    :open="nodeSetupOpen"
+    :title="setupTarget ? `${agentName(setupTarget.agent_id)} · 节点配置` : '节点配置'"
+    @close="closeNodeSetup"
+  >
+    <template v-if="setupTarget">
+      <p class="sub">节点 {{ setupTarget.id }}。提示词留空则使用智能体默认提示词。</p>
+      <label class="field"><span>提示词</span><textarea v-model="setupTarget.prompt" rows="5" placeholder="留空则使用智能体自己的提示词" /></label>
+      <p class="sub">工具</p>
+      <div class="checks">
+        <label v-for="tool in tools" :key="tool.id" class="check"><input type="checkbox" :checked="setupTarget.tool_names?.includes(tool.name)" @change="setupTarget.tool_names = toggleName(setupTarget.tool_names || [], tool.name)" /> {{ tool.name }}</label>
+      </div>
+      <p class="sub">知识库</p>
+      <div class="checks">
+        <label v-for="base in bases" :key="base.id" class="check"><input type="checkbox" :checked="setupTarget.knowledge_ids?.includes(base.id)" @change="setupTarget.knowledge_ids = toggleId(setupTarget.knowledge_ids || [], base.id)" /> {{ base.name }}</label>
+        <span v-if="!bases.length" class="sub">这个部门还没有知识库。</span>
+      </div>
+      <p class="sub">MCP 服务</p>
+      <div class="checks">
+        <label v-for="server in mcpServers" :key="server.id" class="check"><input type="checkbox" :checked="setupTarget.mcp_ids?.includes(server.id)" @change="setupTarget.mcp_ids = toggleId(setupTarget.mcp_ids || [], server.id)" /> {{ server.name }}</label>
+        <span v-if="!mcpServers.length" class="sub">这个部门还没有 MCP 服务。</span>
+      </div>
+      <p class="sub">技能</p>
+      <div class="checks">
+        <label v-for="skill in skills" :key="skill.id" class="check"><input type="checkbox" :checked="setupTarget.skill_ids?.includes(skill.id)" @change="setupTarget.skill_ids = toggleId(setupTarget.skill_ids || [], skill.id)" /> {{ skill.name }}</label>
+        <span v-if="!skills.length" class="sub">这个部门还没有技能。</span>
+      </div>
+    </template>
+    <template #footer>
+      <button class="btn" type="button" @click="closeNodeSetup">完成</button>
     </template>
   </Dialog>
 </template>

@@ -29,6 +29,7 @@ const logEl = ref(null);
 const route = useRoute();
 const editingDraft = ref(null);
 const draftSaving = ref(false);
+const compressing = ref(false);
 
 const canSend = computed(() => ["operator", "builder", "admin"].includes(role.value));
 const pinnedSessions = computed(() => sessions.value.filter((item) => item.pinned));
@@ -300,6 +301,25 @@ async function copyText(text) {
     error.value = "复制没有成功";
   }
 }
+async function compressSession() {
+  if (!thread.value?.id || compressing.value || !canSend.value) return;
+  compressing.value = true;
+  error.value = "";
+  try {
+    const saved = await api(`/api/chats/${thread.value.id}/compress`, { method: "POST", body: {} });
+    thread.value = saved;
+    await loadSessions();
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    compressing.value = false;
+  }
+}
+function roleLabel(role) {
+  if (role === "user") return "问题";
+  if (role === "summary") return "摘要";
+  return "回答";
+}
 watch(
   () => (thread.value?.messages || []).map((item) => `${item.id}:${item.content}`).join("\n"),
   async () => {
@@ -383,17 +403,24 @@ onUnmounted(() => document.removeEventListener("click", closeMenu));
         <div class="ask-title" v-if="thread">
           <p class="ask-title-button">{{ thread.title }}</p>
         </div>
-        <p v-else class="sub">选择智能体后直接提问。构建者使用最新草稿，操作者使用已发布版本。</p>
+        <button
+          v-if="thread?.id && canSend"
+          class="ghost"
+          type="button"
+          :disabled="compressing || sending || (thread.messages || []).length < 2"
+          @click="compressSession"
+        >{{ compressing ? "压缩中…" : "压缩上下文" }}</button>
+        <p v-else-if="!thread" class="sub">选择智能体后直接提问。构建者使用最新草稿，操作者使用已发布版本。</p>
       </header>
       <p v-if="error" class="error">{{ error }}</p>
       <div ref="logEl" class="ask-log" aria-live="polite">
         <p v-if="!thread" class="ask-empty">从左侧打开一条会话，或在下面写下第一个问题。</p>
         <article v-for="item in thread?.messages || []" :key="item.id" class="ask-turn" :class="item.role">
-          <p class="kicker">{{ item.role === "user" ? "问题" : "回答" }}</p>
+          <p class="kicker">{{ roleLabel(item.role) }}</p>
           <p v-if="item.activity" class="ask-activity">{{ item.activity }}</p>
           <div v-if="item.role === 'assistant'" class="md" v-html="renderMarkdown(item.content)"></div>
           <span v-if="item.pending" class="ask-caret" aria-hidden="true"></span>
-          <p v-if="item.role === 'user'" class="ask-user-text">{{ item.content }}</p>
+          <p v-if="item.role === 'user' || item.role === 'summary'" class="ask-user-text">{{ item.content }}</p>
           <p v-if="metaLine(item)" class="ask-meta">{{ metaLine(item) }}</p>
           <div v-if="item.tool_calls?.length" class="ask-tools">
             <details v-for="(call, index) in item.tool_calls" :key="index">

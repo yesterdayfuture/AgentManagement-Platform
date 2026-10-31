@@ -51,27 +51,45 @@ def charge_model(model: ModelEndpoint | None, cost: float) -> None:
     model.quota_used = round((model.quota_used or 0) + cost, 6)
 
 
-def select_model(db, space_id: int, task: str) -> ModelEndpoint | None:
+def select_model(db, space_id: int, task: str, *, allow_rules: bool = True) -> ModelEndpoint | None:
+    """按任务选模型。压缩/记忆抽取应传 allow_rules=False，避免规则模型把提示词回显成摘要。"""
     allowed = ids_for(db, space_id, "model") or [-1]
     rows = (
         db.query(ModelEndpoint)
         .filter(ModelEndpoint.enabled.is_(True), ModelEndpoint.id.in_(allowed))
         .all()
     )
+    if not allow_rules:
+        rows = [row for row in rows if (row.provider or "") != "rules"]
     matched = [row for row in rows if task in load(row.task_types_json, []) and quota_open(row)]
     pool = matched or [row for row in rows if quota_open(row)]
     if not pool:
         return None
-    pool.sort(key=lambda row: (row.price_in, row.priority))
+    pool.sort(key=lambda row: (row.price_in or 0, row.priority or 0))
     return pool[0]
 
 
 def rules_reply(system_prompt: str, message: str, memories: list[str], citations: list[dict]) -> str:
     if citations:
         return citations[0]["excerpt"]
-    if memories:
-        return memories[0]
     line = (system_prompt or "已收到请求").split("。")[0]
+
+    def _tip(raw: str) -> str:
+        tip = re.sub(r"^【v\d+】\s*", "", (raw or "").strip())
+        tip = re.sub(r"^\[(?:短期|长期|用户|short|long|user)\]\s*", "", tip, flags=re.I).strip()
+        if " " in tip:
+            head, tail = tip.split(" ", 1)
+            if len(head) <= 40 and not any(ch in head for ch in "，。；"):
+                tip = tail.strip() or tip
+        return tip
+
+    # 有自定义系统提示时优先用提示作答，记忆只作附注，避免工作流节点把记忆正文当成 carry
+    if (system_prompt or "").strip() and memories:
+        tip = _tip(memories[0])
+        return f"{line}。参考：{tip[:120]}" if tip else f"{line}。"
+    if memories:
+        tip = _tip(memories[0])
+        return tip or memories[0]
     return f"{line}。问题：{message[:80]}"
 
 
@@ -249,13 +267,25 @@ def _stream_completion(client, payload: dict):
     return joined, calls, tokens_in if tokens_in is not None else _usage("", joined)[0], tokens_out if tokens_out is not None else _usage("", joined)[1]
 
 
+def _api_messages(messages: list[dict]) -> list[dict]:
+    """把内部 summary 角色映射成接口可识别的 user，避免模型网关拒识。"""
+    out = []
+    for item in messages:
+        role = item.get("role") or "user"
+        if role == "summary":
+            out.append({**item, "role": "user"})
+        else:
+            out.append(item)
+    return out
+
+
 def complete_with_tools(db, model: ModelEndpoint | None, messages: list[dict], tools: list[dict]) -> dict:
     """一轮模型调用。返回文字，或模型要求执行的函数调用。
 
     没有可用密钥、规则模型或接口失败时 fallback 为真，调用方改走规则路径。
     """
     name = model.name if model else "rules"
-    last_user = next((item.get("content") or "" for item in reversed(messages) if item.get("role") == "user"), "")
+    last_user = next((item.get("content") or "" for item in reversed(messages) if item.get("role") in {"user", "summary"}), "")
     key = _model_key(db, model)
     if model is None or model.provider == "rules" or not key:
         text = rules_reply("", last_user, [], [])
@@ -276,7 +306,7 @@ def complete_with_tools(db, model: ModelEndpoint | None, messages: list[dict], t
         from openai import OpenAI
 
         client = OpenAI(api_key=key, base_url=model.base_url or None, timeout=90)
-        payload = {"model": model.model, "temperature": 0, "messages": messages}
+        payload = {"model": model.model, "temperature": 0, "messages": _api_messages(messages)}
         if tools:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"

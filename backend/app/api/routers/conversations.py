@@ -98,7 +98,7 @@ def _stop_reason(row: ChatMessage, trace: Trace | None) -> str:
 
 
 def _message_dict(db, row: ChatMessage) -> dict:
-    tools = load(row.tool_calls_json, [])
+    tools = load(row.tool_calls_json, []) if row.role != "summary" else []
     data = {
         "id": row.id,
         "role": row.role,
@@ -245,18 +245,30 @@ def _turn(db, ctx, row: ChatSession, body: ChatMessageIn) -> tuple[str, str, lis
         resume = last.trace_id
     elif not text:
         raise HTTPException(400, "请填写问题")
-    history = [{"role": item.role, "content": item.content} for item in prior if item.role in {"user", "assistant"} and item.content]
+    if text and (not row.title or row.title == "新的问答"):
+        row.title = text[:24]
+    history = [
+        {"role": item.role, "content": item.content}
+        for item in prior
+        if item.role in {"user", "assistant", "summary"} and item.content
+    ]
     if resume:
         history = []
     environment = "test" if ctx.role in {"builder", "admin"} or is_platform(ctx.user) else "prod"
-    return text, resume, history, {"environment": environment, "agent_id": row.agent_id}
+    return text, resume, history, {
+        "environment": environment,
+        "agent_id": row.agent_id,
+        "task_id": row.id,
+        "source_kind": "chat",
+        "source_name": row.title or "问答",
+    }
 
 
 def _save_turn(db, row: ChatSession, text: str, result: dict, viewer_id: int) -> dict:
     now = datetime.utcnow()
     if text:
         db.add(ChatMessage(session_id=row.id, role="user", content=text, created_at=now))
-        if row.title == "新的问答":
+        if not row.title or row.title == "新的问答":
             row.title = text[:24]
     db.add(
         ChatMessage(
@@ -305,6 +317,9 @@ def _run_turn(db, ctx, row, text, resume, history, plan) -> dict:
             policy=policy,
             history=history,
             resume_trace_id=resume,
+            task_id=plan.get("task_id") or row.id,
+            source_kind=plan.get("source_kind") or "chat",
+            source_name=plan.get("source_name") or row.title or agent.name,
         )
     except GateError as exc:
         status = 429 if exc.status == "quota" else 409 if exc.status == "offline" else 400
@@ -377,6 +392,65 @@ def send_message(session_id: str, body: ChatMessageIn, request: Request, ctx=Dep
         return _stream_turn(request, ctx, row.id, text, resume, history, plan)
     result = _run_turn(db, ctx, row, text, resume, history, plan)
     return _save_turn(db, row, text, result, ctx.user.id)
+
+
+@router.post("/api/chats/{session_id}/compress")
+def compress_chat(session_id: str, ctx=Depends(get_context), db=Depends(get_db)):
+    """主动压缩当前问答上下文，并写入三层记忆。"""
+    require(ctx, "operator")
+    from app.services.compress_runtime import prepare_history
+    from app.services.gateway import select_model
+
+    row = _load_session(db, ctx, session_id)
+    if row.user_id != ctx.user.id and ctx.role != "admin" and not is_platform(ctx.user):
+        raise HTTPException(403, "只能压缩自己的会话")
+    prior = db.query(ChatMessage).filter_by(session_id=row.id).order_by(ChatMessage.id.asc()).all()
+    history = [
+        {"role": item.role, "content": item.content}
+        for item in prior
+        if item.role in {"user", "assistant", "summary"} and item.content
+    ]
+    if len(history) < 2:
+        raise HTTPException(400, "对话太短，无需压缩")
+    agent = db.get(Agent, row.agent_id) if row.agent_id else None
+    space_id = (agent.space_id if agent and agent.space_id else row.space_id) or ctx.space.id
+    model = select_model(db, space_id, "reason", allow_rules=False)
+    packed = prepare_history(
+        db,
+        history,
+        model=model,
+        space_id=space_id,
+        user_id=row.user_id,
+        force=True,
+        source_kind="chat",
+        source_id=row.id,
+        source_name=row.title or "问答",
+        task_id=row.id,
+        agent_id=row.agent_id,
+        retention_days=getattr(ctx.policy, "retention_days", 30),
+    )
+    if packed.get("mode") == "summary" and packed.get("summary"):
+        db.add(
+            ChatMessage(
+                session_id=row.id,
+                role="summary",
+                content=f"【对话摘要 L{packed.get('level') or 1}】\n{packed['summary']}",
+                created_at=datetime.utcnow(),
+            )
+        )
+        row.updated_at = datetime.utcnow()
+    db.flush()
+    messages = db.query(ChatMessage).filter_by(session_id=row.id).order_by(ChatMessage.id.asc()).all()
+    data = _brief(db, row, viewer_id=ctx.user.id)
+    data["messages"] = [_message_dict(db, item) for item in messages]
+    data["compress"] = {
+        "mode": packed.get("mode"),
+        "tokens_before": packed.get("tokens_before"),
+        "tokens_after": packed.get("tokens_after"),
+        "level": packed.get("level"),
+        "summary_id": packed.get("summary_id"),
+    }
+    return data
 
 
 def _draft_model(db, space_id: int, agent: Agent, environment: str):

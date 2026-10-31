@@ -249,6 +249,7 @@ class ModelIn(BaseModel):
     priority: int = 10
     enabled: bool = True
     quota_limit: float = 0
+    context_tokens: int | None = None
 
 
 class ModelPatch(BaseModel):
@@ -263,6 +264,7 @@ class ModelPatch(BaseModel):
     priority: int | None = None
     enabled: bool | None = None
     quota_limit: float | None = None
+    context_tokens: int | None = None
 
 
 class SecretIn(BaseModel):

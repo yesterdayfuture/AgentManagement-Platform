@@ -246,6 +246,9 @@ def _run_agent_graph(db, workflow: Workflow, *, user, space, message: str, envir
                 role=role,
                 policy=policy,
                 setup=_node_setup(db, space.id, node),
+                task_id=f"run-{run.id}",
+                source_kind="workflow",
+                source_name=workflow.name,
             )
         except GateError as exc:
             run.status = exc.status
@@ -606,6 +609,9 @@ def _run_autonomous(db, workflow: Workflow, *, user, space, message: str, enviro
                 role=role,
                 policy=policy,
                 setup=_setup_for(db, space.id, nodes, agent.id),
+                task_id=f"run-{run.id}",
+                source_kind="workflow",
+                source_name=workflow.name,
             )
         except GateError as exc:
             run.status = exc.status
@@ -673,7 +679,7 @@ def run_workflow(db, workflow: Workflow, *, user, space, message: str, environme
         hit = find_hit(message or "")
         if hit:
             raise GateError("denied", stop_message(hit))
-        return _run_workflow_body(
+        result = _run_workflow_body(
             db,
             workflow,
             user=user,
@@ -685,6 +691,25 @@ def run_workflow(db, workflow: Workflow, *, user, space, message: str, environme
             pause_after=pause_after,
             resume=resume,
         )
+        if result.get("status") in {"completed", "limited"} and result.get("run_id"):
+            from app.services.memory_layers import capture_task_memories
+
+            capture_task_memories(
+                db,
+                space_id=space.id,
+                user_id=user.id,
+                message=message or "",
+                output=(result.get("output") or "")[:2000],
+                dialogue=[],
+                source_kind="workflow",
+                source_id=str(workflow.id),
+                source_name=workflow.name,
+                task_id=f"run-{result['run_id']}",
+                agent_id=workflow.agent_id,
+                retention_days=getattr(policy, "retention_days", 30) if policy else 30,
+            )
+            db.flush()
+        return result
     finally:
         reset_words(sensitive_token)
 

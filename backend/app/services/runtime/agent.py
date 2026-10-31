@@ -89,6 +89,9 @@ def execute_agent(
     setup: dict | None = None,
     history: list | None = None,
     resume_trace_id: str = "",
+    task_id: str = "",
+    source_kind: str = "agent",
+    source_name: str = "",
 ) -> dict:
     """跑一个智能体。depth 用来限制转交只发生一层，避免子智能体再转交。"""
     if space.token_used >= space.token_budget:
@@ -112,6 +115,9 @@ def execute_agent(
             setup=setup,
             history=history,
             resume_trace_id=resume_trace_id,
+            task_id=task_id,
+            source_kind=source_kind,
+            source_name=source_name or agent.name,
         )
     finally:
         reset_words(sensitive_token)
@@ -133,8 +139,13 @@ def _execute_agent_body(
     setup: dict | None = None,
     history: list | None = None,
     resume_trace_id: str = "",
+    task_id: str = "",
+    source_kind: str = "agent",
+    source_name: str = "",
 ) -> dict:
     from app.services.sensitive import find_hit, stop_message
+
+    from app.services.compress_runtime import inject_memories, prepare_history
 
     started = time.perf_counter()
     prior = _prior_dialogue(db, space, agent, history or [], resume_trace_id, policy)
@@ -149,6 +160,9 @@ def _execute_agent_body(
         if hit:
             raise GateError("denied", stop_message(hit))
     version = _overlay(pick_version(db, agent, user.id, environment), setup)
+    memory_task = str(task_id or resume_trace_id or "")
+    memory_source = source_kind or "agent"
+    memory_name = (source_name or agent.name or "")[:160]
     if getattr(agent, "kind", "local") == "remote":
         from app.services.runtime.remote import execute_remote
 
@@ -181,6 +195,33 @@ def _execute_agent_body(
     )
     db.add(trace)
     db.flush()
+    if not memory_task:
+        memory_task = trace.id
+    reason_model = _pick_reason_model(db, version, space, user, agent)
+    if prior:
+        packed = prepare_history(
+            db,
+            prior,
+            model=reason_model,
+            space_id=space.id,
+            user_id=user.id,
+            force=False,
+            source_kind=memory_source,
+            source_id=str(agent.id),
+            source_name=memory_name,
+            task_id=memory_task,
+            agent_id=agent.id,
+            retention_days=getattr(policy, "retention_days", 30) if policy else 30,
+        )
+        prior = [item for item in packed["history"] if item.get("role") != "system"]
+        if packed.get("mode") and packed["mode"] != "none":
+            _step(
+                db,
+                trace,
+                "policy",
+                name="compress",
+                output_text=f"{packed['mode']} {packed.get('tokens_before', 0)}→{packed.get('tokens_after', 0)}",
+            )
     _hop(db, trace, user.id, agent.workload_id, agent.key, credential)
     classify_model = select_model(db, space.id, "classify")
     intent = classify_intent(masked)
@@ -209,21 +250,65 @@ def _execute_agent_body(
     citations = []
     output = ""
     status = "completed"
-    reason_model = _pick_reason_model(db, version, space, user, agent)
+    memory_meta = {
+        "task_id": memory_task,
+        "source_kind": memory_source,
+        "source_name": memory_name,
+        "source_id": str(agent.id),
+    }
     try:
         if intent == "delegate" and depth < 1:
             output, status = _delegate(db, trace, version, user, space, masked, environment, project_id, role, policy)
         elif _can_loop(db, reason_model):
             output, status, citations = _agent_loop(
-                db, trace, agent, version, space, user, masked, environment, role, reason_model, tool_ids, prior
+                db,
+                trace,
+                agent,
+                version,
+                space,
+                user,
+                masked,
+                environment,
+                role,
+                reason_model,
+                tool_ids,
+                prior,
+                memory_meta=memory_meta,
+                policy=policy,
             )
             if status == "fallback":
                 output, status, citations = _route(
-                    db, trace, agent, version, space, user, masked, environment, project_id, role, policy, intent, tool_ids
+                    db,
+                    trace,
+                    agent,
+                    version,
+                    space,
+                    user,
+                    masked,
+                    environment,
+                    project_id,
+                    role,
+                    policy,
+                    intent,
+                    tool_ids,
+                    memory_meta=memory_meta,
                 )
         else:
             output, status, citations = _route(
-                db, trace, agent, version, space, user, masked, environment, project_id, role, policy, intent, tool_ids
+                db,
+                trace,
+                agent,
+                version,
+                space,
+                user,
+                masked,
+                environment,
+                project_id,
+                role,
+                policy,
+                intent,
+                tool_ids,
+                memory_meta=memory_meta,
             )
         if status in {"completed", "limited"}:
             prefix = f"【v{version.number}】"
@@ -247,7 +332,20 @@ def _execute_agent_body(
     trace.tokens_out = sum(step.tokens_out or 0 for step in steps) or max(1, len(output) // 4)
     trace.cost = round(sum(step.cost for step in steps), 6)
     space.token_used += trace.tokens_in + trace.tokens_out
-    _remember(db, policy, space, agent, user, project_id, masked)
+    # 工作流由 run_workflow 在整图完成后统一落库，避免节点间 carry（规则模型回显记忆）污染长期/用户记忆
+    if status in {"completed", "limited", "paused"} and memory_source != "workflow":
+        _remember(
+            db,
+            policy,
+            space,
+            agent,
+            user,
+            project_id,
+            masked,
+            output=output,
+            history=prior,
+            memory_meta=memory_meta,
+        )
     db.flush()
     return {
         "trace_id": trace.id,
@@ -259,6 +357,7 @@ def _execute_agent_body(
         "tokens": trace.tokens_in + trace.tokens_out,
         "tool_calls": _tool_records(steps),
         "limited": status == "limited",
+        "task_id": memory_task,
     }
 
 
@@ -286,7 +385,7 @@ def _can_loop(db, model) -> bool:
     return bool(model and model.provider != "rules" and _model_key(db, model))
 
 
-def _route(db, trace, agent, version, space, user, masked, environment, project_id, role, policy, intent, tool_ids):
+def _route(db, trace, agent, version, space, user, masked, environment, project_id, role, policy, intent, tool_ids, memory_meta=None):
     """规则模型的单步分流。连得上模型时不走这里。"""
     citations = []
     if intent == "calculate":
@@ -311,7 +410,7 @@ def _route(db, trace, agent, version, space, user, masked, environment, project_
         return output, status, citations
     if intent == "search" and load(version.mcp_ids_json, []):
         return _search_web(db, trace, version, masked), "completed", citations
-    output, status = _chat(db, trace, version, space, user, masked, project_id, policy)
+    output, status = _chat(db, trace, version, space, user, masked, project_id, policy, memory_meta=memory_meta)
     return output, status, citations
 
 
@@ -796,9 +895,10 @@ def _prior_dialogue(db, space, agent, history: list, resume_trace_id: str, polic
     for item in history[-40:]:
         role = item.get("role")
         content = (item.get("content") or "").strip()
-        if role not in {"user", "assistant"} or not content:
+        if role not in {"user", "assistant", "summary"} or not content:
             continue
-        content, _notes = apply_context_policy(content, policy)
+        if role != "summary":
+            content, _notes = apply_context_policy(content, policy)
         turns.append({"role": role, "content": content})
     return turns
 
@@ -807,8 +907,26 @@ def _remember_dialogue(trace, messages: list[dict]) -> None:
     trace.dialogue_json = dump([item for item in messages if item.get("role") != "system"])
 
 
-def _agent_loop(db, trace, agent, version, space, user, message, environment, role, model, tool_ids, prior=None):
+def _agent_loop(
+    db,
+    trace,
+    agent,
+    version,
+    space,
+    user,
+    message,
+    environment,
+    role,
+    model,
+    tool_ids,
+    prior=None,
+    memory_meta=None,
+    policy=None,
+):
     """模型、工具、再模型。没有函数调用且不再点名工具时，这一轮就是最终回答。"""
+    from app.services.compress_runtime import inject_memories, prepare_history
+    from app.services.context_compress import context_budget, messages_tokens
+
     specs, bound = _facade()._tool_catalog(db, version, space)
     prompt = _with_skills(db, version, _prompt_for_model(version.system_prompt or ""))
     messages = []
@@ -817,6 +935,15 @@ def _agent_loop(db, trace, agent, version, space, user, message, environment, ro
     messages.extend(prior or [])
     if message:
         messages.append({"role": "user", "content": message})
+    meta = memory_meta or {}
+    messages = inject_memories(
+        db,
+        messages,
+        space_id=space.id,
+        user_id=user.id,
+        task_id=meta.get("task_id") or trace.id,
+        source_kind=meta.get("source_kind") or "agent",
+    )
     citations = []
     used_tool = False
     observations = []
@@ -826,6 +953,31 @@ def _agent_loop(db, trace, agent, version, space, user, message, environment, ro
     capped = False
     repeated = False
     for turn in range(_facade()._LOOP_TURNS):
+        budget = context_budget(model)
+        if messages_tokens(messages) > budget:
+            packed = prepare_history(
+                db,
+                messages,
+                model=model,
+                space_id=space.id,
+                user_id=user.id,
+                force=False,
+                source_kind=meta.get("source_kind") or "agent",
+                source_id=meta.get("source_id") or str(agent.id),
+                source_name=meta.get("source_name") or agent.name,
+                task_id=meta.get("task_id") or trace.id,
+                agent_id=agent.id,
+                retention_days=getattr(policy, "retention_days", 30) if policy else 30,
+            )
+            messages = packed["history"]
+            messages = inject_memories(
+                db,
+                messages,
+                space_id=space.id,
+                user_id=user.id,
+                task_id=meta.get("task_id") or trace.id,
+                source_kind=meta.get("source_kind") or "agent",
+            )
         result = _facade().complete_with_tools(db, model, messages, specs)
         shown = result.get("error") or result["text"] or "、".join(item["name"] for item in result["tool_calls"])
         _record_generate(db, trace, model, message, shown, result["usage"], model, fallback=bool(result["fallback"]))
@@ -902,18 +1054,25 @@ def _agent_loop(db, trace, agent, version, space, user, message, environment, ro
     return "模型没有返回回答", "failed", citations
 
 
-def _remember(db, policy, space, agent, user, project_id, masked: str) -> None:
+def _remember(db, policy, space, agent, user, project_id, masked: str, output: str = "", history: list | None = None, memory_meta=None) -> None:
+    """任务结束后抽取并写入短期 / 长期 / 用户记忆，带来源会话或任务名。"""
+    from app.services.memory_layers import capture_task_memories
+
     days = policy.retention_days if policy else 30
-    db.add(
-        Memory(
-            space_id=space.id,
-            agent_id=agent.id,
-            user_id=user.id,
-            project_id=project_id or "",
-            kind="short",
-            content=masked[:500],
-            expires_at=datetime.utcnow() + timedelta(days=max(days, 0)),
-        )
+    meta = memory_meta or {}
+    capture_task_memories(
+        db,
+        space_id=space.id,
+        user_id=user.id,
+        message=masked or "",
+        output=(output or "")[:2000],
+        dialogue=[item for item in (history or []) if isinstance(item, dict)],
+        source_kind=meta.get("source_kind") or "agent",
+        source_id=meta.get("source_id") or str(agent.id),
+        source_name=(meta.get("source_name") or agent.name or "")[:160],
+        task_id=str(meta.get("task_id") or ""),
+        agent_id=agent.id,
+        retention_days=days,
     )
 
 
@@ -1070,19 +1229,30 @@ def _search_web(db, trace, version, message):
     return _clip(text)
 
 
-def _chat(db, trace, version, space, user, message, project_id, policy):
+def _chat(db, trace, version, space, user, message, project_id, policy, memory_meta=None):
     """对话。版本钉了模型并且该模型启用时只用它；否则按 reason 任务从池子里选。"""
-    memories = [
-        row.content
-        for row in list_memories(
-            db, policy, space_id=space.id, user_id=user.id, agent_id=trace.agent_id, project_id=project_id, role_user_id=user.id
-        )
-        if row.kind == "long"
-    ][:3]
+    from app.services.memory_layers import KIND_LONG, KIND_SHORT, KIND_USER, memories_for_prompt, visible_memories
+
+    meta = memory_meta or {}
+    rows = visible_memories(
+        db,
+        space_id=space.id,
+        user_id=user.id,
+        task_id=meta.get("task_id") or trace.id,
+        source_kind=meta.get("source_kind") or "agent",
+        viewer_id=user.id,
+    )
+    # 长期/用户可回显进规则模型答案；短期只写入系统提示，避免同任务步骤互相覆盖回复
+    lasting = [row for row in rows if row.kind in {KIND_LONG, KIND_USER}]
+    short = [row for row in rows if row.kind == KIND_SHORT]
+    memories = [line for line in memories_for_prompt(lasting, limit=8).split("\n") if line][:8]
+    prompt = _with_skills(db, version, version.system_prompt or "")
+    if short:
+        prompt = f"{prompt}\n\n【短期记忆】\n{memories_for_prompt(short, limit=6)}".strip()
     pinned = db.get(ModelEndpoint, version.model_id) if version.model_id else None
     allowed = set(ids_for(db, space.id, "model"))
     model = pinned if pinned and pinned.id in allowed and pinned.enabled and quota_open(pinned) else select_model(db, space.id, "reason")
-    text, model_name, fallback, usage = complete(db, model, _with_skills(db, version, version.system_prompt or ""), message, memories, [])
+    text, model_name, fallback, usage = complete(db, model, prompt, message, memories, [])
     tokens_in, tokens_out = usage
     cost_in, cost_out, spent = cost_parts(model, tokens_in, tokens_out)
     charge_model(model, spent)

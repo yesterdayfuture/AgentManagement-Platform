@@ -54,6 +54,7 @@ def _model_dict(db, row: ModelEndpoint) -> dict:
         "quota_limit": row.quota_limit or 0,
         "quota_used": round(row.quota_used or 0, 6),
         "quota_remaining": None if not (row.quota_limit or 0) else round(max(0, row.quota_limit - (row.quota_used or 0)), 6),
+        "context_tokens": int(row.context_tokens or 1000000),
         "secret_id": row.secret_id,
         "has_api_key": bool(row.secret_id),
         "secret_name": secret.name if secret else "",
@@ -132,6 +133,7 @@ def create_model(body: ModelIn, ctx=Depends(get_context), db=Depends(get_db)):
         priority=body.priority,
         enabled=body.enabled,
         quota_limit=max(0, body.quota_limit),
+        context_tokens=max(1024, int(body.context_tokens or 1000000)),
         created_by=ctx.user.id,
     )
     db.add(row)
@@ -150,6 +152,8 @@ def patch_model(model_id: int, body: ModelPatch, ctx=Depends(get_context), db=De
         value = getattr(body, field)
         if value is not None:
             setattr(row, field, value.strip() if isinstance(value, str) else value)
+    if body.context_tokens is not None:
+        row.context_tokens = max(1024, int(body.context_tokens))
     if body.task_types is not None:
         row.task_types_json = dump(body.task_types)
     if body.api_key and body.api_key.strip():

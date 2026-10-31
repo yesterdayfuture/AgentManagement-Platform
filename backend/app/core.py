@@ -111,6 +111,10 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
         ensure_backfill(db)
         ensure_skill_grants(db)
+        from app.services.memory_layers import ensure_user_profile_backfill
+
+        ensure_user_profile_backfill(db)
+        db.commit()
         from app.models import Membership
 
         platform_ids = [row[0] for row in db.query(User.id).filter(User.is_platform_admin.is_(True)).all()]
@@ -244,9 +248,27 @@ def _ensure_columns(engine) -> None:
             ("remote_health_url", "VARCHAR(400)"),
             ("remote_health_method", "VARCHAR(10)"),
         ],
-        "memories": [("created_by", "INTEGER")],
+        "memories": [
+            ("created_by", "INTEGER"),
+            ("source_kind", "VARCHAR(20)"),
+            ("source_id", "VARCHAR(80)"),
+            ("source_name", "VARCHAR(160)"),
+            ("task_id", "VARCHAR(80)"),
+            ("level", "INTEGER"),
+            ("active", "INTEGER"),
+            ("parent_summary_id", "INTEGER"),
+            ("source_refs_json", "TEXT"),
+            ("produced_json", "TEXT"),
+        ],
         "memberships": [("created_at", "DATETIME")],
-        "model_endpoints": [("created_at", "DATETIME"), ("quota_limit", "FLOAT"), ("quota_used", "FLOAT"), ("origin", "VARCHAR(20)"), ("created_by", "INTEGER")],
+        "model_endpoints": [
+            ("created_at", "DATETIME"),
+            ("quota_limit", "FLOAT"),
+            ("quota_used", "FLOAT"),
+            ("origin", "VARCHAR(20)"),
+            ("created_by", "INTEGER"),
+            ("context_tokens", "INTEGER"),
+        ],
         "tools": [("created_at", "DATETIME"), ("origin", "VARCHAR(20)"), ("created_by", "INTEGER")],
         "knowledge_bases": [("created_at", "DATETIME"), ("origin", "VARCHAR(20)"), ("created_by", "INTEGER")],
         "documents": [
@@ -308,8 +330,17 @@ def _ensure_columns(engine) -> None:
         ("workflows", "schedule_token_used"): "0",
         ("model_endpoints", "quota_limit"): "0",
         ("model_endpoints", "quota_used"): "0",
+        ("model_endpoints", "context_tokens"): "1000000",
         ("users", "is_platform_admin"): "0",
         ("model_endpoints", "origin"): "'department'",
+        ("memories", "source_kind"): "''",
+        ("memories", "source_id"): "''",
+        ("memories", "source_name"): "''",
+        ("memories", "task_id"): "''",
+        ("memories", "level"): "0",
+        ("memories", "active"): "1",
+        ("memories", "source_refs_json"): "'{}'",
+        ("memories", "produced_json"): "'{}'",
         ("tools", "origin"): "'department'",
         ("knowledge_bases", "origin"): "'department'",
         ("workflows", "origin"): "'department'",

@@ -31,13 +31,12 @@ function search() {
   emit("load");
 }
 function reset() {
-  props.query.q = "";
-  props.query.exact_field = "";
-  props.query.exact = "";
-  props.query.time_from = "";
-  props.query.time_to = "";
-  props.query.page = 1;
-  props.query.page_size = 20;
+  // 清空全部查询条件（含页面自定义 filters 槽位写入的字段）
+  Object.keys(props.query).forEach((key) => {
+    if (key === "page") props.query[key] = 1;
+    else if (key === "page_size") props.query[key] = 20;
+    else props.query[key] = "";
+  });
   emit("reset");
   emit("load");
 }
