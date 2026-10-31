@@ -29,13 +29,13 @@ LIMEN 是一套可自部署的智能体管理与运行平台。模型负责理�
 
 ![LIMEN 运行总览：调用指标、部门分布与资源图表](docs/images/overview-analytics.png)
 
-<p align="center"><sub>当前版本实机截图 · 独立演示数据库 · 中文控制台</sub></p>
+<p align="center"><sub>当前运行界面 · admin 视角 · 中文控制台</sub></p>
 
 <table>
   <tr><th>智能体管理</th><th>模型问答</th></tr>
   <tr>
     <td><img src="docs/images/agents.png" alt="智能体列表与配置入口" /></td>
-    <td><img src="docs/images/ask-math.png" alt="模型问答、计算工具与会话记录" /></td>
+    <td><img src="docs/images/ask.png" alt="模型问答页面；会话标题已遮盖" /></td>
   </tr>
   <tr><th>工作流编排</th><th>部门与资源授权</th></tr>
   <tr>

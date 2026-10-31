@@ -29,13 +29,13 @@ LIMEN is a self-hosted agent management and runtime platform. Models handle unde
 
 ![LIMEN overview: usage metrics, department distributions, and resource charts](docs/images/overview-analytics.png)
 
-<p align="center"><sub>Captured from the current application · Isolated demo database · Chinese-language console</sub></p>
+<p align="center"><sub>Captured from the running application · admin view · Chinese-language console</sub></p>
 
 <table>
   <tr><th>Agent management</th><th>Model conversations</th></tr>
   <tr>
     <td><img src="docs/images/agents.png" alt="Agent list and configuration entry points" /></td>
-    <td><img src="docs/images/ask-math.png" alt="Conversation history and a calculator tool result" /></td>
+    <td><img src="docs/images/ask.png" alt="Model conversations with session titles redacted" /></td>
   </tr>
   <tr><th>Workflow orchestration</th><th>Department grants</th></tr>
   <tr>
