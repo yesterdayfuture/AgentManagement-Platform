@@ -1,0 +1,1016 @@
+{
+  "name": "BIG-bench word_unscrambling · first 250 scalar-target examples",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/word_unscrambling/task.json",
+  "license": "Apache-2.0",
+  "selection": "First 250 source-order examples with one unambiguous string target; multi-answer examples excluded.",
+  "category": "generation",
+  "metrics": [
+    "model_online",
+    "exact",
+    "completion",
+    "latency",
+    "cost"
+  ],
+  "cases": [
+    {
+      "input_text": "The word hte is a scrambled version of the English word ",
+      "expected": "the"
+    },
+    {
+      "input_text": "The word nad is a scrambled version of the English word ",
+      "expected": "and"
+    },
+    {
+      "input_text": "The word ofr is a scrambled version of the English word ",
+      "expected": "for"
+    },
+    {
+      "input_text": "The word ahtt is a scrambled version of the English word ",
+      "expected": "that"
+    },
+    {
+      "input_text": "The word tihw is a scrambled version of the English word ",
+      "expected": "with"
+    },
+    {
+      "input_text": "The word oyu is a scrambled version of the English word ",
+      "expected": "you"
+    },
+    {
+      "input_text": "The word uory is a scrambled version of the English word ",
+      "expected": "your"
+    },
+    {
+      "input_text": "The word lal is a scrambled version of the English word ",
+      "expected": "all"
+    },
+    {
+      "input_text": "The word vaeh is a scrambled version of the English word ",
+      "expected": "have"
+    },
+    {
+      "input_text": "The word enw is a scrambled version of the English word ",
+      "expected": "new"
+    },
+    {
+      "input_text": "The word lilw is a scrambled version of the English word ",
+      "expected": "will"
+    },
+    {
+      "input_text": "The word moeh is a scrambled version of the English word ",
+      "expected": "home"
+    },
+    {
+      "input_text": "The word acn is a scrambled version of the English word ",
+      "expected": "can"
+    },
+    {
+      "input_text": "The word ubota is a scrambled version of the English word ",
+      "expected": "about"
+    },
+    {
+      "input_text": "The word gaep is a scrambled version of the English word ",
+      "expected": "page"
+    },
+    {
+      "input_text": "The word uor is a scrambled version of the English word ",
+      "expected": "our"
+    },
+    {
+      "input_text": "The word noe is a scrambled version of the English word ",
+      "expected": "one"
+    },
+    {
+      "input_text": "The word ethro is a scrambled version of the English word ",
+      "expected": "other"
+    },
+    {
+      "input_text": "The word tofimaorinn is a scrambled version of the English word ",
+      "expected": "information"
+    },
+    {
+      "input_text": "The word ehyt is a scrambled version of the English word ",
+      "expected": "they"
+    },
+    {
+      "input_text": "The word amy is a scrambled version of the English word ",
+      "expected": "may"
+    },
+    {
+      "input_text": "The word ahtw is a scrambled version of the English word ",
+      "expected": "what"
+    },
+    {
+      "input_text": "The word chihw is a scrambled version of the English word ",
+      "expected": "which"
+    },
+    {
+      "input_text": "The word uot is a scrambled version of the English word ",
+      "expected": "out"
+    },
+    {
+      "input_text": "The word nay is a scrambled version of the English word ",
+      "expected": "any"
+    },
+    {
+      "input_text": "The word ese is a scrambled version of the English word ",
+      "expected": "see"
+    },
+    {
+      "input_text": "The word ihs is a scrambled version of the English word ",
+      "expected": "his"
+    },
+    {
+      "input_text": "The word ehnw is a scrambled version of the English word ",
+      "expected": "when"
+    },
+    {
+      "input_text": "The word otantcc is a scrambled version of the English word ",
+      "expected": "contact"
+    },
+    {
+      "input_text": "The word reeh is a scrambled version of the English word ",
+      "expected": "here"
+    },
+    {
+      "input_text": "The word insssebu is a scrambled version of the English word ",
+      "expected": "business"
+    },
+    {
+      "input_text": "The word ewb is a scrambled version of the English word ",
+      "expected": "web"
+    },
+    {
+      "input_text": "The word leph is a scrambled version of the English word ",
+      "expected": "help"
+    },
+    {
+      "input_text": "The word egt is a scrambled version of the English word ",
+      "expected": "get"
+    },
+    {
+      "input_text": "The word eiwv is a scrambled version of the English word ",
+      "expected": "view"
+    },
+    {
+      "input_text": "The word eenb is a scrambled version of the English word ",
+      "expected": "been"
+    },
+    {
+      "input_text": "The word loudw is a scrambled version of the English word ",
+      "expected": "would"
+    },
+    {
+      "input_text": "The word reew is a scrambled version of the English word ",
+      "expected": "were"
+    },
+    {
+      "input_text": "The word viesrcse is a scrambled version of the English word ",
+      "expected": "services"
+    },
+    {
+      "input_text": "The word moes is a scrambled version of the English word ",
+      "expected": "some"
+    },
+    {
+      "input_text": "The word clikc is a scrambled version of the English word ",
+      "expected": "click"
+    },
+    {
+      "input_text": "The word tis is a scrambled version of the English word ",
+      "expected": "its"
+    },
+    {
+      "input_text": "The word kiel is a scrambled version of the English word ",
+      "expected": "like"
+    },
+    {
+      "input_text": "The word eviresc is a scrambled version of the English word ",
+      "expected": "service"
+    },
+    {
+      "input_text": "The word ahnt is a scrambled version of the English word ",
+      "expected": "than"
+    },
+    {
+      "input_text": "The word nidf is a scrambled version of the English word ",
+      "expected": "find"
+    },
+    {
+      "input_text": "The word criep is a scrambled version of the English word ",
+      "expected": "price"
+    },
+    {
+      "input_text": "The word taed is a scrambled version of the English word ",
+      "expected": "date"
+    },
+    {
+      "input_text": "The word cakb is a scrambled version of the English word ",
+      "expected": "back"
+    },
+    {
+      "input_text": "The word otp is a scrambled version of the English word ",
+      "expected": "top"
+    },
+    {
+      "input_text": "The word peolpe is a scrambled version of the English word ",
+      "expected": "people"
+    },
+    {
+      "input_text": "The word ahd is a scrambled version of the English word ",
+      "expected": "had"
+    },
+    {
+      "input_text": "The word sutj is a scrambled version of the English word ",
+      "expected": "just"
+    },
+    {
+      "input_text": "The word aery is a scrambled version of the English word ",
+      "expected": "year"
+    },
+    {
+      "input_text": "The word ady is a scrambled version of the English word ",
+      "expected": "day"
+    },
+    {
+      "input_text": "The word imale is a scrambled version of the English word ",
+      "expected": "email"
+    },
+    {
+      "input_text": "The word wto is a scrambled version of the English word ",
+      "expected": "two"
+    },
+    {
+      "input_text": "The word leathh is a scrambled version of the English word ",
+      "expected": "health"
+    },
+    {
+      "input_text": "The word lordw is a scrambled version of the English word ",
+      "expected": "world"
+    },
+    {
+      "input_text": "The word xetn is a scrambled version of the English word ",
+      "expected": "next"
+    },
+    {
+      "input_text": "The word rokw is a scrambled version of the English word ",
+      "expected": "work"
+    },
+    {
+      "input_text": "The word dutsocpr is a scrambled version of the English word ",
+      "expected": "products"
+    },
+    {
+      "input_text": "The word iuscm is a scrambled version of the English word ",
+      "expected": "music"
+    },
+    {
+      "input_text": "The word uby is a scrambled version of the English word ",
+      "expected": "buy"
+    },
+    {
+      "input_text": "The word taad is a scrambled version of the English word ",
+      "expected": "data"
+    },
+    {
+      "input_text": "The word kaem is a scrambled version of the English word ",
+      "expected": "make"
+    },
+    {
+      "input_text": "The word uholsd is a scrambled version of the English word ",
+      "expected": "should"
+    },
+    {
+      "input_text": "The word rduotpc is a scrambled version of the English word ",
+      "expected": "product"
+    },
+    {
+      "input_text": "The word tysesm is a scrambled version of the English word ",
+      "expected": "system"
+    },
+    {
+      "input_text": "The word ehr is a scrambled version of the English word ",
+      "expected": "her"
+    },
+    {
+      "input_text": "The word tiyc is a scrambled version of the English word ",
+      "expected": "city"
+    },
+    {
+      "input_text": "The word dad is a scrambled version of the English word ",
+      "expected": "add"
+    },
+    {
+      "input_text": "The word iolcpy is a scrambled version of the English word ",
+      "expected": "policy"
+    },
+    {
+      "input_text": "The word bumenr is a scrambled version of the English word ",
+      "expected": "number"
+    },
+    {
+      "input_text": "The word cuhs is a scrambled version of the English word ",
+      "expected": "such"
+    },
+    {
+      "input_text": "The word iblleaaav is a scrambled version of the English word ",
+      "expected": "available"
+    },
+    {
+      "input_text": "The word yghrtpico is a scrambled version of the English word ",
+      "expected": "copyright"
+    },
+    {
+      "input_text": "The word upoptsr is a scrambled version of the English word ",
+      "expected": "support"
+    },
+    {
+      "input_text": "The word esasemg is a scrambled version of the English word ",
+      "expected": "message"
+    },
+    {
+      "input_text": "The word eftra is a scrambled version of the English word ",
+      "expected": "after"
+    },
+    {
+      "input_text": "The word twrefaso is a scrambled version of the English word ",
+      "expected": "software"
+    },
+    {
+      "input_text": "The word ehnt is a scrambled version of the English word ",
+      "expected": "then"
+    },
+    {
+      "input_text": "The word ajn is a scrambled version of the English word ",
+      "expected": "jan"
+    },
+    {
+      "input_text": "The word oodg is a scrambled version of the English word ",
+      "expected": "good"
+    },
+    {
+      "input_text": "The word eidov is a scrambled version of the English word ",
+      "expected": "video"
+    },
+    {
+      "input_text": "The word lelw is a scrambled version of the English word ",
+      "expected": "well"
+    },
+    {
+      "input_text": "The word rheew is a scrambled version of the English word ",
+      "expected": "where"
+    },
+    {
+      "input_text": "The word fnoi is a scrambled version of the English word ",
+      "expected": "info"
+    },
+    {
+      "input_text": "The word higtrs is a scrambled version of the English word ",
+      "expected": "rights"
+    },
+    {
+      "input_text": "The word lubipc is a scrambled version of the English word ",
+      "expected": "public"
+    },
+    {
+      "input_text": "The word koosb is a scrambled version of the English word ",
+      "expected": "books"
+    },
+    {
+      "input_text": "The word gihh is a scrambled version of the English word ",
+      "expected": "high"
+    },
+    {
+      "input_text": "The word ochosl is a scrambled version of the English word ",
+      "expected": "school"
+    },
+    {
+      "input_text": "The word hourhtg is a scrambled version of the English word ",
+      "expected": "through"
+    },
+    {
+      "input_text": "The word cahe is a scrambled version of the English word ",
+      "expected": "each"
+    },
+    {
+      "input_text": "The word kinsl is a scrambled version of the English word ",
+      "expected": "links"
+    },
+    {
+      "input_text": "The word hse is a scrambled version of the English word ",
+      "expected": "she"
+    },
+    {
+      "input_text": "The word reasy is a scrambled version of the English word ",
+      "expected": "years"
+    },
+    {
+      "input_text": "The word erdro is a scrambled version of the English word ",
+      "expected": "order"
+    },
+    {
+      "input_text": "The word reyv is a scrambled version of the English word ",
+      "expected": "very"
+    },
+    {
+      "input_text": "The word rvaiypc is a scrambled version of the English word ",
+      "expected": "privacy"
+    },
+    {
+      "input_text": "The word ookb is a scrambled version of the English word ",
+      "expected": "book"
+    },
+    {
+      "input_text": "The word opamycn is a scrambled version of the English word ",
+      "expected": "company"
+    },
+    {
+      "input_text": "The word naym is a scrambled version of the English word ",
+      "expected": "many"
+    },
+    {
+      "input_text": "The word est is a scrambled version of the English word ",
+      "expected": "set"
+    },
+    {
+      "input_text": "The word endru is a scrambled version of the English word ",
+      "expected": "under"
+    },
+    {
+      "input_text": "The word eachsrre is a scrambled version of the English word ",
+      "expected": "research"
+    },
+    {
+      "input_text": "The word ivitrsyeun is a scrambled version of the English word ",
+      "expected": "university"
+    },
+    {
+      "input_text": "The word auanyjr is a scrambled version of the English word ",
+      "expected": "january"
+    },
+    {
+      "input_text": "The word lulf is a scrambled version of the English word ",
+      "expected": "full"
+    },
+    {
+      "input_text": "The word amp is a scrambled version of the English word ",
+      "expected": "map"
+    },
+    {
+      "input_text": "The word rgrompa is a scrambled version of the English word ",
+      "expected": "program"
+    },
+    {
+      "input_text": "The word onwk is a scrambled version of the English word ",
+      "expected": "know"
+    },
+    {
+      "input_text": "The word awy is a scrambled version of the English word ",
+      "expected": "way"
+    },
+    {
+      "input_text": "The word yasd is a scrambled version of the English word ",
+      "expected": "days"
+    },
+    {
+      "input_text": "The word eannemtgma is a scrambled version of the English word ",
+      "expected": "management"
+    },
+    {
+      "input_text": "The word aretg is a scrambled version of the English word ",
+      "expected": "great"
+    },
+    {
+      "input_text": "The word tnieud is a scrambled version of the English word ",
+      "expected": "united"
+    },
+    {
+      "input_text": "The word eotlh is a scrambled version of the English word ",
+      "expected": "hotel"
+    },
+    {
+      "input_text": "The word tatolnaierinn is a scrambled version of the English word ",
+      "expected": "international"
+    },
+    {
+      "input_text": "The word abye is a scrambled version of the English word ",
+      "expected": "ebay"
+    },
+    {
+      "input_text": "The word rtoes is a scrambled version of the English word ",
+      "expected": "store"
+    },
+    {
+      "input_text": "The word vraetl is a scrambled version of the English word ",
+      "expected": "travel"
+    },
+    {
+      "input_text": "The word metsmnco is a scrambled version of the English word ",
+      "expected": "comments"
+    },
+    {
+      "input_text": "The word meveopnldet is a scrambled version of the English word ",
+      "expected": "development"
+    },
+    {
+      "input_text": "The word fof is a scrambled version of the English word ",
+      "expected": "off"
+    },
+    {
+      "input_text": "The word bememr is a scrambled version of the English word ",
+      "expected": "member"
+    },
+    {
+      "input_text": "The word eaitsdl is a scrambled version of the English word ",
+      "expected": "details"
+    },
+    {
+      "input_text": "The word merst is a scrambled version of the English word ",
+      "expected": "terms"
+    },
+    {
+      "input_text": "The word oefrbe is a scrambled version of the English word ",
+      "expected": "before"
+    },
+    {
+      "input_text": "The word idd is a scrambled version of the English word ",
+      "expected": "did"
+    },
+    {
+      "input_text": "The word higtr is a scrambled version of the English word ",
+      "expected": "right"
+    },
+    {
+      "input_text": "The word pyet is a scrambled version of the English word ",
+      "expected": "type"
+    },
+    {
+      "input_text": "The word eaucebs is a scrambled version of the English word ",
+      "expected": "because"
+    },
+    {
+      "input_text": "The word aocll is a scrambled version of the English word ",
+      "expected": "local"
+    },
+    {
+      "input_text": "The word shoet is a scrambled version of the English word ",
+      "expected": "those"
+    },
+    {
+      "input_text": "The word nsigu is a scrambled version of the English word ",
+      "expected": "using"
+    },
+    {
+      "input_text": "The word eulssrt is a scrambled version of the English word ",
+      "expected": "results"
+    },
+    {
+      "input_text": "The word iffcoe is a scrambled version of the English word ",
+      "expected": "office"
+    },
+    {
+      "input_text": "The word cioanuted is a scrambled version of the English word ",
+      "expected": "education"
+    },
+    {
+      "input_text": "The word ioaltnna is a scrambled version of the English word ",
+      "expected": "national"
+    },
+    {
+      "input_text": "The word acr is a scrambled version of the English word ",
+      "expected": "car"
+    },
+    {
+      "input_text": "The word tosepd is a scrambled version of the English word ",
+      "expected": "posted"
+    },
+    {
+      "input_text": "The word erettnin is a scrambled version of the English word ",
+      "expected": "internet"
+    },
+    {
+      "input_text": "The word dredsas is a scrambled version of the English word ",
+      "expected": "address"
+    },
+    {
+      "input_text": "The word mituymnco is a scrambled version of the English word ",
+      "expected": "community"
+    },
+    {
+      "input_text": "The word hitiwn is a scrambled version of the English word ",
+      "expected": "within"
+    },
+    {
+      "input_text": "The word eraa is a scrambled version of the English word ",
+      "expected": "area"
+    },
+    {
+      "input_text": "The word natw is a scrambled version of the English word ",
+      "expected": "want"
+    },
+    {
+      "input_text": "The word nhoep is a scrambled version of the English word ",
+      "expected": "phone"
+    },
+    {
+      "input_text": "The word vdd is a scrambled version of the English word ",
+      "expected": "dvd"
+    },
+    {
+      "input_text": "The word ppngiish is a scrambled version of the English word ",
+      "expected": "shipping"
+    },
+    {
+      "input_text": "The word ujebtsc is a scrambled version of the English word ",
+      "expected": "subject"
+    },
+    {
+      "input_text": "The word ewetnbe is a scrambled version of the English word ",
+      "expected": "between"
+    },
+    {
+      "input_text": "The word uormf is a scrambled version of the English word ",
+      "expected": "forum"
+    },
+    {
+      "input_text": "The word iamlfy is a scrambled version of the English word ",
+      "expected": "family"
+    },
+    {
+      "input_text": "The word nogl is a scrambled version of the English word ",
+      "expected": "long"
+    },
+    {
+      "input_text": "The word ohws is a scrambled version of the English word ",
+      "expected": "show"
+    },
+    {
+      "input_text": "The word evne is a scrambled version of the English word ",
+      "expected": "even"
+    },
+    {
+      "input_text": "The word clakb is a scrambled version of the English word ",
+      "expected": "black"
+    },
+    {
+      "input_text": "The word chekc is a scrambled version of the English word ",
+      "expected": "check"
+    },
+    {
+      "input_text": "The word pcielsa is a scrambled version of the English word ",
+      "expected": "special"
+    },
+    {
+      "input_text": "The word crieps is a scrambled version of the English word ",
+      "expected": "prices"
+    },
+    {
+      "input_text": "The word esibewt is a scrambled version of the English word ",
+      "expected": "website"
+    },
+    {
+      "input_text": "The word endxi is a scrambled version of the English word ",
+      "expected": "index"
+    },
+    {
+      "input_text": "The word eomnw is a scrambled version of the English word ",
+      "expected": "women"
+    },
+    {
+      "input_text": "The word cuhm is a scrambled version of the English word ",
+      "expected": "much"
+    },
+    {
+      "input_text": "The word aodyt is a scrambled version of the English word ",
+      "expected": "today"
+    },
+    {
+      "input_text": "The word ohcgolynte is a scrambled version of the English word ",
+      "expected": "technology"
+    },
+    {
+      "input_text": "The word rjeotpc is a scrambled version of the English word ",
+      "expected": "project"
+    },
+    {
+      "input_text": "The word eagsp is a scrambled version of the English word ",
+      "expected": "pages"
+    },
+    {
+      "input_text": "The word esirnvo is a scrambled version of the English word ",
+      "expected": "version"
+    },
+    {
+      "input_text": "The word noudf is a scrambled version of the English word ",
+      "expected": "found"
+    },
+    {
+      "input_text": "The word rpotss is a scrambled version of the English word ",
+      "expected": "sports"
+    },
+    {
+      "input_text": "The word soueh is a scrambled version of the English word ",
+      "expected": "house"
+    },
+    {
+      "input_text": "The word urtycise is a scrambled version of the English word ",
+      "expected": "security"
+    },
+    {
+      "input_text": "The word tohb is a scrambled version of the English word ",
+      "expected": "both"
+    },
+    {
+      "input_text": "The word noutcy is a scrambled version of the English word ",
+      "expected": "county"
+    },
+    {
+      "input_text": "The word rianecam is a scrambled version of the English word ",
+      "expected": "american"
+    },
+    {
+      "input_text": "The word thoop is a scrambled version of the English word ",
+      "expected": "photo"
+    },
+    {
+      "input_text": "The word ebemsmr is a scrambled version of the English word ",
+      "expected": "members"
+    },
+    {
+      "input_text": "The word eowrp is a scrambled version of the English word ",
+      "expected": "power"
+    },
+    {
+      "input_text": "The word lhiew is a scrambled version of the English word ",
+      "expected": "while"
+    },
+    {
+      "input_text": "The word ewotknr is a scrambled version of the English word ",
+      "expected": "network"
+    },
+    {
+      "input_text": "The word wond is a scrambled version of the English word ",
+      "expected": "down"
+    },
+    {
+      "input_text": "The word puermtco is a scrambled version of the English word ",
+      "expected": "computer"
+    },
+    {
+      "input_text": "The word ytesssm is a scrambled version of the English word ",
+      "expected": "systems"
+    },
+    {
+      "input_text": "The word aotlt is a scrambled version of the English word ",
+      "expected": "total"
+    },
+    {
+      "input_text": "The word claep is a scrambled version of the English word ",
+      "expected": "place"
+    },
+    {
+      "input_text": "The word linoglwfo is a scrambled version of the English word ",
+      "expected": "following"
+    },
+    {
+      "input_text": "The word ihm is a scrambled version of the English word ",
+      "expected": "him"
+    },
+    {
+      "input_text": "The word ihottwu is a scrambled version of the English word ",
+      "expected": "without"
+    },
+    {
+      "input_text": "The word epr is a scrambled version of the English word ",
+      "expected": "per"
+    },
+    {
+      "input_text": "The word eccsas is a scrambled version of the English word ",
+      "expected": "access"
+    },
+    {
+      "input_text": "The word nhikt is a scrambled version of the English word ",
+      "expected": "think"
+    },
+    {
+      "input_text": "The word oceussrre is a scrambled version of the English word ",
+      "expected": "resources"
+    },
+    {
+      "input_text": "The word urertcn is a scrambled version of the English word ",
+      "expected": "current"
+    },
+    {
+      "input_text": "The word ibg is a scrambled version of the English word ",
+      "expected": "big"
+    },
+    {
+      "input_text": "The word alw is a scrambled version of the English word ",
+      "expected": "law"
+    },
+    {
+      "input_text": "The word otrnlco is a scrambled version of the English word ",
+      "expected": "control"
+    },
+    {
+      "input_text": "The word eatrw is a scrambled version of the English word ",
+      "expected": "water"
+    },
+    {
+      "input_text": "The word itosyhr is a scrambled version of the English word ",
+      "expected": "history"
+    },
+    {
+      "input_text": "The word tuescrpi is a scrambled version of the English word ",
+      "expected": "pictures"
+    },
+    {
+      "input_text": "The word zies is a scrambled version of the English word ",
+      "expected": "size"
+    },
+    {
+      "input_text": "The word soalrnpe is a scrambled version of the English word ",
+      "expected": "personal"
+    },
+    {
+      "input_text": "The word cines is a scrambled version of the English word ",
+      "expected": "since"
+    },
+    {
+      "input_text": "The word linugcdin is a scrambled version of the English word ",
+      "expected": "including"
+    },
+    {
+      "input_text": "The word duieg is a scrambled version of the English word ",
+      "expected": "guide"
+    },
+    {
+      "input_text": "The word eorcyrtdi is a scrambled version of the English word ",
+      "expected": "directory"
+    },
+    {
+      "input_text": "The word atoncilo is a scrambled version of the English word ",
+      "expected": "location"
+    },
+    {
+      "input_text": "The word nhagce is a scrambled version of the English word ",
+      "expected": "change"
+    },
+    {
+      "input_text": "The word thiew is a scrambled version of the English word ",
+      "expected": "white"
+    },
+    {
+      "input_text": "The word xett is a scrambled version of the English word ",
+      "expected": "text"
+    },
+    {
+      "input_text": "The word iatnrg is a scrambled version of the English word ",
+      "expected": "rating"
+    },
+    {
+      "input_text": "The word eevnnmtrgo is a scrambled version of the English word ",
+      "expected": "government"
+    },
+    {
+      "input_text": "The word ldenirch is a scrambled version of the English word ",
+      "expected": "children"
+    },
+    {
+      "input_text": "The word iurndg is a scrambled version of the English word ",
+      "expected": "during"
+    },
+    {
+      "input_text": "The word sua is a scrambled version of the English word ",
+      "expected": "usa"
+    },
+    {
+      "input_text": "The word detsunst is a scrambled version of the English word ",
+      "expected": "students"
+    },
+    {
+      "input_text": "The word ppngoish is a scrambled version of the English word ",
+      "expected": "shopping"
+    },
+    {
+      "input_text": "The word couctan is a scrambled version of the English word ",
+      "expected": "account"
+    },
+    {
+      "input_text": "The word eitss is a scrambled version of the English word ",
+      "expected": "sites"
+    },
+    {
+      "input_text": "The word eevll is a scrambled version of the English word ",
+      "expected": "level"
+    },
+    {
+      "input_text": "The word iitglda is a scrambled version of the English word ",
+      "expected": "digital"
+    },
+    {
+      "input_text": "The word rfioepl is a scrambled version of the English word ",
+      "expected": "profile"
+    },
+    {
+      "input_text": "The word viuseopr is a scrambled version of the English word ",
+      "expected": "previous"
+    },
+    {
+      "input_text": "The word voel is a scrambled version of the English word ",
+      "expected": "love"
+    },
+    {
+      "input_text": "The word lod is a scrambled version of the English word ",
+      "expected": "old"
+    },
+    {
+      "input_text": "The word honj is a scrambled version of the English word ",
+      "expected": "john"
+    },
+    {
+      "input_text": "The word ianm is a scrambled version of the English word ",
+      "expected": "main"
+    },
+    {
+      "input_text": "The word lalc is a scrambled version of the English word ",
+      "expected": "call"
+    },
+    {
+      "input_text": "The word roush is a scrambled version of the English word ",
+      "expected": "hours"
+    },
+    {
+      "input_text": "The word gmaei is a scrambled version of the English word ",
+      "expected": "image"
+    },
+    {
+      "input_text": "The word eapntmtrde is a scrambled version of the English word ",
+      "expected": "department"
+    },
+    {
+      "input_text": "The word onn is a scrambled version of the English word ",
+      "expected": "non"
+    },
+    {
+      "input_text": "The word uncresain is a scrambled version of the English word ",
+      "expected": "insurance"
+    },
+    {
+      "input_text": "The word nthorae is a scrambled version of the English word ",
+      "expected": "another"
+    },
+    {
+      "input_text": "The word hwy is a scrambled version of the English word ",
+      "expected": "why"
+    },
+    {
+      "input_text": "The word petyorpr is a scrambled version of the English word ",
+      "expected": "property"
+    },
+    {
+      "input_text": "The word slasc is a scrambled version of the English word ",
+      "expected": "class"
+    },
+    {
+      "input_text": "The word ltils is a scrambled version of the English word ",
+      "expected": "still"
+    },
+    {
+      "input_text": "The word eonym is a scrambled version of the English word ",
+      "expected": "money"
+    },
+    {
+      "input_text": "The word uliayqt is a scrambled version of the English word ",
+      "expected": "quality"
+    },
+    {
+      "input_text": "The word rveye is a scrambled version of the English word ",
+      "expected": "every"
+    },
+    {
+      "input_text": "The word itisgln is a scrambled version of the English word ",
+      "expected": "listing"
+    },
+    {
+      "input_text": "The word otentcn is a scrambled version of the English word ",
+      "expected": "content"
+    },
+    {
+      "input_text": "The word ontuycr is a scrambled version of the English word ",
+      "expected": "country"
+    },
+    {
+      "input_text": "The word rvaiept is a scrambled version of the English word ",
+      "expected": "private"
+    },
+    {
+      "input_text": "The word titlle is a scrambled version of the English word ",
+      "expected": "little"
+    },
+    {
+      "input_text": "The word iistv is a scrambled version of the English word ",
+      "expected": "visit"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+START bigbench-text-editing-47.json dataset=5 workflow=13 cases=47
+PROGRESS bigbench-text-editing-47.json 25/47 elapsed=169.1s passed=False model_online=True
+PROGRESS bigbench-text-editing-47.json 47/47 elapsed=320.9s passed=True model_online=True
+DONE {"fixture": "bigbench-text-editing-47.json", "eval_run_id": 7, "dataset_cases": 47, "elapsed_seconds": 320.9, "pass_rate": 0.7872340425531915, "cost": 0.23320299999999997}

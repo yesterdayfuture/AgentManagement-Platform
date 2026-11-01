@@ -13,10 +13,10 @@ const navSource = [
   { label: "编排与观测", items: [["ask", "模型问答", "/ask"], ["workflows", "工作流", "/workflows"], ["runs", "执行记录", "/workflow-runs"], ["traces", "调用轨迹", "/traces"], ["evals", "评测中心", "/evals"]] },
   { label: "安全与治理", items: [["departments", "部门管理", "/departments"], ["approvals", "审批中心", "/approvals"], ["sensitive", "敏感词", "/sensitive-words"], ["governance", "空间治理", "/governance"]] },
 ];
-const isDeptAdmin = computed(() => current.value?.role === "admin");
+const isDeptAdmin = computed(() => state.value.spaces?.some((item) => item.role === "admin"));
 const navGroups = computed(() => navSource.map((group) => ({
   ...group,
-  items: group.items.filter((item) => item[2] !== "/departments" || isPlatform.value || isDeptAdmin.value),
+  items: group.items.filter((item) => !["/departments", "/governance"].includes(item[2]) || isPlatform.value || isDeptAdmin.value),
 })));
 const activeNav = computed(() => navGroups.value.flatMap(group => group.items).find(item => route.path === item[2] || route.path.startsWith(item[2] + "/")));
 const state = ref(session());
@@ -37,8 +37,7 @@ async function refresh() {
   try {
     const me = await api("/api/me");
     const saved = session();
-    const stillThere = me.spaces.some((item) => String(item.id) === String(saved.spaceId));
-    const spaceId = stillThere ? saved.spaceId : me.spaces[0]?.id;
+    const spaceId = me.platform_admin ? me.spaces[0]?.id : (me.spaces.find((item) => item.role === "admin")?.id || me.spaces[0]?.id);
     saveSession({
       token: saved.token,
       user: { ...saved.user, username: me.username, display_name: me.display_name, platform_admin: me.platform_admin },
@@ -65,11 +64,6 @@ onMounted(() => {
 });
 watch(() => route.fullPath, refresh);
 
-function switchSpace(event) {
-  localStorage.setItem("spaceId", event.target.value);
-  state.value = session();
-  refresh();
-}
 async function changePassword() {
   passwordError.value = "";
   if (passwordForm.value.new_password !== passwordForm.value.confirm) {
@@ -116,10 +110,7 @@ function logout() {
       <header class="workspace-bar">
         <div class="breadcrumb"><span>控制台</span><span class="breadcrumb-separator">/</span><strong>{{ activeNav?.[1] || "详情" }}</strong></div>
         <div class="workspace-controls">
-          <span v-if="isPlatform" class="role-badge">全部部门</span>
-          <label v-else class="space-picker"><span>当前空间</span><select aria-label="切换工作空间" title="切换后，智能体、知识、账本和工作流都换成这个部门的数据" :value="state.spaceId" @change="switchSpace">
-            <option v-for="item in state.spaces" :key="item.id" :value="item.id">{{ item.name }}</option>
-          </select></label>
+          <span class="workspace-scope" :title="isPlatform ? '查看所有空间的数据' : state.spaces.map(item => item.name).join('、')">{{ isPlatform ? '全部空间' : `所属空间：${state.spaces.map(item => item.name).join('、')}` }}</span>
           <span class="role-badge" v-if="roleLabel">{{ roleLabel }}</span>
           <button class="ghost" type="button" @click="passwordOpen = true">修改密码</button>
           <button class="ghost logout" @click="logout" aria-label="退出登录" title="退出登录"><Icon name="logout" /></button>

@@ -30,11 +30,15 @@ const error = ref("");
 const notice = ref("");
 const gray = ref(0);
 const viewed = ref(null);
+const evalRuns = ref([]);
+const runsFor = (version) => evalRuns.value.filter(item => item.target_version === version.number);
 const latest = computed(() => agent.value?.versions?.at(-1) || null);
 const isRemote = computed(() => agent.value?.kind === "remote");
+const needsEval = computed(() => agent.value?.release_requires_eval !== false);
 
 async function load() {
   agent.value = await api(`/api/agents/${route.params.id}`);
+  evalRuns.value = (await api(`/api/evals/targets/agent/${route.params.id}/runs?page=1&page_size=100`)).items || [];
   tools.value = await api("/api/tools");
   servers.value = await api("/api/mcp");
   const current = agent.value.versions.at(-1);
@@ -135,7 +139,7 @@ async function save() {
   }
 }
 function publish() {
-  if (latest.value && latest.value.status !== "published" && !latest.value.eval_passed) {
+  if (needsEval.value && latest.value && !latest.value.eval_passed) {
     error.value = explain("评测未通过，不能发布");
     notice.value = "";
     return;
@@ -151,6 +155,11 @@ function shiftGray() {
   act(`/api/agents/${agent.value.id}/gray`, { percent: Number(gray.value) }, `灰度流量已设为 ${Number(gray.value)}%。线上版本没有变，仍是 ${agent.value.stable_version ? `v${agent.value.stable_version}` : "未发布"}。`);
 }
 function promote(version, target) {
+  if (needsEval.value && !version.eval_passed) {
+    error.value = explain("该版本评测未通过，不能上线");
+    notice.value = "";
+    return;
+  }
   const percent = Number(gray.value);
   const done = target === "stable"
     ? `v${version.number} 已设为线上。正式环境默认走这一版。`
@@ -275,21 +284,21 @@ async function run(continuing = false) {
       <h2>配置</h2>
       <template v-if="isRemote">
         <label class="field"><span>协议</span>
-          <select v-model="remoteProtocol">
+          <SearchSelect v-model="remoteProtocol">
             <option value="http_sync">同步 HTTP</option>
             <option value="http_async">异步 HTTP</option>
             <option value="a2a">A2A</option>
-          </select>
+          </SearchSelect>
         </label>
         <label class="field"><span>远端地址</span><input v-model="remoteEndpoint" /></label>
         <label class="field"><span>访问令牌</span><input v-model="remoteToken" :placeholder="agent.has_remote_token ? '已配置，留空则不改' : '可选'" /></label>
         <label class="field"><span>超时毫秒</span><input v-model.number="remoteTimeout" type="number" min="1000" /></label>
         <label class="field"><span>健康探测（可选）</span>
           <div class="row" style="gap: 8px; align-items: center">
-            <select v-model="remoteHealthMethod" style="width: 96px">
+            <SearchSelect v-model="remoteHealthMethod" style="width: 96px">
               <option value="GET">GET</option>
               <option value="POST">POST</option>
-            </select>
+            </SearchSelect>
             <input v-model="remoteHealthUrl" placeholder="留空则总览无法实时监测" style="flex: 1" />
           </div>
         </label>
@@ -310,7 +319,7 @@ async function run(continuing = false) {
       <p class="sub">「调整灰度」只改当前灰度版本的流量比例。「恢复」只把已下线的智能体重新接上现在的线上版本。要换成某一版，在版本表里点「设为线上」。</p>
       <div class="row" style="margin-top: 14px">
         <button class="btn" type="button" @click="save">保存草稿</button>
-        <button class="ghost" type="button" @click="publish">发布但不放量</button>
+        <button class="ghost" type="button" :disabled="needsEval && !latest?.eval_passed" :title="needsEval && !latest?.eval_passed ? '请先通过评测' : ''" @click="publish">发布但不放量</button>
         <button class="ghost" type="button" @click="shiftGray">调整灰度</button>
         <input v-model="gray" type="number" min="0" max="100" style="width: 72px" aria-label="灰度百分比" />
       </div>
@@ -337,12 +346,13 @@ async function run(continuing = false) {
             <td>v{{ version.number }}</td>
             <td>{{ place(version) }}</td>
             <td>{{ version.status }}</td>
-            <td>{{ version.eval_passed ? "通过" : "未过" }}</td>
+            <td>{{ runsFor(version).length ? `${Math.round(runsFor(version)[0].completion * 100)}% / 标准 ${Math.round((runsFor(version)[0].min_pass_rate || 1) * 100)}%（${runsFor(version).length} 次）` : "未评测" }}</td>
             <td :title="version.system_prompt">{{ version.system_prompt || "—" }}</td>
             <td class="version-actions">
               <button class="ghost" type="button" @click="viewed = version">查看</button>
-              <button class="ghost" type="button" :disabled="version.number === agent.stable_version" @click="promote(version, 'stable')">设为线上</button>
-              <button class="ghost" type="button" :disabled="version.number === agent.stable_version || version.number === agent.gray_version" @click="promote(version, 'gray')">设为灰度</button>
+              <router-link v-if="needsEval && !version.eval_passed" class="ghost" :to="`/evals?agent_id=${agent.id}&version_id=${version.id}`">评测此版本</router-link>
+              <button class="ghost" type="button" :disabled="(needsEval && !version.eval_passed) || version.number === agent.stable_version" :title="needsEval && !version.eval_passed ? '请先通过评测' : ''" @click="promote(version, 'stable')">设为线上</button>
+              <button class="ghost" type="button" :disabled="(needsEval && !version.eval_passed) || version.number === agent.stable_version || version.number === agent.gray_version" :title="needsEval && !version.eval_passed ? '请先通过评测' : ''" @click="promote(version, 'gray')">设为灰度</button>
             </td>
           </tr>
         </tbody>
@@ -353,7 +363,7 @@ async function run(continuing = false) {
     <div class="sheet">
       <h2>试运行</h2>
       <label class="field"><span>环境</span>
-        <select v-model="environment"><option>test</option><option>staging</option><option>prod</option></select>
+        <SearchSelect v-model="environment"><option>test</option><option>staging</option><option>prod</option></SearchSelect>
       </label>
       <label class="field"><span>输入</span><textarea v-model="message" placeholder="输入问题。再次执行时会带上当前对话。" /></label>
       <label v-if="!isRemote" class="check"><input type="checkbox" v-model="useStream" /> 流式输出（默认关闭，勾选后边生成边显示）</label>
@@ -392,6 +402,7 @@ async function run(continuing = false) {
       <label class="field"><span>MCP</span><input :value="(viewed.mcp_names || []).join('、') || '无'" readonly /></label>
       <label class="field"><span>子智能体</span><input :value="(viewed.child_names || []).join('、') || '无'" readonly /></label>
       <label class="field"><span>系统提示词</span><textarea :value="viewed.system_prompt || '无'" readonly /></label>
+      <div class="sheet"><strong>v{{ viewed.number }} 的评测记录</strong><p v-if="!runsFor(viewed).length" class="sub">此版本尚无评测记录。请到评测中心选择该智能体运行。</p><div v-for="item in runsFor(viewed)" :key="item.id" class="md-bar"><span>{{ item.dataset_name }} · {{ Math.round(item.completion * 100) }}% / 标准 {{ Math.round((item.min_pass_rate || 1) * 100) }}% · {{ item.passed ? '通过' : '未通过' }}</span><router-link :to="`/evals?report=${item.id}`">查看报告</router-link></div></div>
     </template>
   </Dialog>
 </template>

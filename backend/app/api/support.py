@@ -85,15 +85,15 @@ def _visible(db, ctx, model, kind: str):
     query = db.query(model)
     if is_platform(ctx.user):
         return query
-    allowed = ids_for(db, ctx.space.id, kind) or [-1]
+    allowed = sorted({item for space_id in ctx.space_ids for item in ids_for(db, space_id, kind)}) or [-1]
     return query.filter(model.id.in_(allowed))
 
 
 def scope_grants(db, ctx, query, model, kind: str, usable_space: int | None):
-    """按某个部门的授权收窄列表。部门用户只能收窄到当前部门。"""
+    """按某个部门的授权收窄列表；成员只能选择自己加入的部门。"""
     if usable_space is None:
         return query
-    if not is_platform(ctx.user) and usable_space != ctx.space.id:
+    if not is_platform(ctx.user) and usable_space not in ctx.space_ids:
         raise HTTPException(403, "只能查看本部门已授权的资源")
     allowed = ids_for(db, usable_space, kind) or [-1]
     return query.filter(model.id.in_(allowed))
@@ -104,7 +104,7 @@ def _can_read(db, ctx, kind: str, row) -> bool:
         return False
     if is_platform(ctx.user):
         return True
-    return row.id in ids_for(db, ctx.space.id, kind)
+    return any(row.id in ids_for(db, space_id, kind) for space_id in ctx.space_ids)
 
 
 def _can_write(ctx, row) -> bool:
@@ -155,7 +155,7 @@ def _latest(db, agent_id: int) -> AgentVersion | None:
 
 def _load_agent(db, ctx, agent_id: int) -> Agent:
     agent = db.get(Agent, agent_id)
-    if agent is None or (not is_platform(ctx.user) and agent.space_id != ctx.space.id):
+    if agent is None or (not is_platform(ctx.user) and agent.space_id not in ctx.space_ids):
         raise HTTPException(404, "智能体不存在")
     return agent
 

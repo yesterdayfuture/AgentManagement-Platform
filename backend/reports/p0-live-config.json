@@ -1,0 +1,46 @@
+{
+  "space_id": 4,
+  "space_name": "P0 开源基准评测",
+  "agent_id": 30,
+  "agent_name": "DeepSeek 通用能力评测智能体",
+  "model_id": 3,
+  "model_name": "deepseek",
+  "model_code": "deepseek-flash",
+  "sets": [
+    {
+      "fixture": "bigbench-word-unscrambling-250.json",
+      "category": "generation",
+      "dataset_id": 4,
+      "workflow_id": 12,
+      "case_count": 250
+    },
+    {
+      "fixture": "bigbench-text-editing-47.json",
+      "category": "generation",
+      "dataset_id": 5,
+      "workflow_id": 13,
+      "case_count": 47
+    },
+    {
+      "fixture": "bigbench-navigate-250.json",
+      "category": "task_decomposition",
+      "dataset_id": 6,
+      "workflow_id": 14,
+      "case_count": 250
+    },
+    {
+      "fixture": "bigbench-calculation-250.json",
+      "category": "calculation",
+      "dataset_id": 7,
+      "workflow_id": 15,
+      "case_count": 250
+    },
+    {
+      "fixture": "bigbench-tool_calling-250.json",
+      "category": "tool_calling",
+      "dataset_id": 8,
+      "workflow_id": 16,
+      "case_count": 250
+    }
+  ]
+}

@@ -128,15 +128,6 @@ def _save_version(
     """
     latest = _latest(db, agent.id)
     remote = getattr(agent, "kind", "local") == "remote"
-    if latest and latest.status == "draft":
-        latest.system_prompt = prompt
-        latest.tool_ids_json = dump(tool_ids)
-        latest.child_ids_json = dump(child_ids)
-        latest.model_id = model_id
-        latest.mcp_ids_json = dump(mcp_ids or [])
-        latest.skill_ids_json = dump(skill_ids or [])
-        latest.eval_passed = True if remote else False
-        return latest
     number = (latest.number + 1) if latest else 1
     version = AgentVersion(
         agent_id=agent.id,
@@ -201,6 +192,7 @@ def _apply_remote_fields(
 
 
 def _agent_brief(db, agent: Agent) -> dict:
+    space = db.get(Space, agent.space_id) if agent.space_id is not None else None
     stable = db.get(AgentVersion, agent.stable_version_id) if agent.stable_version_id else None
     gray = db.get(AgentVersion, agent.gray_version_id) if agent.gray_version_id else None
     latest = _latest(db, agent.id)
@@ -222,6 +214,7 @@ def _agent_brief(db, agent: Agent) -> dict:
         "description": (latest.system_prompt if latest else "") if kind == "remote" else "",
         "status": agent.status,
         "require_plan": agent.require_plan,
+        "release_requires_eval": space is None or space.require_eval,
         "gray_percent": agent.gray_percent,
         "stable_version": stable.number if stable else None,
         "gray_version": gray.number if gray else None,
@@ -236,7 +229,7 @@ def _agent_brief(db, agent: Agent) -> dict:
 
 @router.get("/api/agents")
 def list_agents(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Depends(desk_params)):
-    query = db.query(Agent) if is_platform(ctx.user) else db.query(Agent).filter_by(space_id=ctx.space.id)
+    query = db.query(Agent) if is_platform(ctx.user) else db.query(Agent).filter(Agent.space_id.in_(ctx.space_ids))
     return finish(
         query,
         lambda row: _agent_brief(db, row),
@@ -464,12 +457,19 @@ def remote_complete(agent_id: int, body: RemoteCompleteIn, request: Request, db=
         raise HTTPException(403 if exc.status == "denied" else 400, exc.message) from exc
 
 
-def _publish(agent: Agent, version: AgentVersion, space: Space, percent: int) -> None:
+def _assert_release_ready(db, agent: Agent, version: AgentVersion) -> None:
+    space = db.get(Space, agent.space_id) if agent.space_id is not None else None
+    # An unassigned platform agent has no space policy to inherit. Keep the
+    # release gate enabled until the exact version has passed an evaluation.
+    if (space is None or space.require_eval) and not version.eval_passed:
+        raise HTTPException(409, "该版本评测未通过，不能上线")
+
+
+def _publish(db, agent: Agent, version: AgentVersion, percent: int) -> None:
     if percent < 0 or percent > 100:
         raise HTTPException(400, "灰度比例无效")
+    _assert_release_ready(db, agent, version)
     if version.status != "published":
-        if space.require_eval and not version.eval_passed:
-            raise HTTPException(409, "评测未通过，不能发布")
         version.status = "published"
     if agent.stable_version_id is None or percent >= 100:
         agent.stable_version_id = version.id
@@ -491,7 +491,7 @@ def publish_agent(agent_id: int, body: PublishIn, ctx=Depends(get_context), db=D
     version = _latest(db, agent.id)
     if version is None:
         raise HTTPException(400, "没有版本")
-    _publish(agent, version, ctx.space, body.gray_percent)
+    _publish(db, agent, version, body.gray_percent)
     audit(db, ctx.space.id, ctx.user.username, "agent.publish", agent.key, str(body.gray_percent))
     return _agent_detail(db, agent)
 
@@ -529,6 +529,7 @@ def rollback(agent_id: int, ctx=Depends(get_context), db=Depends(get_db)):
     )
     if previous is None:
         raise HTTPException(400, "没有可回滚版本")
+    _assert_release_ready(db, agent, previous)
     agent.stable_version_id = previous.id
     agent.gray_version_id = None
     agent.gray_percent = 0
@@ -554,6 +555,7 @@ def online(agent_id: int, ctx=Depends(get_context), db=Depends(get_db)):
     agent = _load_agent(db, ctx, agent_id)
     if agent.stable_version_id is None:
         raise HTTPException(400, "没有已发布版本")
+    _assert_release_ready(db, agent, db.get(AgentVersion, agent.stable_version_id))
     agent.status = "published"
     audit(db, ctx.space.id, ctx.user.username, "agent.online", agent.key)
     return _agent_brief(db, agent)
@@ -561,11 +563,9 @@ def online(agent_id: int, ctx=Depends(get_context), db=Depends(get_db)):
 
 def _release_version(db, agent: Agent, version: AgentVersion) -> None:
     """草稿要先通过评测才能进入线上或灰度。已经发布过的版本直接切换。"""
+    _assert_release_ready(db, agent, version)
     if version.status == "published":
         return
-    space = db.get(Space, agent.space_id)
-    if space and space.require_eval and not version.eval_passed:
-        raise HTTPException(409, "评测未通过，不能发布")
     version.status = "published"
 
 

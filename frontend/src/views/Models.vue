@@ -117,7 +117,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
   </Desk>
   <Dialog :open="open" :mode="mode" :title="form.name || '模型'" @close="open = false" @submit="save">
     <label class="field"><span>名称</span><input v-model="form.name" /></label>
-    <label class="field"><span>提供方</span><select v-model="form.provider"><option>openai</option><option>rules</option></select></label>
+    <label class="field"><span>提供方</span><SearchSelect v-model="form.provider"><option>openai</option><option>rules</option></SearchSelect></label>
     <label class="field"><span>模型名</span><input v-model="form.model" /></label>
     <label class="field"><span>Base URL</span><input v-model="form.base_url" placeholder="https://api.openai.com/v1，可留空" /></label>
     <label class="field"><span>API Key</span><input v-model="form.api_key" type="password" autocomplete="new-password" :placeholder="mode === 'edit' ? '留空则不更换' : '没有密钥时回退规则引擎'" /></label>

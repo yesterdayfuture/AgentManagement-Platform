@@ -52,7 +52,8 @@ LIMEN is a self-hosted agent management and runtime platform. Models handle unde
 |---|---|
 | **Agents and models** | Version prompts, manage model pools and tool permissions, and connect local agents or remote agents over synchronous HTTP, asynchronous HTTP, and A2A. |
 | **Conversations** | Stream answers, render Markdown and formulas, inspect tool calls, and search sessions. Draft workflows from a question and publish after approval. |
-| **Workflows** | Use fixed graphs or autonomous dispatch, drafts and releases, pause/resume, schedules, pre-run cost estimates, and token budgets. |
+| **Workflows** | Use fixed graphs or autonomous dispatch, version diffs and restore, concurrent edit checks, evaluation gates, failed-node retry, schedules, and token budgets. |
+| **Evaluation and release** | Benchmark generation, math, task decomposition, and tool use with open BIG-bench and MMLU data; inspect per-case reports by agent or workflow version, set a pass-rate threshold, and gate release on evaluation. Platform admins can also evaluate unassigned agents. |
 | **Knowledge and memory** | Ingest and retrieve documents, compress context, and inspect short-term memory, long-term memory, versioned user profiles, and provenance. |
 | **Tools and skills** | Register built-in tools and MCP services; import SKILL.md packages and execute skill scripts inside Docker. |
 | **Observability** | Filter by department; inspect usage trends, cost and token charts, live agent/workflow monitoring, run history, and traces. |
@@ -125,6 +126,8 @@ The default database is `backend/data/app.db`; override it with `DATABASE_URL`. 
 | [Console and runtime guide](docs/console-guide.en.md) | Full page reference, roles, APIs, streaming, and billing conventions |
 | [Autonomous workflows](docs/autonomous-agent.md) | Planning, member responsibilities, dispatch, and execution |
 | [Draft workflows from chat](docs/ask-workflow.md) | Drafting prompts, model input, and approval flow |
+| [P0 loops and DeepSeek evaluation](docs/p0-closures-evaluation.md) | Versions, release gates, retries, and 1,047 open benchmark cases (Chinese) |
+| [MMLU general capability evaluation](docs/mmlu-evaluation.md) | Multidisciplinary, complex math, decomposition, tool use, and constrained generation in the existing space (Chinese) |
 | [Context and memory](docs/context-memory.md) | Long-context compression, three-tier memory, and provenance |
 | [Skills and containers](docs/skills.md) | Skill packages, grants, and isolated execution |
 | [Built-in tool development](docs/builtin-tools.md) | Register a tool and connect it to the runtime |

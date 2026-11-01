@@ -169,12 +169,12 @@ watch(() => route.query.space_id, () => members.refresh());
       </template>
       <template v-else>
         <label v-if="platform" class="field"><span>部门</span>
-          <select v-model="form.space_id" :disabled="mode !== 'create'">
+          <SearchSelect v-model="form.space_id" :disabled="mode !== 'create'">
             <option v-for="item in spaces" :key="item.id" :value="String(item.id)">{{ item.name }}</option>
-          </select>
+          </SearchSelect>
         </label>
         <label class="field"><span>账号</span><input v-model="form.username" :disabled="mode !== 'create'" /></label>
-        <label class="field"><span>角色</span><select v-model="form.role"><option value="viewer">只读</option><option value="operator">操作者</option><option value="builder">构建者</option><option v-if="platform || mode === 'view'" value="admin">部门管理员</option></select></label>
+        <label class="field"><span>角色</span><SearchSelect v-model="form.role"><option value="viewer">只读</option><option value="operator">操作者</option><option value="builder">构建者</option><option v-if="platform || mode === 'view'" value="admin">部门管理员</option></SearchSelect></label>
         <p v-if="mode === 'create'" class="sub">{{ (form.username || "").trim() ? `新账号初始密码为 ${initialPassword}。` : "填写账号后，初始密码是账号后面加 123。" }}已有账号不会重置密码。</p>
       </template>
     </template>

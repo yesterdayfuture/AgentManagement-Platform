@@ -1,0 +1,5989 @@
+{
+  "eval_run_id": 9,
+  "space_id": 4,
+  "space_name": "P0 开源基准评测",
+  "agent_id": 30,
+  "agent_name": "DeepSeek 通用能力评测智能体",
+  "model_id": 3,
+  "model_name": "deepseek",
+  "model_code": "deepseek-flash",
+  "dataset_id": 7,
+  "workflow_id": 15,
+  "workflow_revision": 1,
+  "fixture": "bigbench-calculation-250.json",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/simple_arithmetic/task.py",
+  "license": "Apache-2.0",
+  "selection": "Task-rule-generated, seed 42; records 1-250 of 1,000 unique additions.",
+  "category": "calculation",
+  "dataset_cases": 250,
+  "elapsed_seconds": 418.0,
+  "pass_rate": 0.996,
+  "cost": 0.05889800000000004,
+  "metrics": [
+    {
+      "key": "model_online",
+      "name": "真实模型响应",
+      "passed": 250,
+      "total": 250,
+      "rate": 1.0
+    },
+    {
+      "key": "exact",
+      "name": "精确匹配",
+      "passed": 249,
+      "total": 250,
+      "rate": 0.996
+    },
+    {
+      "key": "completion",
+      "name": "任务完成",
+      "passed": 250,
+      "total": 250,
+      "rate": 1.0
+    },
+    {
+      "key": "latency",
+      "name": "端到端耗时",
+      "passed": 250,
+      "total": 250,
+      "rate": 1.0
+    },
+    {
+      "key": "cost",
+      "name": "调用费用",
+      "passed": 250,
+      "total": 250,
+      "rate": 1.0
+    }
+  ],
+  "details": [
+    {
+      "id": 550,
+      "run_id": 843,
+      "trace_id": "eac4294aa3a149c1bfc1150ac52fe13a",
+      "input": "81 + 14 =",
+      "expected": "95",
+      "expected_tool": "",
+      "output": "【v1】95",
+      "status": "completed",
+      "latency_ms": 1965,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 551,
+      "run_id": 844,
+      "trace_id": "e7d80dc93bd54280adc92841729da5f9",
+      "input": "3 + 94 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1754,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 552,
+      "run_id": 845,
+      "trace_id": "bdf0f33beb7249089030c5cc01bc9613",
+      "input": "35 + 31 =",
+      "expected": "66",
+      "expected_tool": "",
+      "output": "【v1】66",
+      "status": "completed",
+      "latency_ms": 1774,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 553,
+      "run_id": 846,
+      "trace_id": "3842db35333e4ca185cd04b579ef0af6",
+      "input": "28 + 17 =",
+      "expected": "45",
+      "expected_tool": "",
+      "output": "【v1】45",
+      "status": "completed",
+      "latency_ms": 1912,
+      "cost": 0.000228,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 554,
+      "run_id": 847,
+      "trace_id": "488dcf8794b7417795ff3814579b8520",
+      "input": "94 + 13 =",
+      "expected": "107",
+      "expected_tool": "",
+      "output": "【v1】107",
+      "status": "completed",
+      "latency_ms": 1810,
+      "cost": 0.000228,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 555,
+      "run_id": 848,
+      "trace_id": "dcd29be180844f8bb147bebc816606f8",
+      "input": "86 + 94 =",
+      "expected": "180",
+      "expected_tool": "",
+      "output": "【v1】180",
+      "status": "completed",
+      "latency_ms": 1704,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 556,
+      "run_id": 849,
+      "trace_id": "bf014d4bba0d4056aee561725e73cb05",
+      "input": "69 + 11 =",
+      "expected": "80",
+      "expected_tool": "",
+      "output": "【v1】80",
+      "status": "completed",
+      "latency_ms": 1499,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 557,
+      "run_id": 850,
+      "trace_id": "e688a2695b9b4aa9add96d744301564d",
+      "input": "75 + 54 =",
+      "expected": "129",
+      "expected_tool": "",
+      "output": "【v1】129",
+      "status": "completed",
+      "latency_ms": 3133,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 558,
+      "run_id": 851,
+      "trace_id": "46dced6eb47f4eea85ff5625c0e5c859",
+      "input": "4 + 3 =",
+      "expected": "7",
+      "expected_tool": "",
+      "output": "【v1】7",
+      "status": "completed",
+      "latency_ms": 1648,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 559,
+      "run_id": 852,
+      "trace_id": "7522c576fbb04226a2e497a6ae4893ef",
+      "input": "11 + 27 =",
+      "expected": "38",
+      "expected_tool": "",
+      "output": "【v1】38",
+      "status": "completed",
+      "latency_ms": 1345,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 560,
+      "run_id": 853,
+      "trace_id": "7964a518cf454bf69351715197f2606c",
+      "input": "29 + 64 =",
+      "expected": "93",
+      "expected_tool": "",
+      "output": "【v1】93",
+      "status": "completed",
+      "latency_ms": 1445,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 561,
+      "run_id": 854,
+      "trace_id": "c1f17c3ab3224ca0bf1738ff9f3c444d",
+      "input": "77 + 3 =",
+      "expected": "80",
+      "expected_tool": "",
+      "output": "【v1】80",
+      "status": "completed",
+      "latency_ms": 1346,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 562,
+      "run_id": 855,
+      "trace_id": "f1dc179b7c2d4445bbde32303ddb2f3e",
+      "input": "71 + 25 =",
+      "expected": "96",
+      "expected_tool": "",
+      "output": "【v1】96",
+      "status": "completed",
+      "latency_ms": 2274,
+      "cost": 0.000215,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 563,
+      "run_id": 856,
+      "trace_id": "11e84bd69c7f40a29af1d4fd7e5082cd",
+      "input": "91 + 83 =",
+      "expected": "174",
+      "expected_tool": "",
+      "output": "【v1】174",
+      "status": "completed",
+      "latency_ms": 2615,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 564,
+      "run_id": 857,
+      "trace_id": "e5b340eb126a4d709a149c501f077df9",
+      "input": "89 + 69 =",
+      "expected": "158",
+      "expected_tool": "",
+      "output": "【v1】158",
+      "status": "completed",
+      "latency_ms": 1681,
+      "cost": 0.000219,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 565,
+      "run_id": 858,
+      "trace_id": "acbfd4852c7b47999e11d99b1140eda8",
+      "input": "53 + 28 =",
+      "expected": "81",
+      "expected_tool": "",
+      "output": "【v1】81",
+      "status": "completed",
+      "latency_ms": 1643,
+      "cost": 0.000228,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 566,
+      "run_id": 859,
+      "trace_id": "d14174492a3d41a9b42ef5a0364e3785",
+      "input": "57 + 75 =",
+      "expected": "132",
+      "expected_tool": "",
+      "output": "【v1】132",
+      "status": "completed",
+      "latency_ms": 1955,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 567,
+      "run_id": 860,
+      "trace_id": "25e024b23a204be4b35f1cf7fba1e7ea",
+      "input": "35 + 0 =",
+      "expected": "35",
+      "expected_tool": "",
+      "output": "【v1】35",
+      "status": "completed",
+      "latency_ms": 1481,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 568,
+      "run_id": 861,
+      "trace_id": "7804ace82e06442a994a5c4dc2edffa0",
+      "input": "97 + 20 =",
+      "expected": "117",
+      "expected_tool": "",
+      "output": "【v1】117",
+      "status": "completed",
+      "latency_ms": 1599,
+      "cost": 0.00024,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 569,
+      "run_id": 862,
+      "trace_id": "813dbaf03ada46f8a2203aa034e39be0",
+      "input": "89 + 54 =",
+      "expected": "143",
+      "expected_tool": "",
+      "output": "【v1】143",
+      "status": "completed",
+      "latency_ms": 1475,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 570,
+      "run_id": 863,
+      "trace_id": "dbbc5ecfe2134f309db0fbb514ee80c1",
+      "input": "43 + 35 =",
+      "expected": "78",
+      "expected_tool": "",
+      "output": "【v1】78",
+      "status": "completed",
+      "latency_ms": 1420,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 571,
+      "run_id": 864,
+      "trace_id": "2ffa15af2e7a4f1fb0ec3391203fcc9d",
+      "input": "19 + 27 =",
+      "expected": "46",
+      "expected_tool": "",
+      "output": "【v1】46",
+      "status": "completed",
+      "latency_ms": 2227,
+      "cost": 0.000224,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 572,
+      "run_id": 865,
+      "trace_id": "85867afc8d304bcc876bc385e7f9f43b",
+      "input": "97 + 43 =",
+      "expected": "140",
+      "expected_tool": "",
+      "output": "【v1】140",
+      "status": "completed",
+      "latency_ms": 1827,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 573,
+      "run_id": 866,
+      "trace_id": "3e6060f2f37646ceac1295c55bc24f87",
+      "input": "13 + 11 =",
+      "expected": "24",
+      "expected_tool": "",
+      "output": "【v1】24",
+      "status": "completed",
+      "latency_ms": 1291,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 574,
+      "run_id": 867,
+      "trace_id": "3411680c31e94f6eaf7026df3a63f423",
+      "input": "48 + 12 =",
+      "expected": "60",
+      "expected_tool": "",
+      "output": "【v1】60",
+      "status": "completed",
+      "latency_ms": 1887,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 575,
+      "run_id": 868,
+      "trace_id": "9e517eeba34f4dbbb857f8f1c31b21f8",
+      "input": "45 + 44 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 1507,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 576,
+      "run_id": 869,
+      "trace_id": "fb039aed20ec4cbbbd20539b193a86ad",
+      "input": "77 + 33 =",
+      "expected": "110",
+      "expected_tool": "",
+      "output": "【v1】110",
+      "status": "completed",
+      "latency_ms": 1426,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 577,
+      "run_id": 870,
+      "trace_id": "4d8255f729a54f9ab0cc6ac36a7c4f38",
+      "input": "5 + 93 =",
+      "expected": "98",
+      "expected_tool": "",
+      "output": "【v1】98",
+      "status": "completed",
+      "latency_ms": 1694,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 578,
+      "run_id": 871,
+      "trace_id": "5035acb5602a4ff5a9c34f1650d50686",
+      "input": "58 + 68 =",
+      "expected": "126",
+      "expected_tool": "",
+      "output": "【v1】126",
+      "status": "completed",
+      "latency_ms": 1802,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 579,
+      "run_id": 872,
+      "trace_id": "27b3a1ab67a647c0a7bc691ecc212235",
+      "input": "15 + 48 =",
+      "expected": "63",
+      "expected_tool": "",
+      "output": "【v1】63",
+      "status": "completed",
+      "latency_ms": 1642,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 580,
+      "run_id": 873,
+      "trace_id": "c7563e0a69084966bb552f097ecc4957",
+      "input": "10 + 70 =",
+      "expected": "80",
+      "expected_tool": "",
+      "output": "【v1】80",
+      "status": "completed",
+      "latency_ms": 1465,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 581,
+      "run_id": 874,
+      "trace_id": "b1213c8ac8154938806f17d1c09f5067",
+      "input": "37 + 80 =",
+      "expected": "117",
+      "expected_tool": "",
+      "output": "【v1】117",
+      "status": "completed",
+      "latency_ms": 1803,
+      "cost": 0.000272,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 582,
+      "run_id": 875,
+      "trace_id": "fb4f13a42379479d8a74db853f45e69e",
+      "input": "79 + 46 =",
+      "expected": "125",
+      "expected_tool": "",
+      "output": "【v1】125",
+      "status": "completed",
+      "latency_ms": 1363,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 583,
+      "run_id": 876,
+      "trace_id": "3d852dc972114c7685b78dfe12648f71",
+      "input": "73 + 24 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1253,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 584,
+      "run_id": 877,
+      "trace_id": "cdd9dd398eca477db71e3dbcb4e2d574",
+      "input": "90 + 8 =",
+      "expected": "98",
+      "expected_tool": "",
+      "output": "【v1】98",
+      "status": "completed",
+      "latency_ms": 1423,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 585,
+      "run_id": 878,
+      "trace_id": "22113a3b6e674edd8fbcf0861ffd98b9",
+      "input": "5 + 84 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 1463,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 586,
+      "run_id": 879,
+      "trace_id": "ad202989261741b58f9310fd64ec10a1",
+      "input": "29 + 98 =",
+      "expected": "127",
+      "expected_tool": "",
+      "output": "【v1】127",
+      "status": "completed",
+      "latency_ms": 1873,
+      "cost": 0.000256,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 587,
+      "run_id": 880,
+      "trace_id": "9c12b7f8187a4ed295abd007c7a89dec",
+      "input": "37 + 10 =",
+      "expected": "47",
+      "expected_tool": "",
+      "output": "【v1】47",
+      "status": "completed",
+      "latency_ms": 1738,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 588,
+      "run_id": 881,
+      "trace_id": "4ba551a7cfaa4338b761182b87c6b20a",
+      "input": "29 + 12 =",
+      "expected": "41",
+      "expected_tool": "",
+      "output": "【v1】41",
+      "status": "completed",
+      "latency_ms": 1587,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 589,
+      "run_id": 882,
+      "trace_id": "fa7178d13b16419e8ae833a127fb3ba7",
+      "input": "48 + 35 =",
+      "expected": "83",
+      "expected_tool": "",
+      "output": "【v1】83",
+      "status": "completed",
+      "latency_ms": 1088,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 590,
+      "run_id": 883,
+      "trace_id": "08378f4a39b2475580d3d866cbe62169",
+      "input": "58 + 81 =",
+      "expected": "139",
+      "expected_tool": "",
+      "output": "【v1】139",
+      "status": "completed",
+      "latency_ms": 1315,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 591,
+      "run_id": 884,
+      "trace_id": "1e2710f773d2485e91fbb19b0c687906",
+      "input": "46 + 20 =",
+      "expected": "66",
+      "expected_tool": "",
+      "output": "【v1】66",
+      "status": "completed",
+      "latency_ms": 1451,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 592,
+      "run_id": 885,
+      "trace_id": "c8998957711045da9615d57c501abd5f",
+      "input": "47 + 45 =",
+      "expected": "92",
+      "expected_tool": "",
+      "output": "【v1】92",
+      "status": "completed",
+      "latency_ms": 1870,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 593,
+      "run_id": 886,
+      "trace_id": "3f66e3b695694964b5c9854f084ad75f",
+      "input": "26 + 85 =",
+      "expected": "111",
+      "expected_tool": "",
+      "output": "【v1】111",
+      "status": "completed",
+      "latency_ms": 1810,
+      "cost": 0.000387,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 594,
+      "run_id": 887,
+      "trace_id": "38e5fd20a7a340bdb90366d835cca465",
+      "input": "34 + 89 =",
+      "expected": "123",
+      "expected_tool": "",
+      "output": "【v1】123",
+      "status": "completed",
+      "latency_ms": 1354,
+      "cost": 0.000319,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 595,
+      "run_id": 888,
+      "trace_id": "efa60eec61a44fbe994c5cb212169ea0",
+      "input": "87 + 82 =",
+      "expected": "169",
+      "expected_tool": "",
+      "output": "【v1】169",
+      "status": "completed",
+      "latency_ms": 2977,
+      "cost": 0.000804,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 596,
+      "run_id": 889,
+      "trace_id": "c026a2ee7827450ebffd29b3da6f8e6b",
+      "input": "9 + 77 =",
+      "expected": "86",
+      "expected_tool": "",
+      "output": "【v1】86",
+      "status": "completed",
+      "latency_ms": 1733,
+      "cost": 0.000339,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 597,
+      "run_id": 890,
+      "trace_id": "001585f4c0b2443991d1d564b4ec072a",
+      "input": "81 + 21 =",
+      "expected": "102",
+      "expected_tool": "",
+      "output": "【v1】102",
+      "status": "completed",
+      "latency_ms": 1783,
+      "cost": 0.000348,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 598,
+      "run_id": 891,
+      "trace_id": "696f0adfeaa5467c92ba9b47b8e4969e",
+      "input": "68 + 93 =",
+      "expected": "161",
+      "expected_tool": "",
+      "output": "【v1】161",
+      "status": "completed",
+      "latency_ms": 1770,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 599,
+      "run_id": 892,
+      "trace_id": "b8b89c42b94c475684893c3fe0253f5a",
+      "input": "31 + 20 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1822,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 600,
+      "run_id": 893,
+      "trace_id": "0c8e6bf8e19a40f78e7f60c691d029be",
+      "input": "59 + 48 =",
+      "expected": "107",
+      "expected_tool": "",
+      "output": "【v1】107",
+      "status": "completed",
+      "latency_ms": 1656,
+      "cost": 0.00024,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 601,
+      "run_id": 894,
+      "trace_id": "86bc2d345d2a43c5a6cd07da1810fd0c",
+      "input": "34 + 81 =",
+      "expected": "115",
+      "expected_tool": "",
+      "output": "【v1】115",
+      "status": "completed",
+      "latency_ms": 1528,
+      "cost": 0.000199,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 602,
+      "run_id": 895,
+      "trace_id": "c965c36ae0864220b05c28cc5b45c1e8",
+      "input": "88 + 71 =",
+      "expected": "159",
+      "expected_tool": "",
+      "output": "【v1】159",
+      "status": "completed",
+      "latency_ms": 1442,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 603,
+      "run_id": 896,
+      "trace_id": "c78b84cb66bf4fd29a1777607476aaaa",
+      "input": "28 + 87 =",
+      "expected": "115",
+      "expected_tool": "",
+      "output": "【v1】115",
+      "status": "completed",
+      "latency_ms": 1662,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 604,
+      "run_id": 897,
+      "trace_id": "9f213ad0f66a4e3a9edd4e534a1b8ec3",
+      "input": "41 + 98 =",
+      "expected": "139",
+      "expected_tool": "",
+      "output": "【v1】139",
+      "status": "completed",
+      "latency_ms": 1431,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 605,
+      "run_id": 898,
+      "trace_id": "fff387c5ea8a4d96bd40b0cfc0b9384d",
+      "input": "99 + 7 =",
+      "expected": "106",
+      "expected_tool": "",
+      "output": "【v1】106",
+      "status": "completed",
+      "latency_ms": 1806,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 606,
+      "run_id": 899,
+      "trace_id": "f3b466eba08a41e3991bf51b4b2254a5",
+      "input": "29 + 4 =",
+      "expected": "33",
+      "expected_tool": "",
+      "output": "【v1】33",
+      "status": "completed",
+      "latency_ms": 1663,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 607,
+      "run_id": 900,
+      "trace_id": "028deecf31704705a128e6243cb74d8d",
+      "input": "40 + 51 =",
+      "expected": "91",
+      "expected_tool": "",
+      "output": "【v1】91",
+      "status": "completed",
+      "latency_ms": 1704,
+      "cost": 0.000272,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 608,
+      "run_id": 901,
+      "trace_id": "60cfb9457e4f4ca1b3f5bed278917586",
+      "input": "34 + 8 =",
+      "expected": "42",
+      "expected_tool": "",
+      "output": "【v1】42",
+      "status": "completed",
+      "latency_ms": 1542,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 609,
+      "run_id": 902,
+      "trace_id": "4bd5849f7dab491d86f1a2cbf7cfb334",
+      "input": "27 + 72 =",
+      "expected": "99",
+      "expected_tool": "",
+      "output": "【v1】99",
+      "status": "completed",
+      "latency_ms": 1507,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 610,
+      "run_id": 903,
+      "trace_id": "7c7eb4aed8e04344a9b55ebe9f289a2a",
+      "input": "91 + 40 =",
+      "expected": "131",
+      "expected_tool": "",
+      "output": "【v1】131",
+      "status": "completed",
+      "latency_ms": 1219,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 611,
+      "run_id": 904,
+      "trace_id": "147472bf1b504f9dafebd525db91953b",
+      "input": "27 + 83 =",
+      "expected": "110",
+      "expected_tool": "",
+      "output": "【v1】110",
+      "status": "completed",
+      "latency_ms": 1504,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 612,
+      "run_id": 905,
+      "trace_id": "b0c5c2387ae8448eab884e02b05980ac",
+      "input": "63 + 50 =",
+      "expected": "113",
+      "expected_tool": "",
+      "output": "【v1】113",
+      "status": "completed",
+      "latency_ms": 1590,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 613,
+      "run_id": 906,
+      "trace_id": "65112f5d2784426f959fcb6e8bd7d2f5",
+      "input": "82 + 58 =",
+      "expected": "140",
+      "expected_tool": "",
+      "output": "【v1】140",
+      "status": "completed",
+      "latency_ms": 1835,
+      "cost": 0.000219,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 614,
+      "run_id": 907,
+      "trace_id": "3d829994d6824438b407c1956e2df847",
+      "input": "18 + 33 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1927,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 615,
+      "run_id": 908,
+      "trace_id": "48e679a0d2e5425786a778046d106304",
+      "input": "17 + 31 =",
+      "expected": "48",
+      "expected_tool": "",
+      "output": "【v1】48",
+      "status": "completed",
+      "latency_ms": 1560,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 616,
+      "run_id": 909,
+      "trace_id": "b1a7388826854f58b48a62b5c7570b95",
+      "input": "95 + 71 =",
+      "expected": "166",
+      "expected_tool": "",
+      "output": "【v1】166",
+      "status": "completed",
+      "latency_ms": 1337,
+      "cost": 0.000268,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 617,
+      "run_id": 910,
+      "trace_id": "98d8cb5736484c2baf238bfd61cc7d97",
+      "input": "68 + 33 =",
+      "expected": "101",
+      "expected_tool": "",
+      "output": "【v1】101",
+      "status": "completed",
+      "latency_ms": 1406,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 618,
+      "run_id": 911,
+      "trace_id": "ac05c9300d134e9b8299179f1572684e",
+      "input": "95 + 74 =",
+      "expected": "169",
+      "expected_tool": "",
+      "output": "【v1】169",
+      "status": "completed",
+      "latency_ms": 1696,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 619,
+      "run_id": 912,
+      "trace_id": "e1592b7fb1134531ae9bb4ac86f4ce10",
+      "input": "54 + 74 =",
+      "expected": "128",
+      "expected_tool": "",
+      "output": "【v1】128",
+      "status": "completed",
+      "latency_ms": 1764,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 620,
+      "run_id": 913,
+      "trace_id": "bcf39a2f8c0240dc8b7ce21552a5a96a",
+      "input": "51 + 46 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1812,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 621,
+      "run_id": 914,
+      "trace_id": "16c52d68a0c843a1a3990cbf8c569430",
+      "input": "65 + 63 =",
+      "expected": "128",
+      "expected_tool": "",
+      "output": "【v1】128",
+      "status": "completed",
+      "latency_ms": 1897,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 622,
+      "run_id": 915,
+      "trace_id": "9f843912e9e14589b88f0dffffdd6735",
+      "input": "11 + 96 =",
+      "expected": "107",
+      "expected_tool": "",
+      "output": "【v1】107",
+      "status": "completed",
+      "latency_ms": 1778,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 623,
+      "run_id": 916,
+      "trace_id": "a43ba18f6be34c9aa2f6cb0411ac6a18",
+      "input": "6 + 14 =",
+      "expected": "20",
+      "expected_tool": "",
+      "output": "【v1】20",
+      "status": "completed",
+      "latency_ms": 1602,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 624,
+      "run_id": 917,
+      "trace_id": "358c03b4bdcd4af993700744b9626b1c",
+      "input": "19 + 80 =",
+      "expected": "99",
+      "expected_tool": "",
+      "output": "【v1】99",
+      "status": "completed",
+      "latency_ms": 1653,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 625,
+      "run_id": 918,
+      "trace_id": "ac8fb81958204d7ca7c605f612b53d20",
+      "input": "20 + 87 =",
+      "expected": "107",
+      "expected_tool": "",
+      "output": "【v1】107",
+      "status": "completed",
+      "latency_ms": 1597,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 626,
+      "run_id": 919,
+      "trace_id": "99ec8fc6f8cd484ab42acc0998c1ded5",
+      "input": "54 + 76 =",
+      "expected": "130",
+      "expected_tool": "",
+      "output": "【v1】130",
+      "status": "completed",
+      "latency_ms": 1254,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 627,
+      "run_id": 920,
+      "trace_id": "4aaa5ac9bf43466591758939a7d666db",
+      "input": "8 + 49 =",
+      "expected": "57",
+      "expected_tool": "",
+      "output": "【v1】57",
+      "status": "completed",
+      "latency_ms": 1692,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 628,
+      "run_id": 921,
+      "trace_id": "da48cf191e85481aa4d0be840e952b88",
+      "input": "48 + 76 =",
+      "expected": "124",
+      "expected_tool": "",
+      "output": "【v1】124",
+      "status": "completed",
+      "latency_ms": 1672,
+      "cost": 0.000355,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 629,
+      "run_id": 922,
+      "trace_id": "292a05feb4594d0fa2549f82376a3dca",
+      "input": "59 + 67 =",
+      "expected": "126",
+      "expected_tool": "",
+      "output": "【v1】126",
+      "status": "completed",
+      "latency_ms": 1661,
+      "cost": 0.00042,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 630,
+      "run_id": 923,
+      "trace_id": "8655affd6ddf44c6b64e2acff2490e75",
+      "input": "32 + 70 =",
+      "expected": "102",
+      "expected_tool": "",
+      "output": "【v1】102",
+      "status": "completed",
+      "latency_ms": 1439,
+      "cost": 0.000332,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 631,
+      "run_id": 924,
+      "trace_id": "24626cc3d7fa4af18b3927e4bd139cb5",
+      "input": "1 + 87 =",
+      "expected": "88",
+      "expected_tool": "",
+      "output": "【v1】88",
+      "status": "completed",
+      "latency_ms": 1769,
+      "cost": 0.00032,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 632,
+      "run_id": 925,
+      "trace_id": "0253abc1a7f44f86852427bf80886ab2",
+      "input": "92 + 14 =",
+      "expected": "106",
+      "expected_tool": "",
+      "output": "【v1】106",
+      "status": "completed",
+      "latency_ms": 2232,
+      "cost": 0.00038,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 633,
+      "run_id": 926,
+      "trace_id": "6ec31e2c71674330818748ce3d1eb4f0",
+      "input": "87 + 68 =",
+      "expected": "155",
+      "expected_tool": "",
+      "output": "【v1】155",
+      "status": "completed",
+      "latency_ms": 1687,
+      "cost": 0.000404,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 634,
+      "run_id": 927,
+      "trace_id": "e5816a412bef4747b877da45fc360271",
+      "input": "96 + 34 =",
+      "expected": "130",
+      "expected_tool": "",
+      "output": "【v1】130",
+      "status": "completed",
+      "latency_ms": 2686,
+      "cost": 0.000727,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 635,
+      "run_id": 928,
+      "trace_id": "5bd136a08d244416b65668a48b0a012d",
+      "input": "98 + 82 =",
+      "expected": "180",
+      "expected_tool": "",
+      "output": "【v1】180",
+      "status": "completed",
+      "latency_ms": 2129,
+      "cost": 0.000264,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 636,
+      "run_id": 929,
+      "trace_id": "73627559967b4f4b8f31364a251ed70b",
+      "input": "43 + 14 =",
+      "expected": "57",
+      "expected_tool": "",
+      "output": "【v1】57",
+      "status": "completed",
+      "latency_ms": 1287,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 637,
+      "run_id": 930,
+      "trace_id": "a4bb6d37e2e34a9b837fef4a6b05ae41",
+      "input": "37 + 55 =",
+      "expected": "92",
+      "expected_tool": "",
+      "output": "【v1】92",
+      "status": "completed",
+      "latency_ms": 1814,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 638,
+      "run_id": 931,
+      "trace_id": "6260bf7347a84238b5c8ff13392b2fe2",
+      "input": "20 + 58 =",
+      "expected": "78",
+      "expected_tool": "",
+      "output": "【v1】78",
+      "status": "completed",
+      "latency_ms": 1543,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 639,
+      "run_id": 932,
+      "trace_id": "df9ccacec0094f8995b6a5fea7987e38",
+      "input": "0 + 92 =",
+      "expected": "92",
+      "expected_tool": "",
+      "output": "【v1】92",
+      "status": "completed",
+      "latency_ms": 1653,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 640,
+      "run_id": 933,
+      "trace_id": "fe82e3f66f53495280955e7ec543c5b1",
+      "input": "92 + 33 =",
+      "expected": "125",
+      "expected_tool": "",
+      "output": "【v1】125",
+      "status": "completed",
+      "latency_ms": 1846,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 641,
+      "run_id": 934,
+      "trace_id": "9f344a3ea7f241e5a5a035a8be37d468",
+      "input": "64 + 97 =",
+      "expected": "161",
+      "expected_tool": "",
+      "output": "【v1】161",
+      "status": "completed",
+      "latency_ms": 1790,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 642,
+      "run_id": 935,
+      "trace_id": "27eb27b0fedd464292786375d2544bdb",
+      "input": "22 + 64 =",
+      "expected": "86",
+      "expected_tool": "",
+      "output": "【v1】86",
+      "status": "completed",
+      "latency_ms": 1758,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 643,
+      "run_id": 936,
+      "trace_id": "7ea06d758efd4d1ba9ba9cf9a845d420",
+      "input": "13 + 80 =",
+      "expected": "93",
+      "expected_tool": "",
+      "output": "【v1】93",
+      "status": "completed",
+      "latency_ms": 1499,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 644,
+      "run_id": 937,
+      "trace_id": "70c4bb4b7ae74a21974957d5ee6b2e63",
+      "input": "38 + 81 =",
+      "expected": "119",
+      "expected_tool": "",
+      "output": "【v1】119",
+      "status": "completed",
+      "latency_ms": 2029,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 645,
+      "run_id": 938,
+      "trace_id": "72a69651bea2499ab6e62f90285d4619",
+      "input": "64 + 77 =",
+      "expected": "141",
+      "expected_tool": "",
+      "output": "【v1】141",
+      "status": "completed",
+      "latency_ms": 1743,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 646,
+      "run_id": 939,
+      "trace_id": "285b32af2acf40d8b7d01cb5d6bec8f9",
+      "input": "25 + 19 =",
+      "expected": "44",
+      "expected_tool": "",
+      "output": "【v1】44",
+      "status": "completed",
+      "latency_ms": 1829,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 647,
+      "run_id": 940,
+      "trace_id": "19d1a85469ca4742a52613cef376b2bb",
+      "input": "47 + 97 =",
+      "expected": "144",
+      "expected_tool": "",
+      "output": "【v1】144",
+      "status": "completed",
+      "latency_ms": 1850,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 648,
+      "run_id": 941,
+      "trace_id": "fd6d9cf0d5cb4b27bbd71b42d30be549",
+      "input": "20 + 69 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 1633,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 649,
+      "run_id": 942,
+      "trace_id": "a4c3d0cce6b641249690da80cc45757d",
+      "input": "99 + 67 =",
+      "expected": "166",
+      "expected_tool": "",
+      "output": "【v1】166",
+      "status": "completed",
+      "latency_ms": 1734,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 650,
+      "run_id": 943,
+      "trace_id": "45ca517059fe46188e20e64143712008",
+      "input": "0 + 76 =",
+      "expected": "76",
+      "expected_tool": "",
+      "output": "【v1】76",
+      "status": "completed",
+      "latency_ms": 1709,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 651,
+      "run_id": 944,
+      "trace_id": "7eeb52c7ce294eabb67cc3f7adeef768",
+      "input": "41 + 62 =",
+      "expected": "103",
+      "expected_tool": "",
+      "output": "【v1】103",
+      "status": "completed",
+      "latency_ms": 1622,
+      "cost": 0.000256,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 652,
+      "run_id": 945,
+      "trace_id": "7750a516248046f89eeb185116d42cdd",
+      "input": "2 + 14 =",
+      "expected": "16",
+      "expected_tool": "",
+      "output": "【v1】16",
+      "status": "completed",
+      "latency_ms": 1729,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 653,
+      "run_id": 946,
+      "trace_id": "ed4e39f4ad2a4a419b524bde54d83c29",
+      "input": "46 + 39 =",
+      "expected": "85",
+      "expected_tool": "",
+      "output": "【v1】85",
+      "status": "completed",
+      "latency_ms": 1494,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 654,
+      "run_id": 947,
+      "trace_id": "f0b7a5a8c8b040df8d211f0fb144323d",
+      "input": "30 + 7 =",
+      "expected": "37",
+      "expected_tool": "",
+      "output": "【v1】37",
+      "status": "completed",
+      "latency_ms": 1682,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 655,
+      "run_id": 948,
+      "trace_id": "f3a7e08efba3499a81f8dbbf814e96ee",
+      "input": "30 + 72 =",
+      "expected": "102",
+      "expected_tool": "",
+      "output": "【v1】102",
+      "status": "completed",
+      "latency_ms": 1325,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 656,
+      "run_id": 949,
+      "trace_id": "c8164f4be56a4616be0505ec46c9a7a7",
+      "input": "10 + 10 =",
+      "expected": "20",
+      "expected_tool": "",
+      "output": "【v1】20",
+      "status": "completed",
+      "latency_ms": 1588,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 657,
+      "run_id": 950,
+      "trace_id": "96add2f1c32b413f857ce9ffb6b92f75",
+      "input": "93 + 62 =",
+      "expected": "155",
+      "expected_tool": "",
+      "output": "【v1】155",
+      "status": "completed",
+      "latency_ms": 1592,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 658,
+      "run_id": 951,
+      "trace_id": "95f3813a8dfa4884b338541e6fd1ff46",
+      "input": "8 + 97 =",
+      "expected": "105",
+      "expected_tool": "",
+      "output": "【v1】105",
+      "status": "completed",
+      "latency_ms": 1502,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 659,
+      "run_id": 952,
+      "trace_id": "c25ebdd11a62434699b12faaf597c8c6",
+      "input": "68 + 98 =",
+      "expected": "166",
+      "expected_tool": "",
+      "output": "【v1】166",
+      "status": "completed",
+      "latency_ms": 1287,
+      "cost": 0.000228,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 660,
+      "run_id": 953,
+      "trace_id": "8f3d81f5a4564316939775b18703ed85",
+      "input": "16 + 16 =",
+      "expected": "32",
+      "expected_tool": "",
+      "output": "【v1】32",
+      "status": "completed",
+      "latency_ms": 2023,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 661,
+      "run_id": 954,
+      "trace_id": "584f1d2c65bb44d783a21777d6fcc36a",
+      "input": "84 + 60 =",
+      "expected": "144",
+      "expected_tool": "",
+      "output": "【v1】144",
+      "status": "completed",
+      "latency_ms": 1582,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 662,
+      "run_id": 955,
+      "trace_id": "1a4e5d1f5479407999c2fefa775c8263",
+      "input": "70 + 21 =",
+      "expected": "91",
+      "expected_tool": "",
+      "output": "【v1】91",
+      "status": "completed",
+      "latency_ms": 1766,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 663,
+      "run_id": 956,
+      "trace_id": "47ac398c089d4ced87c88c6a229e9e6a",
+      "input": "33 + 67 =",
+      "expected": "100",
+      "expected_tool": "",
+      "output": "【v1】100",
+      "status": "completed",
+      "latency_ms": 1472,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 664,
+      "run_id": 957,
+      "trace_id": "e9f2f1945944496f89a34f1ea995b686",
+      "input": "77 + 54 =",
+      "expected": "131",
+      "expected_tool": "",
+      "output": "【v1】131",
+      "status": "completed",
+      "latency_ms": 1587,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 665,
+      "run_id": 958,
+      "trace_id": "bc90299d2a1f4ff8abde33e6f37ec844",
+      "input": "27 + 69 =",
+      "expected": "96",
+      "expected_tool": "",
+      "output": "【v1】96",
+      "status": "completed",
+      "latency_ms": 1593,
+      "cost": 0.000384,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 666,
+      "run_id": 959,
+      "trace_id": "04ef1f6d55674f42acab0754f42172bf",
+      "input": "96 + 93 =",
+      "expected": "189",
+      "expected_tool": "",
+      "output": "【v1】189",
+      "status": "completed",
+      "latency_ms": 1780,
+      "cost": 0.000271,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 667,
+      "run_id": 960,
+      "trace_id": "fa187906298d4e3398f8e79a1ff071e3",
+      "input": "88 + 25 =",
+      "expected": "113",
+      "expected_tool": "",
+      "output": "【v1】113",
+      "status": "completed",
+      "latency_ms": 1890,
+      "cost": 0.000391,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 668,
+      "run_id": 961,
+      "trace_id": "0203eace35104f1faccf1aee0abd72b2",
+      "input": "91 + 39 =",
+      "expected": "130",
+      "expected_tool": "",
+      "output": "【v1】130",
+      "status": "completed",
+      "latency_ms": 1481,
+      "cost": 0.000232,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 669,
+      "run_id": 962,
+      "trace_id": "21a3bec3ae31469aaf9a4ab2a2850ff7",
+      "input": "51 + 85 =",
+      "expected": "136",
+      "expected_tool": "",
+      "output": "【v1】136",
+      "status": "completed",
+      "latency_ms": 1724,
+      "cost": 0.000371,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 670,
+      "run_id": 963,
+      "trace_id": "ab901d03ea3a4f1bb4a3ad78b86900ad",
+      "input": "83 + 47 =",
+      "expected": "130",
+      "expected_tool": "",
+      "output": "【v1】130",
+      "status": "completed",
+      "latency_ms": 1400,
+      "cost": 0.00026,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 671,
+      "run_id": 964,
+      "trace_id": "07bb2d778b9042709e2f485a9ab731ed",
+      "input": "56 + 66 =",
+      "expected": "122",
+      "expected_tool": "",
+      "output": "【v1】122",
+      "status": "completed",
+      "latency_ms": 1747,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 672,
+      "run_id": 965,
+      "trace_id": "14ead42ceede437b8a6c74d6f5fbef35",
+      "input": "57 + 15 =",
+      "expected": "72",
+      "expected_tool": "",
+      "output": "【v1】72",
+      "status": "completed",
+      "latency_ms": 1733,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 673,
+      "run_id": 966,
+      "trace_id": "875c94552f544cd6b5865681a17792ce",
+      "input": "31 + 28 =",
+      "expected": "59",
+      "expected_tool": "",
+      "output": "【v1】59",
+      "status": "completed",
+      "latency_ms": 1688,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 674,
+      "run_id": 967,
+      "trace_id": "9675ab8c29f74701ae404b6c181709ba",
+      "input": "8 + 43 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1527,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 675,
+      "run_id": 968,
+      "trace_id": "3538e10683394b45bd02bef887ea29b3",
+      "input": "2 + 75 =",
+      "expected": "77",
+      "expected_tool": "",
+      "output": "【v1】77",
+      "status": "completed",
+      "latency_ms": 1463,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 676,
+      "run_id": 969,
+      "trace_id": "d1d8c3e5b5bf4e39abb4057e282ec6bf",
+      "input": "70 + 29 =",
+      "expected": "99",
+      "expected_tool": "",
+      "output": "【v1】99",
+      "status": "completed",
+      "latency_ms": 2373,
+      "cost": 0.000224,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 677,
+      "run_id": 970,
+      "trace_id": "07ba845247ec4997bcab0b65e546ffcc",
+      "input": "75 + 28 =",
+      "expected": "103",
+      "expected_tool": "",
+      "output": "【v1】103",
+      "status": "completed",
+      "latency_ms": 1336,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 678,
+      "run_id": 971,
+      "trace_id": "1e3a182961db4f819dae9e8008fd5691",
+      "input": "0 + 9 =",
+      "expected": "9",
+      "expected_tool": "",
+      "output": "【v1】9",
+      "status": "completed",
+      "latency_ms": 1477,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 679,
+      "run_id": 972,
+      "trace_id": "a26efc389fba419ea84d54af84ae4456",
+      "input": "90 + 80 =",
+      "expected": "170",
+      "expected_tool": "",
+      "output": "【v1】170",
+      "status": "completed",
+      "latency_ms": 1834,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 680,
+      "run_id": 973,
+      "trace_id": "93529c508e2345b2b7b10bc2ec95786d",
+      "input": "7 + 29 =",
+      "expected": "36",
+      "expected_tool": "",
+      "output": "【v1】36",
+      "status": "completed",
+      "latency_ms": 2028,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 681,
+      "run_id": 974,
+      "trace_id": "e1dc3d08c8dd415cbcdcd5ec276dde9a",
+      "input": "8 + 4 =",
+      "expected": "12",
+      "expected_tool": "",
+      "output": "【v1】12",
+      "status": "completed",
+      "latency_ms": 1623,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 682,
+      "run_id": 975,
+      "trace_id": "3abc0170d8044368b0908aa701403e5e",
+      "input": "42 + 9 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1817,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 683,
+      "run_id": 976,
+      "trace_id": "ce0494a9bb634127b93dcae9a2df146f",
+      "input": "65 + 30 =",
+      "expected": "95",
+      "expected_tool": "",
+      "output": "【v1】95",
+      "status": "completed",
+      "latency_ms": 1659,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 684,
+      "run_id": 977,
+      "trace_id": "cb3ed038673e4a6ba420cbf3a48def92",
+      "input": "35 + 85 =",
+      "expected": "120",
+      "expected_tool": "",
+      "output": "【v1】120",
+      "status": "completed",
+      "latency_ms": 2044,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 685,
+      "run_id": 978,
+      "trace_id": "7954cbdc14014479beb64f841450eb08",
+      "input": "62 + 27 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 1477,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 686,
+      "run_id": 979,
+      "trace_id": "34e8b5f0f84a4f2badd55e295fdfe61d",
+      "input": "69 + 16 =",
+      "expected": "85",
+      "expected_tool": "",
+      "output": "【v1】85",
+      "status": "completed",
+      "latency_ms": 1717,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 687,
+      "run_id": 980,
+      "trace_id": "7bc9ad4807d54c8284bbdfb2cf86dedf",
+      "input": "92 + 73 =",
+      "expected": "165",
+      "expected_tool": "",
+      "output": "【v1】165",
+      "status": "completed",
+      "latency_ms": 1621,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 688,
+      "run_id": 981,
+      "trace_id": "bf7d787c6415431d8257a8e90a4d312e",
+      "input": "73 + 60 =",
+      "expected": "133",
+      "expected_tool": "",
+      "output": "【v1】133",
+      "status": "completed",
+      "latency_ms": 1669,
+      "cost": 0.00024,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 689,
+      "run_id": 982,
+      "trace_id": "c150be9515674d22bebf774183eef250",
+      "input": "31 + 60 =",
+      "expected": "91",
+      "expected_tool": "",
+      "output": "【v1】91",
+      "status": "completed",
+      "latency_ms": 1421,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 690,
+      "run_id": 983,
+      "trace_id": "ffba241bf184475e88350181e147485b",
+      "input": "52 + 24 =",
+      "expected": "76",
+      "expected_tool": "",
+      "output": "【v1】76",
+      "status": "completed",
+      "latency_ms": 1943,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 691,
+      "run_id": 984,
+      "trace_id": "aed5aa326f6e4188b56a6776626ba8ec",
+      "input": "12 + 12 =",
+      "expected": "24",
+      "expected_tool": "",
+      "output": "【v1】24",
+      "status": "completed",
+      "latency_ms": 1897,
+      "cost": 0.000244,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 692,
+      "run_id": 985,
+      "trace_id": "10572bc273d8420b9c8f701724f7bcda",
+      "input": "84 + 55 =",
+      "expected": "139",
+      "expected_tool": "",
+      "output": "【v1】139",
+      "status": "completed",
+      "latency_ms": 1561,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 693,
+      "run_id": 986,
+      "trace_id": "8606db0647a34788bbd8597ed1298264",
+      "input": "45 + 54 =",
+      "expected": "99",
+      "expected_tool": "",
+      "output": "【v1】99",
+      "status": "completed",
+      "latency_ms": 1649,
+      "cost": 0.000191,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 694,
+      "run_id": 987,
+      "trace_id": "2adec84987124d8a8bc92e7078f9a7fb",
+      "input": "52 + 59 =",
+      "expected": "111",
+      "expected_tool": "",
+      "output": "【v1】111",
+      "status": "completed",
+      "latency_ms": 1396,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 695,
+      "run_id": 988,
+      "trace_id": "f1130d019c83400f9c759876722e644a",
+      "input": "93 + 6 =",
+      "expected": "99",
+      "expected_tool": "",
+      "output": "【v1】99",
+      "status": "completed",
+      "latency_ms": 1370,
+      "cost": 0.000272,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 696,
+      "run_id": 989,
+      "trace_id": "e1a09eedcb7c4277972e0cf32f51896e",
+      "input": "86 + 83 =",
+      "expected": "169",
+      "expected_tool": "",
+      "output": "【v1】169",
+      "status": "completed",
+      "latency_ms": 1081,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 697,
+      "run_id": 990,
+      "trace_id": "2e05ace7961946648053e71bf2b5af9d",
+      "input": "82 + 12 =",
+      "expected": "94",
+      "expected_tool": "",
+      "output": "【v1】94",
+      "status": "completed",
+      "latency_ms": 1196,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 698,
+      "run_id": 991,
+      "trace_id": "a851c5889b7148c9ba64af0e728d0a32",
+      "input": "7 + 51 =",
+      "expected": "58",
+      "expected_tool": "",
+      "output": "【v1】58",
+      "status": "completed",
+      "latency_ms": 1611,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 699,
+      "run_id": 992,
+      "trace_id": "7cded9c7d8674cb98a79ec553281ba88",
+      "input": "93 + 43 =",
+      "expected": "136",
+      "expected_tool": "",
+      "output": "【v1】136",
+      "status": "completed",
+      "latency_ms": 1727,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 700,
+      "run_id": 993,
+      "trace_id": "52c53f4fa73346dc9e700139cb3623fc",
+      "input": "13 + 31 =",
+      "expected": "44",
+      "expected_tool": "",
+      "output": "【v1】44",
+      "status": "completed",
+      "latency_ms": 2007,
+      "cost": 0.000519,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 701,
+      "run_id": 994,
+      "trace_id": "e60f52ef52234ecabfdf3e0db2beb364",
+      "input": "24 + 24 =",
+      "expected": "48",
+      "expected_tool": "",
+      "output": "【v1】48",
+      "status": "completed",
+      "latency_ms": 1856,
+      "cost": 0.000267,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 702,
+      "run_id": 995,
+      "trace_id": "dbe5e28a9e7c440bb710b0a5e653b7e0",
+      "input": "68 + 57 =",
+      "expected": "125",
+      "expected_tool": "",
+      "output": "【v1】125",
+      "status": "completed",
+      "latency_ms": 2237,
+      "cost": 0.000723,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 703,
+      "run_id": 996,
+      "trace_id": "c370016c041645a09bc8010d20b2ac49",
+      "input": "17 + 54 =",
+      "expected": "71",
+      "expected_tool": "",
+      "output": "【v1】71",
+      "status": "completed",
+      "latency_ms": 2003,
+      "cost": 0.000452,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 704,
+      "run_id": 997,
+      "trace_id": "dac96f7241984dff837e05ff5a6e1b4b",
+      "input": "23 + 35 =",
+      "expected": "58",
+      "expected_tool": "",
+      "output": "【v1】58",
+      "status": "completed",
+      "latency_ms": 1672,
+      "cost": 0.000331,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 705,
+      "run_id": 998,
+      "trace_id": "7c1e8f6216874d38a8c2368dd075bf23",
+      "input": "59 + 31 =",
+      "expected": "90",
+      "expected_tool": "",
+      "output": "【v1】90",
+      "status": "completed",
+      "latency_ms": 2151,
+      "cost": 0.000496,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 706,
+      "run_id": 999,
+      "trace_id": "aa1074e918e046e7b69c309922260d0e",
+      "input": "9 + 56 =",
+      "expected": "65",
+      "expected_tool": "",
+      "output": "【v1】65",
+      "status": "completed",
+      "latency_ms": 1836,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 707,
+      "run_id": 1000,
+      "trace_id": "42240eb485004ae6b3804f02de380945",
+      "input": "70 + 12 =",
+      "expected": "82",
+      "expected_tool": "",
+      "output": "【v1】82",
+      "status": "completed",
+      "latency_ms": 2237,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 708,
+      "run_id": 1001,
+      "trace_id": "666385ab956448b2a23468c0698febb1",
+      "input": "6 + 83 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 1381,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 709,
+      "run_id": 1002,
+      "trace_id": "504dfc20c2dd4d5c8e864a05c8d51fd6",
+      "input": "69 + 1 =",
+      "expected": "70",
+      "expected_tool": "",
+      "output": "【v1】70",
+      "status": "completed",
+      "latency_ms": 1634,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 710,
+      "run_id": 1003,
+      "trace_id": "8c41e733ad6c430484ca5c0ec2af6940",
+      "input": "30 + 21 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1644,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 711,
+      "run_id": 1004,
+      "trace_id": "2347409787a74173b2619867988a58aa",
+      "input": "52 + 62 =",
+      "expected": "114",
+      "expected_tool": "",
+      "output": "【v1】114",
+      "status": "completed",
+      "latency_ms": 2558,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 712,
+      "run_id": 1005,
+      "trace_id": "199a4c0c50f24558ae961a0eb8e83e06",
+      "input": "61 + 27 =",
+      "expected": "88",
+      "expected_tool": "",
+      "output": "【v1】88",
+      "status": "completed",
+      "latency_ms": 1316,
+      "cost": 0.00026,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 713,
+      "run_id": 1006,
+      "trace_id": "36fe07b483b34039899348d4a89beb1e",
+      "input": "51 + 7 =",
+      "expected": "58",
+      "expected_tool": "",
+      "output": "【v1】58",
+      "status": "completed",
+      "latency_ms": 1803,
+      "cost": 0.000272,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 714,
+      "run_id": 1007,
+      "trace_id": "cd9a88b3e657434489f9e4e54c13cf77",
+      "input": "21 + 48 =",
+      "expected": "69",
+      "expected_tool": "",
+      "output": "【v1】69",
+      "status": "completed",
+      "latency_ms": 1884,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 715,
+      "run_id": 1008,
+      "trace_id": "f23325d64e5841679eb7160554217a13",
+      "input": "0 + 49 =",
+      "expected": "49",
+      "expected_tool": "",
+      "output": "【v1】49",
+      "status": "completed",
+      "latency_ms": 1685,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 716,
+      "run_id": 1009,
+      "trace_id": "c4d54abfcd4047709dac9163798d578e",
+      "input": "33 + 58 =",
+      "expected": "91",
+      "expected_tool": "",
+      "output": "【v1】91",
+      "status": "completed",
+      "latency_ms": 1953,
+      "cost": 0.000199,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 717,
+      "run_id": 1010,
+      "trace_id": "df0beb9f52164837b7d5b811e1fd5094",
+      "input": "36 + 54 =",
+      "expected": "90",
+      "expected_tool": "",
+      "output": "【v1】90",
+      "status": "completed",
+      "latency_ms": 1541,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 718,
+      "run_id": 1011,
+      "trace_id": "96899afffece495489b9c87c4fef12cf",
+      "input": "89 + 93 =",
+      "expected": "182",
+      "expected_tool": "",
+      "output": "【v1】182",
+      "status": "completed",
+      "latency_ms": 1773,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 719,
+      "run_id": 1012,
+      "trace_id": "aff8a9ef24084f8d8f04412a8ab3e5b8",
+      "input": "71 + 84 =",
+      "expected": "155",
+      "expected_tool": "",
+      "output": "【v1】155",
+      "status": "completed",
+      "latency_ms": 1679,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 720,
+      "run_id": 1013,
+      "trace_id": "14e24d67cf114a09b40408e7cf3686c4",
+      "input": "91 + 62 =",
+      "expected": "153",
+      "expected_tool": "",
+      "output": "【v1】153",
+      "status": "completed",
+      "latency_ms": 1503,
+      "cost": 0.000244,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 721,
+      "run_id": 1014,
+      "trace_id": "edc771085e7f4c52a7897f7e23bc85de",
+      "input": "19 + 24 =",
+      "expected": "43",
+      "expected_tool": "",
+      "output": "【v1】43",
+      "status": "completed",
+      "latency_ms": 1818,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 722,
+      "run_id": 1015,
+      "trace_id": "9ff67fa20f0c408bb4a17f01f438a277",
+      "input": "37 + 27 =",
+      "expected": "64",
+      "expected_tool": "",
+      "output": "【v1】64",
+      "status": "completed",
+      "latency_ms": 1390,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 723,
+      "run_id": 1016,
+      "trace_id": "752dd21ecb154048be722d7416915d9a",
+      "input": "7 + 74 =",
+      "expected": "81",
+      "expected_tool": "",
+      "output": "【v1】81",
+      "status": "completed",
+      "latency_ms": 1347,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 724,
+      "run_id": 1017,
+      "trace_id": "f213aa813faa4151b81992705fdab0e9",
+      "input": "94 + 69 =",
+      "expected": "163",
+      "expected_tool": "",
+      "output": "【v1】163",
+      "status": "completed",
+      "latency_ms": 1714,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 725,
+      "run_id": 1018,
+      "trace_id": "d3e88b6b130c4a4e92d59fcdc0741954",
+      "input": "7 + 95 =",
+      "expected": "102",
+      "expected_tool": "",
+      "output": "【v1】102",
+      "status": "completed",
+      "latency_ms": 1420,
+      "cost": 0.000264,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 726,
+      "run_id": 1019,
+      "trace_id": "470b4be082b144bd9f4643a75a8b7dde",
+      "input": "40 + 7 =",
+      "expected": "47",
+      "expected_tool": "",
+      "output": "【v1】47",
+      "status": "completed",
+      "latency_ms": 1418,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 727,
+      "run_id": 1020,
+      "trace_id": "f5ba8cf2bc2b4433b5a5af11ec4e0b8d",
+      "input": "6 + 74 =",
+      "expected": "80",
+      "expected_tool": "",
+      "output": "【v1】80",
+      "status": "completed",
+      "latency_ms": 1872,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 728,
+      "run_id": 1021,
+      "trace_id": "68c6494522fb45e483aab41bb7396297",
+      "input": "61 + 64 =",
+      "expected": "125",
+      "expected_tool": "",
+      "output": "【v1】125",
+      "status": "completed",
+      "latency_ms": 1422,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 729,
+      "run_id": 1022,
+      "trace_id": "b774b8ccc4da481e89c8a314ba77052e",
+      "input": "67 + 20 =",
+      "expected": "87",
+      "expected_tool": "",
+      "output": "【v1】87",
+      "status": "completed",
+      "latency_ms": 1422,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 730,
+      "run_id": 1023,
+      "trace_id": "f2939b10a25e4eca928eb78a25ca0b52",
+      "input": "7 + 65 =",
+      "expected": "72",
+      "expected_tool": "",
+      "output": "【v1】72",
+      "status": "completed",
+      "latency_ms": 1662,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 731,
+      "run_id": 1024,
+      "trace_id": "6911f2262a4e43ae890ca579aa3afedf",
+      "input": "10 + 23 =",
+      "expected": "33",
+      "expected_tool": "",
+      "output": "【v1】33",
+      "status": "completed",
+      "latency_ms": 1355,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 732,
+      "run_id": 1025,
+      "trace_id": "0a63eb003bf441bf9b9f5a5d190bea80",
+      "input": "8 + 76 =",
+      "expected": "84",
+      "expected_tool": "",
+      "output": "【v1】84",
+      "status": "completed",
+      "latency_ms": 1325,
+      "cost": 0.000224,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 733,
+      "run_id": 1026,
+      "trace_id": "6d244c52932b4ce5b0d14b9ac241ceb1",
+      "input": "8 + 86 =",
+      "expected": "94",
+      "expected_tool": "",
+      "output": "【v1】94",
+      "status": "completed",
+      "latency_ms": 1518,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 734,
+      "run_id": 1027,
+      "trace_id": "c36be691e2664c349ccba557b7b71290",
+      "input": "30 + 51 =",
+      "expected": "81",
+      "expected_tool": "",
+      "output": "【v1】81",
+      "status": "completed",
+      "latency_ms": 1863,
+      "cost": 0.000268,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 735,
+      "run_id": 1028,
+      "trace_id": "e3ad04e8df7447ff9f15a540f7aff453",
+      "input": "15 + 72 =",
+      "expected": "87",
+      "expected_tool": "",
+      "output": "【v1】87",
+      "status": "completed",
+      "latency_ms": 1700,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 736,
+      "run_id": 1029,
+      "trace_id": "06c929ec14b24e468c9895f7170d160c",
+      "input": "31 + 74 =",
+      "expected": "105",
+      "expected_tool": "",
+      "output": "【v1】105",
+      "status": "completed",
+      "latency_ms": 2234,
+      "cost": 0.000444,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 737,
+      "run_id": 1030,
+      "trace_id": "b3ff7db4352b464ab5bdf00e5f1c38db",
+      "input": "76 + 5 =",
+      "expected": "81",
+      "expected_tool": "",
+      "output": "【v1】81",
+      "status": "completed",
+      "latency_ms": 1340,
+      "cost": 0.000263,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 738,
+      "run_id": 1031,
+      "trace_id": "cee77e035ca649c68d488378a6179187",
+      "input": "79 + 10 =",
+      "expected": "89",
+      "expected_tool": "",
+      "output": "【v1】89",
+      "status": "completed",
+      "latency_ms": 2084,
+      "cost": 0.000291,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 739,
+      "run_id": 1032,
+      "trace_id": "386117d812824add9367ff6e702cb528",
+      "input": "53 + 84 =",
+      "expected": "137",
+      "expected_tool": "",
+      "output": "【v1】137",
+      "status": "completed",
+      "latency_ms": 2152,
+      "cost": 0.000404,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 740,
+      "run_id": 1033,
+      "trace_id": "9e8977cc1d1243e1b1b1db6b314a80a0",
+      "input": "74 + 72 =",
+      "expected": "146",
+      "expected_tool": "",
+      "output": "【v1】工具调用被熔断了，无法返回结果。但按算术：74 + 72 = 146。\n\n146",
+      "status": "completed",
+      "latency_ms": 1773,
+      "cost": 0.000312,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": false,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": false
+    },
+    {
+      "id": 741,
+      "run_id": 1034,
+      "trace_id": "3c58a57eea6a47938bc62ede053d056c",
+      "input": "66 + 40 =",
+      "expected": "106",
+      "expected_tool": "",
+      "output": "【v1】106",
+      "status": "completed",
+      "latency_ms": 2170,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 742,
+      "run_id": 1035,
+      "trace_id": "a220d024f4854ef9b1156f06e40c50a1",
+      "input": "33 + 26 =",
+      "expected": "59",
+      "expected_tool": "",
+      "output": "【v1】59",
+      "status": "completed",
+      "latency_ms": 1930,
+      "cost": 0.00026,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 743,
+      "run_id": 1036,
+      "trace_id": "8386dd98afb4431a9ec4a30c86e9fda2",
+      "input": "85 + 91 =",
+      "expected": "176",
+      "expected_tool": "",
+      "output": "【v1】176",
+      "status": "completed",
+      "latency_ms": 1949,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 744,
+      "run_id": 1037,
+      "trace_id": "cac2a9b18a2446ee85eebebaab39f640",
+      "input": "40 + 30 =",
+      "expected": "70",
+      "expected_tool": "",
+      "output": "【v1】70",
+      "status": "completed",
+      "latency_ms": 1558,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 745,
+      "run_id": 1038,
+      "trace_id": "624f120f39e84f5d94f762afcb1a4cc4",
+      "input": "33 + 50 =",
+      "expected": "83",
+      "expected_tool": "",
+      "output": "【v1】83",
+      "status": "completed",
+      "latency_ms": 1523,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 746,
+      "run_id": 1039,
+      "trace_id": "f23336d5faed4e208a7ba2b6d8d2b8ab",
+      "input": "16 + 85 =",
+      "expected": "101",
+      "expected_tool": "",
+      "output": "【v1】101",
+      "status": "completed",
+      "latency_ms": 2005,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 747,
+      "run_id": 1040,
+      "trace_id": "27ff63f3273f492a9cdfbea4dcfff8e8",
+      "input": "82 + 38 =",
+      "expected": "120",
+      "expected_tool": "",
+      "output": "【v1】120",
+      "status": "completed",
+      "latency_ms": 1193,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 748,
+      "run_id": 1041,
+      "trace_id": "fccbdc04aba0447ea367684795bd1436",
+      "input": "58 + 40 =",
+      "expected": "98",
+      "expected_tool": "",
+      "output": "【v1】98",
+      "status": "completed",
+      "latency_ms": 1260,
+      "cost": 0.000252,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 749,
+      "run_id": 1042,
+      "trace_id": "0f58492b8ae74e76bd4861e3decd904c",
+      "input": "96 + 9 =",
+      "expected": "105",
+      "expected_tool": "",
+      "output": "【v1】105",
+      "status": "completed",
+      "latency_ms": 1484,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 750,
+      "run_id": 1043,
+      "trace_id": "186ded1bf8a14dd29318ddddf521aaa9",
+      "input": "1 + 58 =",
+      "expected": "59",
+      "expected_tool": "",
+      "output": "【v1】59",
+      "status": "completed",
+      "latency_ms": 1425,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 751,
+      "run_id": 1044,
+      "trace_id": "76d8f91efef64af5bc0d132a14f65dc3",
+      "input": "79 + 72 =",
+      "expected": "151",
+      "expected_tool": "",
+      "output": "【v1】151",
+      "status": "completed",
+      "latency_ms": 1480,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 752,
+      "run_id": 1045,
+      "trace_id": "612a28a526ee40c88323e4c0d6e3b517",
+      "input": "12 + 9 =",
+      "expected": "21",
+      "expected_tool": "",
+      "output": "【v1】21",
+      "status": "completed",
+      "latency_ms": 1879,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 753,
+      "run_id": 1046,
+      "trace_id": "21151201b2b64caf8f197bb051b94fe3",
+      "input": "68 + 27 =",
+      "expected": "95",
+      "expected_tool": "",
+      "output": "【v1】95",
+      "status": "completed",
+      "latency_ms": 1606,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 754,
+      "run_id": 1047,
+      "trace_id": "bd6e78f240274f45a2a038c97a5e458d",
+      "input": "64 + 33 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1493,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 755,
+      "run_id": 1048,
+      "trace_id": "0217c6de666d451481b1961f5fc83a8e",
+      "input": "16 + 44 =",
+      "expected": "60",
+      "expected_tool": "",
+      "output": "【v1】60",
+      "status": "completed",
+      "latency_ms": 1352,
+      "cost": 0.000244,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 756,
+      "run_id": 1049,
+      "trace_id": "2ae9f60782bf493f99d0a19474961c7e",
+      "input": "8 + 31 =",
+      "expected": "39",
+      "expected_tool": "",
+      "output": "【v1】39",
+      "status": "completed",
+      "latency_ms": 1669,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 757,
+      "run_id": 1050,
+      "trace_id": "d1bde0908a5b4edab1d3b27410d4ac74",
+      "input": "47 + 36 =",
+      "expected": "83",
+      "expected_tool": "",
+      "output": "【v1】83",
+      "status": "completed",
+      "latency_ms": 1582,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 758,
+      "run_id": 1051,
+      "trace_id": "aa9515d529734a11814fb47a8310e500",
+      "input": "20 + 56 =",
+      "expected": "76",
+      "expected_tool": "",
+      "output": "【v1】76",
+      "status": "completed",
+      "latency_ms": 1314,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 759,
+      "run_id": 1052,
+      "trace_id": "8fcc8fc02fc64559a0d326585aad776d",
+      "input": "69 + 90 =",
+      "expected": "159",
+      "expected_tool": "",
+      "output": "【v1】159",
+      "status": "completed",
+      "latency_ms": 1263,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 760,
+      "run_id": 1053,
+      "trace_id": "bdf598908925474dbfd2362058409b1a",
+      "input": "38 + 78 =",
+      "expected": "116",
+      "expected_tool": "",
+      "output": "【v1】116",
+      "status": "completed",
+      "latency_ms": 1686,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 761,
+      "run_id": 1054,
+      "trace_id": "4db843935d834c31b7c95c438d5ae96b",
+      "input": "83 + 67 =",
+      "expected": "150",
+      "expected_tool": "",
+      "output": "【v1】150",
+      "status": "completed",
+      "latency_ms": 1515,
+      "cost": 0.000252,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 762,
+      "run_id": 1055,
+      "trace_id": "051fd26cd625426eb2fab0ded1c89c84",
+      "input": "1 + 85 =",
+      "expected": "86",
+      "expected_tool": "",
+      "output": "【v1】86",
+      "status": "completed",
+      "latency_ms": 1496,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 763,
+      "run_id": 1056,
+      "trace_id": "ad568a596d794daba21ca82d56932087",
+      "input": "70 + 38 =",
+      "expected": "108",
+      "expected_tool": "",
+      "output": "【v1】108",
+      "status": "completed",
+      "latency_ms": 1197,
+      "cost": 0.00024,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 764,
+      "run_id": 1057,
+      "trace_id": "ba01b7c8c3a743408049b01bd43e8a10",
+      "input": "84 + 13 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1270,
+      "cost": 0.000224,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 765,
+      "run_id": 1058,
+      "trace_id": "c3c26682571549109fc837f6c2e902b4",
+      "input": "17 + 33 =",
+      "expected": "50",
+      "expected_tool": "",
+      "output": "【v1】50",
+      "status": "completed",
+      "latency_ms": 1229,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 766,
+      "run_id": 1059,
+      "trace_id": "217e016c433f4dca823e700d6b697653",
+      "input": "14 + 13 =",
+      "expected": "27",
+      "expected_tool": "",
+      "output": "【v1】27",
+      "status": "completed",
+      "latency_ms": 1647,
+      "cost": 0.000183,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 767,
+      "run_id": 1060,
+      "trace_id": "3bc455fb894a43afbce7c530b6d613e0",
+      "input": "95 + 70 =",
+      "expected": "165",
+      "expected_tool": "",
+      "output": "【v1】165",
+      "status": "completed",
+      "latency_ms": 1480,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 768,
+      "run_id": 1061,
+      "trace_id": "b0b5e1af099342a7877cec392d9d4116",
+      "input": "19 + 34 =",
+      "expected": "53",
+      "expected_tool": "",
+      "output": "【v1】53",
+      "status": "completed",
+      "latency_ms": 1402,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 769,
+      "run_id": 1062,
+      "trace_id": "8cc2e115192f4f10adff5396f76f4fd2",
+      "input": "36 + 77 =",
+      "expected": "113",
+      "expected_tool": "",
+      "output": "【v1】113",
+      "status": "completed",
+      "latency_ms": 1494,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 770,
+      "run_id": 1063,
+      "trace_id": "6f1cfadc05e94769be1c82b5668a037a",
+      "input": "26 + 91 =",
+      "expected": "117",
+      "expected_tool": "",
+      "output": "【v1】117",
+      "status": "completed",
+      "latency_ms": 1452,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 771,
+      "run_id": 1064,
+      "trace_id": "8fd3f328072d42b8aece88c7bec345db",
+      "input": "43 + 26 =",
+      "expected": "69",
+      "expected_tool": "",
+      "output": "【v1】69",
+      "status": "completed",
+      "latency_ms": 1402,
+      "cost": 0.000336,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 772,
+      "run_id": 1065,
+      "trace_id": "acc4ac1ea0fd42c4a95fc205ece18dac",
+      "input": "87 + 81 =",
+      "expected": "168",
+      "expected_tool": "",
+      "output": "【v1】168",
+      "status": "completed",
+      "latency_ms": 1955,
+      "cost": 0.000376,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 773,
+      "run_id": 1066,
+      "trace_id": "5d163f6214bb455b8ba63dd09e8c0867",
+      "input": "33 + 64 =",
+      "expected": "97",
+      "expected_tool": "",
+      "output": "【v1】97",
+      "status": "completed",
+      "latency_ms": 1703,
+      "cost": 0.000315,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 774,
+      "run_id": 1067,
+      "trace_id": "93efd9219e3b464da03d833f1021d8d3",
+      "input": "62 + 32 =",
+      "expected": "94",
+      "expected_tool": "",
+      "output": "【v1】94",
+      "status": "completed",
+      "latency_ms": 1742,
+      "cost": 0.000404,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 775,
+      "run_id": 1068,
+      "trace_id": "aba87567f43245e1bf411d2c192287c8",
+      "input": "6 + 11 =",
+      "expected": "17",
+      "expected_tool": "",
+      "output": "【v1】17",
+      "status": "completed",
+      "latency_ms": 1646,
+      "cost": 0.000275,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 776,
+      "run_id": 1069,
+      "trace_id": "eed65e86b2bf4754833178d9dcddb1aa",
+      "input": "81 + 54 =",
+      "expected": "135",
+      "expected_tool": "",
+      "output": "【v1】135",
+      "status": "completed",
+      "latency_ms": 1399,
+      "cost": 0.000423,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 777,
+      "run_id": 1070,
+      "trace_id": "9c042833a16e4e00baedd28f15a888af",
+      "input": "35 + 5 =",
+      "expected": "40",
+      "expected_tool": "",
+      "output": "【v1】40",
+      "status": "completed",
+      "latency_ms": 1813,
+      "cost": 0.000287,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 778,
+      "run_id": 1071,
+      "trace_id": "154dcbb8ebb240e0aa5ae73ee99089c4",
+      "input": "0 + 42 =",
+      "expected": "42",
+      "expected_tool": "",
+      "output": "【v1】42",
+      "status": "completed",
+      "latency_ms": 1939,
+      "cost": 0.000312,
+      "tools": [],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 779,
+      "run_id": 1072,
+      "trace_id": "26c725da03f649978605a6650ef67e65",
+      "input": "98 + 16 =",
+      "expected": "114",
+      "expected_tool": "",
+      "output": "【v1】114",
+      "status": "completed",
+      "latency_ms": 2199,
+      "cost": 0.000211,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 780,
+      "run_id": 1073,
+      "trace_id": "aa3eaa88ca0a4fab8b82fbb76e59580b",
+      "input": "81 + 33 =",
+      "expected": "114",
+      "expected_tool": "",
+      "output": "【v1】114",
+      "status": "completed",
+      "latency_ms": 1836,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 781,
+      "run_id": 1074,
+      "trace_id": "5b4cc337d45e4aab81c688117a786137",
+      "input": "20 + 94 =",
+      "expected": "114",
+      "expected_tool": "",
+      "output": "【v1】114",
+      "status": "completed",
+      "latency_ms": 1485,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 782,
+      "run_id": 1075,
+      "trace_id": "28393480b796435c8e1ea3a4be459443",
+      "input": "56 + 70 =",
+      "expected": "126",
+      "expected_tool": "",
+      "output": "【v1】126",
+      "status": "completed",
+      "latency_ms": 1517,
+      "cost": 0.000228,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 783,
+      "run_id": 1076,
+      "trace_id": "9bd9e3d34aca4357863f8ed0ad8c1ed8",
+      "input": "90 + 54 =",
+      "expected": "144",
+      "expected_tool": "",
+      "output": "【v1】144",
+      "status": "completed",
+      "latency_ms": 1582,
+      "cost": 0.000264,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 784,
+      "run_id": 1077,
+      "trace_id": "62a4e47e5e9b44e48e82eae6990d25dd",
+      "input": "71 + 1 =",
+      "expected": "72",
+      "expected_tool": "",
+      "output": "【v1】72",
+      "status": "completed",
+      "latency_ms": 1367,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 785,
+      "run_id": 1078,
+      "trace_id": "c96eeebafd884b0faddccf8be4d30cd2",
+      "input": "14 + 9 =",
+      "expected": "23",
+      "expected_tool": "",
+      "output": "【v1】23",
+      "status": "completed",
+      "latency_ms": 1532,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 786,
+      "run_id": 1079,
+      "trace_id": "92271892c1f74f9fb743cbdd7d0e5de0",
+      "input": "88 + 19 =",
+      "expected": "107",
+      "expected_tool": "",
+      "output": "【v1】107",
+      "status": "completed",
+      "latency_ms": 2535,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 787,
+      "run_id": 1080,
+      "trace_id": "f8b47abd7aaa42f78920605752774c50",
+      "input": "69 + 4 =",
+      "expected": "73",
+      "expected_tool": "",
+      "output": "【v1】73",
+      "status": "completed",
+      "latency_ms": 1808,
+      "cost": 0.000248,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 788,
+      "run_id": 1081,
+      "trace_id": "03bf9c14d79b4fafb1de3b659aaaf4d1",
+      "input": "47 + 74 =",
+      "expected": "121",
+      "expected_tool": "",
+      "output": "【v1】121",
+      "status": "completed",
+      "latency_ms": 1427,
+      "cost": 0.000236,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 789,
+      "run_id": 1082,
+      "trace_id": "67610aa7b9724584a01c9df044e26eee",
+      "input": "70 + 18 =",
+      "expected": "88",
+      "expected_tool": "",
+      "output": "【v1】88",
+      "status": "completed",
+      "latency_ms": 2530,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 790,
+      "run_id": 1083,
+      "trace_id": "678ea7a68692431fa1019e0b9e852e93",
+      "input": "55 + 16 =",
+      "expected": "71",
+      "expected_tool": "",
+      "output": "【v1】71",
+      "status": "completed",
+      "latency_ms": 1171,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 791,
+      "run_id": 1084,
+      "trace_id": "237a087762ab4aed804b63e7a2eeb615",
+      "input": "5 + 39 =",
+      "expected": "44",
+      "expected_tool": "",
+      "output": "【v1】44",
+      "status": "completed",
+      "latency_ms": 1572,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 792,
+      "run_id": 1085,
+      "trace_id": "d61f4fc0330648d38f6a1ddcebca3550",
+      "input": "46 + 5 =",
+      "expected": "51",
+      "expected_tool": "",
+      "output": "【v1】51",
+      "status": "completed",
+      "latency_ms": 1602,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 793,
+      "run_id": 1086,
+      "trace_id": "7e973f8a4c274bbba9c9436a95e318b1",
+      "input": "45 + 26 =",
+      "expected": "71",
+      "expected_tool": "",
+      "output": "【v1】71",
+      "status": "completed",
+      "latency_ms": 1128,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 794,
+      "run_id": 1087,
+      "trace_id": "c22e8c3d9cec4e43a8af53cd68ad4733",
+      "input": "87 + 31 =",
+      "expected": "118",
+      "expected_tool": "",
+      "output": "【v1】118",
+      "status": "completed",
+      "latency_ms": 1418,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 795,
+      "run_id": 1088,
+      "trace_id": "a3497eaf0aa14b0aa1583c7aeead34db",
+      "input": "85 + 13 =",
+      "expected": "98",
+      "expected_tool": "",
+      "output": "【v1】98",
+      "status": "completed",
+      "latency_ms": 1723,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 796,
+      "run_id": 1089,
+      "trace_id": "efd1c40a913f4b779b9ee84a995a7a16",
+      "input": "45 + 99 =",
+      "expected": "144",
+      "expected_tool": "",
+      "output": "【v1】144",
+      "status": "completed",
+      "latency_ms": 1708,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 797,
+      "run_id": 1090,
+      "trace_id": "b652ffcdd854403fb0b5567ec1a2e525",
+      "input": "71 + 52 =",
+      "expected": "123",
+      "expected_tool": "",
+      "output": "【v1】123",
+      "status": "completed",
+      "latency_ms": 1704,
+      "cost": 0.000187,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 798,
+      "run_id": 1091,
+      "trace_id": "5a0b0e949bca41d7871010cd1f1a46d7",
+      "input": "79 + 95 =",
+      "expected": "174",
+      "expected_tool": "",
+      "output": "【v1】174",
+      "status": "completed",
+      "latency_ms": 1669,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    },
+    {
+      "id": 799,
+      "run_id": 1092,
+      "trace_id": "d73b33e7dd494858b4a867574184a67c",
+      "input": "19 + 30 =",
+      "expected": "49",
+      "expected_tool": "",
+      "output": "【v1】49",
+      "status": "completed",
+      "latency_ms": 1469,
+      "cost": 0.000232,
+      "tools": [
+        "calculator"
+      ],
+      "model_online": true,
+      "scores": {
+        "model_online": true,
+        "exact": true,
+        "completion": true,
+        "latency": true,
+        "cost": true
+      },
+      "passed": true
+    }
+  ]
+}

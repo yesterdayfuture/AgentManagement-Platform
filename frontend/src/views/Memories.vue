@@ -192,20 +192,20 @@ onMounted(() => desk.refresh());
   >
     <template #filters>
       <label>来源
-        <select v-model="desk.query.source_kind">
+        <SearchSelect v-model="desk.query.source_kind">
           <option value="">全部</option>
           <option value="chat">问答</option>
           <option value="agent">智能体</option>
           <option value="workflow">工作流</option>
-        </select>
+        </SearchSelect>
       </label>
       <label>类型
-        <select v-model="desk.query.kind">
+        <SearchSelect v-model="desk.query.kind">
           <option value="">全部</option>
           <option value="short">短期</option>
           <option value="long">长期</option>
           <option value="user">用户画像</option>
-        </select>
+        </SearchSelect>
       </label>
       <label>会话/任务名<input v-model="desk.query.source_name" placeholder="按名称过滤" /></label>
       <button class="ghost" type="button" @click="download">导出</button>
@@ -213,11 +213,11 @@ onMounted(() => desk.refresh());
   </Desk>
   <Dialog :open="open" :mode="mode" :title="form?.kind === 'user' ? '用户画像' : '记忆'" @close="open = false" @submit="save">
     <label v-if="mode === 'create'" class="field"><span>类型</span>
-      <select v-model="form.kind">
+      <SearchSelect v-model="form.kind">
         <option value="long">长期</option>
         <option value="short">短期</option>
         <option value="user">用户画像</option>
-      </select>
+      </SearchSelect>
     </label>
     <p v-if="mode === 'edit' && form?.kind === 'user'" class="sub">保存后将固化当前版本，并启用编辑后的新版本。</p>
     <label class="field"><span>内容</span><textarea v-model="form.content" rows="8" /></label>

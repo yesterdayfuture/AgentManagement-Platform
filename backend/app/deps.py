@@ -79,6 +79,7 @@ def get_context(
         space=space,
         policy=policy,
         role=membership.role if membership is not None else "admin",
+        space_ids=([space_id] if payload.get("typ") == "delegation" else ([row.id for row in db.query(Space.id).all()] if platform_admin else [row.space_id for row in db.query(Membership.space_id).filter_by(user_id=principal.user.id).all()])),
     )
 
 

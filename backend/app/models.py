@@ -319,6 +319,10 @@ class Workflow(Base):
     agent_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     name: Mapped[str] = mapped_column(String(120))
     definition_json: Mapped[str] = mapped_column(Text, default="{}")
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    published_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    eval_dataset_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    eval_min_pass_rate: Mapped[float] = mapped_column(Float, default=1.0)
     status: Mapped[str] = mapped_column(String(20), default="active")
     release: Mapped[str] = mapped_column(String(20), default="draft")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -334,12 +338,27 @@ class Workflow(Base):
     created_at: Mapped[datetime | None] = mapped_column(DateTime, default=now)
 
 
+class WorkflowVersion(Base):
+    __tablename__ = "workflow_versions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    workflow_id: Mapped[int] = mapped_column(Integer, index=True)
+    number: Mapped[int] = mapped_column(Integer)
+    name: Mapped[str] = mapped_column(String(120))
+    agent_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    definition_json: Mapped[str] = mapped_column(Text)
+    created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
 class WorkflowRun(Base):
     """一次执行。cursor 是固定图的下一节点，或自主调度的下一任务下标。log_json 是步骤日志。"""
     __tablename__ = "workflow_runs"
     id: Mapped[int] = mapped_column(primary_key=True)
     space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id"))
     workflow_id: Mapped[int] = mapped_column(Integer)
+    workflow_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    definition_json: Mapped[str] = mapped_column(Text, default="{}")
+    retry_of_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     trace_id: Mapped[str] = mapped_column(String(40), default="")
     status: Mapped[str] = mapped_column(String(20), default="running")
     environment: Mapped[str] = mapped_column(String(20), default="prod")
@@ -490,6 +509,10 @@ class EvalDataset(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id"))
     name: Mapped[str] = mapped_column(String(120))
+    source_url: Mapped[str] = mapped_column(String(500), default="")
+    license: Mapped[str] = mapped_column(String(80), default="")
+    selection_note: Mapped[str] = mapped_column(Text, default="")
+    default_metrics_json: Mapped[str] = mapped_column(Text, default='["contains","completion"]')
     created_at: Mapped[datetime | None] = mapped_column(DateTime, default=now)
 
 
@@ -509,10 +532,17 @@ class EvalRun(Base):
     dataset_id: Mapped[int] = mapped_column(Integer)
     agent_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     workflow_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    workflow_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    dataset_fingerprint: Mapped[str] = mapped_column(String(64), default="")
+    agent_fingerprint: Mapped[str] = mapped_column(String(64), default="")
     version_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    target_space_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    platform_only: Mapped[bool] = mapped_column(Boolean, default=False)
+    note: Mapped[str] = mapped_column(Text, default="")
     metrics_json: Mapped[str] = mapped_column(Text, default="[]")
     completion: Mapped[float] = mapped_column(Float, default=0)
     quality: Mapped[float] = mapped_column(Float, default=0)
+    min_pass_rate: Mapped[float] = mapped_column(Float, default=1.0)
     cost: Mapped[float] = mapped_column(Float, default=0)
     passed: Mapped[bool] = mapped_column(Boolean, default=False)
     detail_json: Mapped[str] = mapped_column(Text, default="[]")

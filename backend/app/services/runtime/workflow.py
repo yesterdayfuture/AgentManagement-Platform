@@ -176,6 +176,8 @@ def _run_agent_graph(db, workflow: Workflow, *, user, space, message: str, envir
         run = WorkflowRun(
             space_id=space.id,
             workflow_id=workflow.id,
+            workflow_revision=int(workflow.revision or 1),
+            definition_json=dump(definition),
             status="running",
             environment=environment,
             actor=user.username,
@@ -327,6 +329,8 @@ def _record_legacy_run(db, workflow, trace: Trace, message: str, environment: st
     run = WorkflowRun(
         space_id=workflow.space_id,
         workflow_id=workflow.id,
+        workflow_revision=int(workflow.revision or 1),
+        definition_json=dump(_definition_of(workflow)),
         trace_id=trace.id,
         status=status,
         environment=environment,
@@ -532,6 +536,8 @@ def _run_autonomous(db, workflow: Workflow, *, user, space, message: str, enviro
         run = WorkflowRun(
             space_id=space.id,
             workflow_id=workflow.id,
+            workflow_revision=int(workflow.revision or 1),
+            definition_json=dump(definition),
             status="running",
             environment=environment,
             actor=user.username,
@@ -679,6 +685,8 @@ def run_workflow(db, workflow: Workflow, *, user, space, message: str, environme
         hit = find_hit(message or "")
         if hit:
             raise GateError("denied", stop_message(hit))
+        definition_snapshot = _definition_of(workflow)
+        revision_snapshot = int(workflow.revision or 1)
         result = _run_workflow_body(
             db,
             workflow,
@@ -691,6 +699,12 @@ def run_workflow(db, workflow: Workflow, *, user, space, message: str, environme
             pause_after=pause_after,
             resume=resume,
         )
+        if result.get("run_id"):
+            recorded = db.get(WorkflowRun, result["run_id"])
+            if recorded is not None and not recorded.workflow_revision:
+                recorded.workflow_revision = revision_snapshot
+                recorded.definition_json = dump(definition_snapshot)
+                db.commit()
         if result.get("status") in {"completed", "limited"} and result.get("run_id"):
             from app.services.memory_layers import capture_task_memories
 

@@ -1,0 +1,14 @@
+{
+  "name": "BIG-bench simple_arithmetic_json · smoke subset",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/simple_arithmetic_json/task.json",
+  "license": "Apache-2.0",
+  "selection": "First five public one-digit addition examples, in source order. For smoke testing only; not a representative benchmark score.",
+  "metrics": ["contains", "completion"],
+  "cases": [
+    {"input_text": "1 + 4 =", "expected": "5"},
+    {"input_text": "4 + 9 =", "expected": "13"},
+    {"input_text": "5 + 0 =", "expected": "5"},
+    {"input_text": "6 + 4 =", "expected": "10"},
+    {"input_text": "8 + 3 =", "expected": "11"}
+  ]
+}

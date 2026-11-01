@@ -9,6 +9,21 @@ import re
 
 METRICS = [
     {
+        "key": "steps_present",
+        "name": "分步拆解",
+        "summary": "输出至少包含两条编号步骤。",
+    },
+    {
+        "key": "model_online",
+        "name": "真实模型响应",
+        "summary": "模型调用成功且未回退到规则回复。",
+    },
+    {
+        "key": "final_answer",
+        "name": "最终答案",
+        "summary": "提取输出末尾的 Answer: 值，与用例期望比较；用于分步推理任务。",
+    },
+    {
         "key": "contains",
         "name": "期望包含",
         "summary": "输出里要出现用例填写的期望文本。对应关键词包含检查。",
@@ -56,13 +71,20 @@ def names() -> dict[str, str]:
     return {item["key"]: item["name"] for item in METRICS}
 
 
-def score_case(metrics: list[str], case, output: str, status: str, tool_names: list[str], tool_text: str, latency_ms: int, cost: float) -> dict[str, bool]:
+def score_case(metrics: list[str], case, output: str, status: str, tool_names: list[str], tool_text: str, latency_ms: int, cost: float, model_online: bool = True) -> dict[str, bool]:
     body = _PREFIX.sub("", output or "").strip()
     scores = {}
+    if "model_online" in metrics:
+        scores["model_online"] = model_online
     if "contains" in metrics:
         scores["contains"] = bool(case.expected) and case.expected in (output or "")
     if "exact" in metrics:
         scores["exact"] = body == (case.expected or "").strip()
+    if "final_answer" in metrics:
+        match = re.search(r"(?:^|\n)\s*(?:Final\s+)?Answer\s*[:：]\s*([^\n]+)\s*$", body, re.IGNORECASE)
+        scores["final_answer"] = bool(match) and match.group(1).strip().rstrip(".").casefold() == (case.expected or "").strip().casefold()
+    if "steps_present" in metrics:
+        scores["steps_present"] = len(re.findall(r"(?m)^\s*\d+[.)、]\s*\S", body)) >= 2
     if "completion" in metrics:
         scores["completion"] = status == "completed"
     if "tool" in metrics:

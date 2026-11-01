@@ -1,0 +1,4014 @@
+{
+  "name": "BIG-bench simple_arithmetic · 1000 unique additions",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/simple_arithmetic/task.py",
+  "license": "Apache-2.0",
+  "selection": "Task-rule-generated, Python random seed 42; 250 unique operand pairs each for 2, 3, 4 and 5 digits. Evaluation use only.",
+  "metrics": [
+    "exact",
+    "completion",
+    "latency",
+    "cost"
+  ],
+  "cases": [
+    {
+      "input_text": "81 + 14 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "3 + 94 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "35 + 31 =",
+      "expected": "66"
+    },
+    {
+      "input_text": "28 + 17 =",
+      "expected": "45"
+    },
+    {
+      "input_text": "94 + 13 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "86 + 94 =",
+      "expected": "180"
+    },
+    {
+      "input_text": "69 + 11 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "75 + 54 =",
+      "expected": "129"
+    },
+    {
+      "input_text": "4 + 3 =",
+      "expected": "7"
+    },
+    {
+      "input_text": "11 + 27 =",
+      "expected": "38"
+    },
+    {
+      "input_text": "29 + 64 =",
+      "expected": "93"
+    },
+    {
+      "input_text": "77 + 3 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "71 + 25 =",
+      "expected": "96"
+    },
+    {
+      "input_text": "91 + 83 =",
+      "expected": "174"
+    },
+    {
+      "input_text": "89 + 69 =",
+      "expected": "158"
+    },
+    {
+      "input_text": "53 + 28 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "57 + 75 =",
+      "expected": "132"
+    },
+    {
+      "input_text": "35 + 0 =",
+      "expected": "35"
+    },
+    {
+      "input_text": "97 + 20 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "89 + 54 =",
+      "expected": "143"
+    },
+    {
+      "input_text": "43 + 35 =",
+      "expected": "78"
+    },
+    {
+      "input_text": "19 + 27 =",
+      "expected": "46"
+    },
+    {
+      "input_text": "97 + 43 =",
+      "expected": "140"
+    },
+    {
+      "input_text": "13 + 11 =",
+      "expected": "24"
+    },
+    {
+      "input_text": "48 + 12 =",
+      "expected": "60"
+    },
+    {
+      "input_text": "45 + 44 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "77 + 33 =",
+      "expected": "110"
+    },
+    {
+      "input_text": "5 + 93 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "58 + 68 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "15 + 48 =",
+      "expected": "63"
+    },
+    {
+      "input_text": "10 + 70 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "37 + 80 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "79 + 46 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "73 + 24 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "90 + 8 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "5 + 84 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "29 + 98 =",
+      "expected": "127"
+    },
+    {
+      "input_text": "37 + 10 =",
+      "expected": "47"
+    },
+    {
+      "input_text": "29 + 12 =",
+      "expected": "41"
+    },
+    {
+      "input_text": "48 + 35 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "58 + 81 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "46 + 20 =",
+      "expected": "66"
+    },
+    {
+      "input_text": "47 + 45 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "26 + 85 =",
+      "expected": "111"
+    },
+    {
+      "input_text": "34 + 89 =",
+      "expected": "123"
+    },
+    {
+      "input_text": "87 + 82 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "9 + 77 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "81 + 21 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "68 + 93 =",
+      "expected": "161"
+    },
+    {
+      "input_text": "31 + 20 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "59 + 48 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "34 + 81 =",
+      "expected": "115"
+    },
+    {
+      "input_text": "88 + 71 =",
+      "expected": "159"
+    },
+    {
+      "input_text": "28 + 87 =",
+      "expected": "115"
+    },
+    {
+      "input_text": "41 + 98 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "99 + 7 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "29 + 4 =",
+      "expected": "33"
+    },
+    {
+      "input_text": "40 + 51 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "34 + 8 =",
+      "expected": "42"
+    },
+    {
+      "input_text": "27 + 72 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "91 + 40 =",
+      "expected": "131"
+    },
+    {
+      "input_text": "27 + 83 =",
+      "expected": "110"
+    },
+    {
+      "input_text": "63 + 50 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "82 + 58 =",
+      "expected": "140"
+    },
+    {
+      "input_text": "18 + 33 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "17 + 31 =",
+      "expected": "48"
+    },
+    {
+      "input_text": "95 + 71 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "68 + 33 =",
+      "expected": "101"
+    },
+    {
+      "input_text": "95 + 74 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "54 + 74 =",
+      "expected": "128"
+    },
+    {
+      "input_text": "51 + 46 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "65 + 63 =",
+      "expected": "128"
+    },
+    {
+      "input_text": "11 + 96 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "6 + 14 =",
+      "expected": "20"
+    },
+    {
+      "input_text": "19 + 80 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "20 + 87 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "54 + 76 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "8 + 49 =",
+      "expected": "57"
+    },
+    {
+      "input_text": "48 + 76 =",
+      "expected": "124"
+    },
+    {
+      "input_text": "59 + 67 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "32 + 70 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "1 + 87 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "92 + 14 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "87 + 68 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "96 + 34 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "98 + 82 =",
+      "expected": "180"
+    },
+    {
+      "input_text": "43 + 14 =",
+      "expected": "57"
+    },
+    {
+      "input_text": "37 + 55 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "20 + 58 =",
+      "expected": "78"
+    },
+    {
+      "input_text": "0 + 92 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "92 + 33 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "64 + 97 =",
+      "expected": "161"
+    },
+    {
+      "input_text": "22 + 64 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "13 + 80 =",
+      "expected": "93"
+    },
+    {
+      "input_text": "38 + 81 =",
+      "expected": "119"
+    },
+    {
+      "input_text": "64 + 77 =",
+      "expected": "141"
+    },
+    {
+      "input_text": "25 + 19 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "47 + 97 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "20 + 69 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "99 + 67 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "0 + 76 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "41 + 62 =",
+      "expected": "103"
+    },
+    {
+      "input_text": "2 + 14 =",
+      "expected": "16"
+    },
+    {
+      "input_text": "46 + 39 =",
+      "expected": "85"
+    },
+    {
+      "input_text": "30 + 7 =",
+      "expected": "37"
+    },
+    {
+      "input_text": "30 + 72 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "10 + 10 =",
+      "expected": "20"
+    },
+    {
+      "input_text": "93 + 62 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "8 + 97 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "68 + 98 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "16 + 16 =",
+      "expected": "32"
+    },
+    {
+      "input_text": "84 + 60 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "70 + 21 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "33 + 67 =",
+      "expected": "100"
+    },
+    {
+      "input_text": "77 + 54 =",
+      "expected": "131"
+    },
+    {
+      "input_text": "27 + 69 =",
+      "expected": "96"
+    },
+    {
+      "input_text": "96 + 93 =",
+      "expected": "189"
+    },
+    {
+      "input_text": "88 + 25 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "91 + 39 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "51 + 85 =",
+      "expected": "136"
+    },
+    {
+      "input_text": "83 + 47 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "56 + 66 =",
+      "expected": "122"
+    },
+    {
+      "input_text": "57 + 15 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "31 + 28 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "8 + 43 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "2 + 75 =",
+      "expected": "77"
+    },
+    {
+      "input_text": "70 + 29 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "75 + 28 =",
+      "expected": "103"
+    },
+    {
+      "input_text": "0 + 9 =",
+      "expected": "9"
+    },
+    {
+      "input_text": "90 + 80 =",
+      "expected": "170"
+    },
+    {
+      "input_text": "7 + 29 =",
+      "expected": "36"
+    },
+    {
+      "input_text": "8 + 4 =",
+      "expected": "12"
+    },
+    {
+      "input_text": "42 + 9 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "65 + 30 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "35 + 85 =",
+      "expected": "120"
+    },
+    {
+      "input_text": "62 + 27 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "69 + 16 =",
+      "expected": "85"
+    },
+    {
+      "input_text": "92 + 73 =",
+      "expected": "165"
+    },
+    {
+      "input_text": "73 + 60 =",
+      "expected": "133"
+    },
+    {
+      "input_text": "31 + 60 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "52 + 24 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "12 + 12 =",
+      "expected": "24"
+    },
+    {
+      "input_text": "84 + 55 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "45 + 54 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "52 + 59 =",
+      "expected": "111"
+    },
+    {
+      "input_text": "93 + 6 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "86 + 83 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "82 + 12 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "7 + 51 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "93 + 43 =",
+      "expected": "136"
+    },
+    {
+      "input_text": "13 + 31 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "24 + 24 =",
+      "expected": "48"
+    },
+    {
+      "input_text": "68 + 57 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "17 + 54 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "23 + 35 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "59 + 31 =",
+      "expected": "90"
+    },
+    {
+      "input_text": "9 + 56 =",
+      "expected": "65"
+    },
+    {
+      "input_text": "70 + 12 =",
+      "expected": "82"
+    },
+    {
+      "input_text": "6 + 83 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "69 + 1 =",
+      "expected": "70"
+    },
+    {
+      "input_text": "30 + 21 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "52 + 62 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "61 + 27 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "51 + 7 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "21 + 48 =",
+      "expected": "69"
+    },
+    {
+      "input_text": "0 + 49 =",
+      "expected": "49"
+    },
+    {
+      "input_text": "33 + 58 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "36 + 54 =",
+      "expected": "90"
+    },
+    {
+      "input_text": "89 + 93 =",
+      "expected": "182"
+    },
+    {
+      "input_text": "71 + 84 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "91 + 62 =",
+      "expected": "153"
+    },
+    {
+      "input_text": "19 + 24 =",
+      "expected": "43"
+    },
+    {
+      "input_text": "37 + 27 =",
+      "expected": "64"
+    },
+    {
+      "input_text": "7 + 74 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "94 + 69 =",
+      "expected": "163"
+    },
+    {
+      "input_text": "7 + 95 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "40 + 7 =",
+      "expected": "47"
+    },
+    {
+      "input_text": "6 + 74 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "61 + 64 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "67 + 20 =",
+      "expected": "87"
+    },
+    {
+      "input_text": "7 + 65 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "10 + 23 =",
+      "expected": "33"
+    },
+    {
+      "input_text": "8 + 76 =",
+      "expected": "84"
+    },
+    {
+      "input_text": "8 + 86 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "30 + 51 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "15 + 72 =",
+      "expected": "87"
+    },
+    {
+      "input_text": "31 + 74 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "76 + 5 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "79 + 10 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "53 + 84 =",
+      "expected": "137"
+    },
+    {
+      "input_text": "74 + 72 =",
+      "expected": "146"
+    },
+    {
+      "input_text": "66 + 40 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "33 + 26 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "85 + 91 =",
+      "expected": "176"
+    },
+    {
+      "input_text": "40 + 30 =",
+      "expected": "70"
+    },
+    {
+      "input_text": "33 + 50 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "16 + 85 =",
+      "expected": "101"
+    },
+    {
+      "input_text": "82 + 38 =",
+      "expected": "120"
+    },
+    {
+      "input_text": "58 + 40 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "96 + 9 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "1 + 58 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "79 + 72 =",
+      "expected": "151"
+    },
+    {
+      "input_text": "12 + 9 =",
+      "expected": "21"
+    },
+    {
+      "input_text": "68 + 27 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "64 + 33 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "16 + 44 =",
+      "expected": "60"
+    },
+    {
+      "input_text": "8 + 31 =",
+      "expected": "39"
+    },
+    {
+      "input_text": "47 + 36 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "20 + 56 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "69 + 90 =",
+      "expected": "159"
+    },
+    {
+      "input_text": "38 + 78 =",
+      "expected": "116"
+    },
+    {
+      "input_text": "83 + 67 =",
+      "expected": "150"
+    },
+    {
+      "input_text": "1 + 85 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "70 + 38 =",
+      "expected": "108"
+    },
+    {
+      "input_text": "84 + 13 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "17 + 33 =",
+      "expected": "50"
+    },
+    {
+      "input_text": "14 + 13 =",
+      "expected": "27"
+    },
+    {
+      "input_text": "95 + 70 =",
+      "expected": "165"
+    },
+    {
+      "input_text": "19 + 34 =",
+      "expected": "53"
+    },
+    {
+      "input_text": "36 + 77 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "26 + 91 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "43 + 26 =",
+      "expected": "69"
+    },
+    {
+      "input_text": "87 + 81 =",
+      "expected": "168"
+    },
+    {
+      "input_text": "33 + 64 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "62 + 32 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "6 + 11 =",
+      "expected": "17"
+    },
+    {
+      "input_text": "81 + 54 =",
+      "expected": "135"
+    },
+    {
+      "input_text": "35 + 5 =",
+      "expected": "40"
+    },
+    {
+      "input_text": "0 + 42 =",
+      "expected": "42"
+    },
+    {
+      "input_text": "98 + 16 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "81 + 33 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "20 + 94 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "56 + 70 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "90 + 54 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "71 + 1 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "14 + 9 =",
+      "expected": "23"
+    },
+    {
+      "input_text": "88 + 19 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "69 + 4 =",
+      "expected": "73"
+    },
+    {
+      "input_text": "47 + 74 =",
+      "expected": "121"
+    },
+    {
+      "input_text": "70 + 18 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "55 + 16 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "5 + 39 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "46 + 5 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "45 + 26 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "87 + 31 =",
+      "expected": "118"
+    },
+    {
+      "input_text": "85 + 13 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "45 + 99 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "71 + 52 =",
+      "expected": "123"
+    },
+    {
+      "input_text": "79 + 95 =",
+      "expected": "174"
+    },
+    {
+      "input_text": "19 + 30 =",
+      "expected": "49"
+    },
+    {
+      "input_text": "885 + 166 =",
+      "expected": "1051"
+    },
+    {
+      "input_text": "999 + 819 =",
+      "expected": "1818"
+    },
+    {
+      "input_text": "830 + 181 =",
+      "expected": "1011"
+    },
+    {
+      "input_text": "902 + 422 =",
+      "expected": "1324"
+    },
+    {
+      "input_text": "25 + 183 =",
+      "expected": "208"
+    },
+    {
+      "input_text": "754 + 946 =",
+      "expected": "1700"
+    },
+    {
+      "input_text": "340 + 801 =",
+      "expected": "1141"
+    },
+    {
+      "input_text": "953 + 421 =",
+      "expected": "1374"
+    },
+    {
+      "input_text": "821 + 685 =",
+      "expected": "1506"
+    },
+    {
+      "input_text": "884 + 752 =",
+      "expected": "1636"
+    },
+    {
+      "input_text": "830 + 254 =",
+      "expected": "1084"
+    },
+    {
+      "input_text": "273 + 163 =",
+      "expected": "436"
+    },
+    {
+      "input_text": "806 + 718 =",
+      "expected": "1524"
+    },
+    {
+      "input_text": "110 + 391 =",
+      "expected": "501"
+    },
+    {
+      "input_text": "893 + 39 =",
+      "expected": "932"
+    },
+    {
+      "input_text": "879 + 481 =",
+      "expected": "1360"
+    },
+    {
+      "input_text": "227 + 204 =",
+      "expected": "431"
+    },
+    {
+      "input_text": "836 + 940 =",
+      "expected": "1776"
+    },
+    {
+      "input_text": "471 + 358 =",
+      "expected": "829"
+    },
+    {
+      "input_text": "312 + 840 =",
+      "expected": "1152"
+    },
+    {
+      "input_text": "814 + 892 =",
+      "expected": "1706"
+    },
+    {
+      "input_text": "233 + 228 =",
+      "expected": "461"
+    },
+    {
+      "input_text": "24 + 675 =",
+      "expected": "699"
+    },
+    {
+      "input_text": "197 + 408 =",
+      "expected": "605"
+    },
+    {
+      "input_text": "336 + 285 =",
+      "expected": "621"
+    },
+    {
+      "input_text": "885 + 71 =",
+      "expected": "956"
+    },
+    {
+      "input_text": "990 + 791 =",
+      "expected": "1781"
+    },
+    {
+      "input_text": "285 + 359 =",
+      "expected": "644"
+    },
+    {
+      "input_text": "656 + 521 =",
+      "expected": "1177"
+    },
+    {
+      "input_text": "409 + 695 =",
+      "expected": "1104"
+    },
+    {
+      "input_text": "863 + 549 =",
+      "expected": "1412"
+    },
+    {
+      "input_text": "339 + 961 =",
+      "expected": "1300"
+    },
+    {
+      "input_text": "28 + 118 =",
+      "expected": "146"
+    },
+    {
+      "input_text": "898 + 993 =",
+      "expected": "1891"
+    },
+    {
+      "input_text": "267 + 182 =",
+      "expected": "449"
+    },
+    {
+      "input_text": "594 + 985 =",
+      "expected": "1579"
+    },
+    {
+      "input_text": "271 + 39 =",
+      "expected": "310"
+    },
+    {
+      "input_text": "111 + 610 =",
+      "expected": "721"
+    },
+    {
+      "input_text": "444 + 353 =",
+      "expected": "797"
+    },
+    {
+      "input_text": "746 + 805 =",
+      "expected": "1551"
+    },
+    {
+      "input_text": "321 + 446 =",
+      "expected": "767"
+    },
+    {
+      "input_text": "620 + 523 =",
+      "expected": "1143"
+    },
+    {
+      "input_text": "118 + 394 =",
+      "expected": "512"
+    },
+    {
+      "input_text": "921 + 590 =",
+      "expected": "1511"
+    },
+    {
+      "input_text": "194 + 260 =",
+      "expected": "454"
+    },
+    {
+      "input_text": "45 + 725 =",
+      "expected": "770"
+    },
+    {
+      "input_text": "446 + 1 =",
+      "expected": "447"
+    },
+    {
+      "input_text": "532 + 947 =",
+      "expected": "1479"
+    },
+    {
+      "input_text": "825 + 551 =",
+      "expected": "1376"
+    },
+    {
+      "input_text": "703 + 736 =",
+      "expected": "1439"
+    },
+    {
+      "input_text": "962 + 759 =",
+      "expected": "1721"
+    },
+    {
+      "input_text": "754 + 686 =",
+      "expected": "1440"
+    },
+    {
+      "input_text": "201 + 372 =",
+      "expected": "573"
+    },
+    {
+      "input_text": "441 + 71 =",
+      "expected": "512"
+    },
+    {
+      "input_text": "971 + 680 =",
+      "expected": "1651"
+    },
+    {
+      "input_text": "942 + 338 =",
+      "expected": "1280"
+    },
+    {
+      "input_text": "638 + 321 =",
+      "expected": "959"
+    },
+    {
+      "input_text": "679 + 868 =",
+      "expected": "1547"
+    },
+    {
+      "input_text": "127 + 737 =",
+      "expected": "864"
+    },
+    {
+      "input_text": "921 + 307 =",
+      "expected": "1228"
+    },
+    {
+      "input_text": "519 + 316 =",
+      "expected": "835"
+    },
+    {
+      "input_text": "682 + 418 =",
+      "expected": "1100"
+    },
+    {
+      "input_text": "334 + 412 =",
+      "expected": "746"
+    },
+    {
+      "input_text": "713 + 302 =",
+      "expected": "1015"
+    },
+    {
+      "input_text": "567 + 130 =",
+      "expected": "697"
+    },
+    {
+      "input_text": "196 + 430 =",
+      "expected": "626"
+    },
+    {
+      "input_text": "680 + 962 =",
+      "expected": "1642"
+    },
+    {
+      "input_text": "388 + 693 =",
+      "expected": "1081"
+    },
+    {
+      "input_text": "766 + 924 =",
+      "expected": "1690"
+    },
+    {
+      "input_text": "178 + 630 =",
+      "expected": "808"
+    },
+    {
+      "input_text": "582 + 308 =",
+      "expected": "890"
+    },
+    {
+      "input_text": "415 + 561 =",
+      "expected": "976"
+    },
+    {
+      "input_text": "853 + 0 =",
+      "expected": "853"
+    },
+    {
+      "input_text": "311 + 293 =",
+      "expected": "604"
+    },
+    {
+      "input_text": "215 + 440 =",
+      "expected": "655"
+    },
+    {
+      "input_text": "804 + 593 =",
+      "expected": "1397"
+    },
+    {
+      "input_text": "621 + 670 =",
+      "expected": "1291"
+    },
+    {
+      "input_text": "329 + 476 =",
+      "expected": "805"
+    },
+    {
+      "input_text": "452 + 452 =",
+      "expected": "904"
+    },
+    {
+      "input_text": "691 + 218 =",
+      "expected": "909"
+    },
+    {
+      "input_text": "523 + 484 =",
+      "expected": "1007"
+    },
+    {
+      "input_text": "812 + 922 =",
+      "expected": "1734"
+    },
+    {
+      "input_text": "982 + 815 =",
+      "expected": "1797"
+    },
+    {
+      "input_text": "753 + 173 =",
+      "expected": "926"
+    },
+    {
+      "input_text": "674 + 86 =",
+      "expected": "760"
+    },
+    {
+      "input_text": "290 + 527 =",
+      "expected": "817"
+    },
+    {
+      "input_text": "679 + 648 =",
+      "expected": "1327"
+    },
+    {
+      "input_text": "634 + 343 =",
+      "expected": "977"
+    },
+    {
+      "input_text": "95 + 838 =",
+      "expected": "933"
+    },
+    {
+      "input_text": "974 + 769 =",
+      "expected": "1743"
+    },
+    {
+      "input_text": "240 + 688 =",
+      "expected": "928"
+    },
+    {
+      "input_text": "317 + 230 =",
+      "expected": "547"
+    },
+    {
+      "input_text": "825 + 203 =",
+      "expected": "1028"
+    },
+    {
+      "input_text": "150 + 25 =",
+      "expected": "175"
+    },
+    {
+      "input_text": "47 + 250 =",
+      "expected": "297"
+    },
+    {
+      "input_text": "486 + 625 =",
+      "expected": "1111"
+    },
+    {
+      "input_text": "870 + 786 =",
+      "expected": "1656"
+    },
+    {
+      "input_text": "74 + 466 =",
+      "expected": "540"
+    },
+    {
+      "input_text": "424 + 907 =",
+      "expected": "1331"
+    },
+    {
+      "input_text": "644 + 589 =",
+      "expected": "1233"
+    },
+    {
+      "input_text": "199 + 735 =",
+      "expected": "934"
+    },
+    {
+      "input_text": "713 + 393 =",
+      "expected": "1106"
+    },
+    {
+      "input_text": "506 + 409 =",
+      "expected": "915"
+    },
+    {
+      "input_text": "249 + 151 =",
+      "expected": "400"
+    },
+    {
+      "input_text": "671 + 704 =",
+      "expected": "1375"
+    },
+    {
+      "input_text": "5 + 914 =",
+      "expected": "919"
+    },
+    {
+      "input_text": "768 + 881 =",
+      "expected": "1649"
+    },
+    {
+      "input_text": "788 + 906 =",
+      "expected": "1694"
+    },
+    {
+      "input_text": "109 + 797 =",
+      "expected": "906"
+    },
+    {
+      "input_text": "435 + 224 =",
+      "expected": "659"
+    },
+    {
+      "input_text": "180 + 823 =",
+      "expected": "1003"
+    },
+    {
+      "input_text": "980 + 712 =",
+      "expected": "1692"
+    },
+    {
+      "input_text": "530 + 475 =",
+      "expected": "1005"
+    },
+    {
+      "input_text": "51 + 570 =",
+      "expected": "621"
+    },
+    {
+      "input_text": "255 + 939 =",
+      "expected": "1194"
+    },
+    {
+      "input_text": "868 + 124 =",
+      "expected": "992"
+    },
+    {
+      "input_text": "467 + 136 =",
+      "expected": "603"
+    },
+    {
+      "input_text": "820 + 475 =",
+      "expected": "1295"
+    },
+    {
+      "input_text": "683 + 543 =",
+      "expected": "1226"
+    },
+    {
+      "input_text": "572 + 609 =",
+      "expected": "1181"
+    },
+    {
+      "input_text": "324 + 972 =",
+      "expected": "1296"
+    },
+    {
+      "input_text": "773 + 912 =",
+      "expected": "1685"
+    },
+    {
+      "input_text": "453 + 627 =",
+      "expected": "1080"
+    },
+    {
+      "input_text": "834 + 736 =",
+      "expected": "1570"
+    },
+    {
+      "input_text": "913 + 516 =",
+      "expected": "1429"
+    },
+    {
+      "input_text": "436 + 850 =",
+      "expected": "1286"
+    },
+    {
+      "input_text": "928 + 561 =",
+      "expected": "1489"
+    },
+    {
+      "input_text": "456 + 918 =",
+      "expected": "1374"
+    },
+    {
+      "input_text": "162 + 761 =",
+      "expected": "923"
+    },
+    {
+      "input_text": "882 + 486 =",
+      "expected": "1368"
+    },
+    {
+      "input_text": "460 + 265 =",
+      "expected": "725"
+    },
+    {
+      "input_text": "769 + 253 =",
+      "expected": "1022"
+    },
+    {
+      "input_text": "860 + 652 =",
+      "expected": "1512"
+    },
+    {
+      "input_text": "283 + 784 =",
+      "expected": "1067"
+    },
+    {
+      "input_text": "796 + 533 =",
+      "expected": "1329"
+    },
+    {
+      "input_text": "496 + 641 =",
+      "expected": "1137"
+    },
+    {
+      "input_text": "244 + 281 =",
+      "expected": "525"
+    },
+    {
+      "input_text": "450 + 79 =",
+      "expected": "529"
+    },
+    {
+      "input_text": "730 + 292 =",
+      "expected": "1022"
+    },
+    {
+      "input_text": "240 + 278 =",
+      "expected": "518"
+    },
+    {
+      "input_text": "343 + 327 =",
+      "expected": "670"
+    },
+    {
+      "input_text": "914 + 553 =",
+      "expected": "1467"
+    },
+    {
+      "input_text": "82 + 141 =",
+      "expected": "223"
+    },
+    {
+      "input_text": "154 + 236 =",
+      "expected": "390"
+    },
+    {
+      "input_text": "392 + 710 =",
+      "expected": "1102"
+    },
+    {
+      "input_text": "156 + 723 =",
+      "expected": "879"
+    },
+    {
+      "input_text": "219 + 65 =",
+      "expected": "284"
+    },
+    {
+      "input_text": "424 + 417 =",
+      "expected": "841"
+    },
+    {
+      "input_text": "338 + 555 =",
+      "expected": "893"
+    },
+    {
+      "input_text": "477 + 425 =",
+      "expected": "902"
+    },
+    {
+      "input_text": "63 + 211 =",
+      "expected": "274"
+    },
+    {
+      "input_text": "852 + 430 =",
+      "expected": "1282"
+    },
+    {
+      "input_text": "398 + 926 =",
+      "expected": "1324"
+    },
+    {
+      "input_text": "788 + 598 =",
+      "expected": "1386"
+    },
+    {
+      "input_text": "968 + 712 =",
+      "expected": "1680"
+    },
+    {
+      "input_text": "20 + 877 =",
+      "expected": "897"
+    },
+    {
+      "input_text": "901 + 783 =",
+      "expected": "1684"
+    },
+    {
+      "input_text": "589 + 389 =",
+      "expected": "978"
+    },
+    {
+      "input_text": "488 + 6 =",
+      "expected": "494"
+    },
+    {
+      "input_text": "965 + 360 =",
+      "expected": "1325"
+    },
+    {
+      "input_text": "305 + 771 =",
+      "expected": "1076"
+    },
+    {
+      "input_text": "399 + 873 =",
+      "expected": "1272"
+    },
+    {
+      "input_text": "913 + 976 =",
+      "expected": "1889"
+    },
+    {
+      "input_text": "855 + 429 =",
+      "expected": "1284"
+    },
+    {
+      "input_text": "551 + 765 =",
+      "expected": "1316"
+    },
+    {
+      "input_text": "752 + 559 =",
+      "expected": "1311"
+    },
+    {
+      "input_text": "819 + 617 =",
+      "expected": "1436"
+    },
+    {
+      "input_text": "919 + 225 =",
+      "expected": "1144"
+    },
+    {
+      "input_text": "499 + 224 =",
+      "expected": "723"
+    },
+    {
+      "input_text": "279 + 446 =",
+      "expected": "725"
+    },
+    {
+      "input_text": "497 + 29 =",
+      "expected": "526"
+    },
+    {
+      "input_text": "398 + 344 =",
+      "expected": "742"
+    },
+    {
+      "input_text": "684 + 695 =",
+      "expected": "1379"
+    },
+    {
+      "input_text": "817 + 414 =",
+      "expected": "1231"
+    },
+    {
+      "input_text": "741 + 169 =",
+      "expected": "910"
+    },
+    {
+      "input_text": "860 + 478 =",
+      "expected": "1338"
+    },
+    {
+      "input_text": "941 + 130 =",
+      "expected": "1071"
+    },
+    {
+      "input_text": "637 + 546 =",
+      "expected": "1183"
+    },
+    {
+      "input_text": "27 + 928 =",
+      "expected": "955"
+    },
+    {
+      "input_text": "403 + 606 =",
+      "expected": "1009"
+    },
+    {
+      "input_text": "577 + 678 =",
+      "expected": "1255"
+    },
+    {
+      "input_text": "27 + 85 =",
+      "expected": "112"
+    },
+    {
+      "input_text": "658 + 438 =",
+      "expected": "1096"
+    },
+    {
+      "input_text": "138 + 887 =",
+      "expected": "1025"
+    },
+    {
+      "input_text": "472 + 186 =",
+      "expected": "658"
+    },
+    {
+      "input_text": "51 + 266 =",
+      "expected": "317"
+    },
+    {
+      "input_text": "388 + 335 =",
+      "expected": "723"
+    },
+    {
+      "input_text": "216 + 465 =",
+      "expected": "681"
+    },
+    {
+      "input_text": "334 + 345 =",
+      "expected": "679"
+    },
+    {
+      "input_text": "779 + 900 =",
+      "expected": "1679"
+    },
+    {
+      "input_text": "388 + 284 =",
+      "expected": "672"
+    },
+    {
+      "input_text": "770 + 974 =",
+      "expected": "1744"
+    },
+    {
+      "input_text": "851 + 431 =",
+      "expected": "1282"
+    },
+    {
+      "input_text": "258 + 854 =",
+      "expected": "1112"
+    },
+    {
+      "input_text": "83 + 481 =",
+      "expected": "564"
+    },
+    {
+      "input_text": "19 + 767 =",
+      "expected": "786"
+    },
+    {
+      "input_text": "552 + 53 =",
+      "expected": "605"
+    },
+    {
+      "input_text": "974 + 358 =",
+      "expected": "1332"
+    },
+    {
+      "input_text": "229 + 665 =",
+      "expected": "894"
+    },
+    {
+      "input_text": "70 + 799 =",
+      "expected": "869"
+    },
+    {
+      "input_text": "980 + 667 =",
+      "expected": "1647"
+    },
+    {
+      "input_text": "41 + 772 =",
+      "expected": "813"
+    },
+    {
+      "input_text": "31 + 972 =",
+      "expected": "1003"
+    },
+    {
+      "input_text": "253 + 204 =",
+      "expected": "457"
+    },
+    {
+      "input_text": "859 + 20 =",
+      "expected": "879"
+    },
+    {
+      "input_text": "636 + 156 =",
+      "expected": "792"
+    },
+    {
+      "input_text": "244 + 129 =",
+      "expected": "373"
+    },
+    {
+      "input_text": "484 + 685 =",
+      "expected": "1169"
+    },
+    {
+      "input_text": "117 + 577 =",
+      "expected": "694"
+    },
+    {
+      "input_text": "970 + 223 =",
+      "expected": "1193"
+    },
+    {
+      "input_text": "476 + 716 =",
+      "expected": "1192"
+    },
+    {
+      "input_text": "262 + 785 =",
+      "expected": "1047"
+    },
+    {
+      "input_text": "377 + 171 =",
+      "expected": "548"
+    },
+    {
+      "input_text": "620 + 621 =",
+      "expected": "1241"
+    },
+    {
+      "input_text": "986 + 765 =",
+      "expected": "1751"
+    },
+    {
+      "input_text": "735 + 117 =",
+      "expected": "852"
+    },
+    {
+      "input_text": "796 + 838 =",
+      "expected": "1634"
+    },
+    {
+      "input_text": "167 + 987 =",
+      "expected": "1154"
+    },
+    {
+      "input_text": "318 + 110 =",
+      "expected": "428"
+    },
+    {
+      "input_text": "592 + 26 =",
+      "expected": "618"
+    },
+    {
+      "input_text": "951 + 319 =",
+      "expected": "1270"
+    },
+    {
+      "input_text": "589 + 693 =",
+      "expected": "1282"
+    },
+    {
+      "input_text": "929 + 981 =",
+      "expected": "1910"
+    },
+    {
+      "input_text": "384 + 406 =",
+      "expected": "790"
+    },
+    {
+      "input_text": "964 + 732 =",
+      "expected": "1696"
+    },
+    {
+      "input_text": "203 + 77 =",
+      "expected": "280"
+    },
+    {
+      "input_text": "606 + 707 =",
+      "expected": "1313"
+    },
+    {
+      "input_text": "850 + 642 =",
+      "expected": "1492"
+    },
+    {
+      "input_text": "248 + 104 =",
+      "expected": "352"
+    },
+    {
+      "input_text": "713 + 791 =",
+      "expected": "1504"
+    },
+    {
+      "input_text": "308 + 870 =",
+      "expected": "1178"
+    },
+    {
+      "input_text": "700 + 614 =",
+      "expected": "1314"
+    },
+    {
+      "input_text": "824 + 123 =",
+      "expected": "947"
+    },
+    {
+      "input_text": "815 + 579 =",
+      "expected": "1394"
+    },
+    {
+      "input_text": "801 + 42 =",
+      "expected": "843"
+    },
+    {
+      "input_text": "355 + 545 =",
+      "expected": "900"
+    },
+    {
+      "input_text": "438 + 677 =",
+      "expected": "1115"
+    },
+    {
+      "input_text": "379 + 70 =",
+      "expected": "449"
+    },
+    {
+      "input_text": "518 + 663 =",
+      "expected": "1181"
+    },
+    {
+      "input_text": "349 + 12 =",
+      "expected": "361"
+    },
+    {
+      "input_text": "869 + 430 =",
+      "expected": "1299"
+    },
+    {
+      "input_text": "842 + 501 =",
+      "expected": "1343"
+    },
+    {
+      "input_text": "108 + 443 =",
+      "expected": "551"
+    },
+    {
+      "input_text": "983 + 370 =",
+      "expected": "1353"
+    },
+    {
+      "input_text": "650 + 912 =",
+      "expected": "1562"
+    },
+    {
+      "input_text": "848 + 470 =",
+      "expected": "1318"
+    },
+    {
+      "input_text": "724 + 156 =",
+      "expected": "880"
+    },
+    {
+      "input_text": "445 + 180 =",
+      "expected": "625"
+    },
+    {
+      "input_text": "751 + 534 =",
+      "expected": "1285"
+    },
+    {
+      "input_text": "988 + 666 =",
+      "expected": "1654"
+    },
+    {
+      "input_text": "4425 + 8817 =",
+      "expected": "13242"
+    },
+    {
+      "input_text": "7921 + 7616 =",
+      "expected": "15537"
+    },
+    {
+      "input_text": "7136 + 9707 =",
+      "expected": "16843"
+    },
+    {
+      "input_text": "4397 + 5280 =",
+      "expected": "9677"
+    },
+    {
+      "input_text": "4022 + 1419 =",
+      "expected": "5441"
+    },
+    {
+      "input_text": "4569 + 7385 =",
+      "expected": "11954"
+    },
+    {
+      "input_text": "3995 + 7613 =",
+      "expected": "11608"
+    },
+    {
+      "input_text": "9336 + 9999 =",
+      "expected": "19335"
+    },
+    {
+      "input_text": "6209 + 5511 =",
+      "expected": "11720"
+    },
+    {
+      "input_text": "470 + 8098 =",
+      "expected": "8568"
+    },
+    {
+      "input_text": "5325 + 2979 =",
+      "expected": "8304"
+    },
+    {
+      "input_text": "7988 + 3475 =",
+      "expected": "11463"
+    },
+    {
+      "input_text": "5813 + 4232 =",
+      "expected": "10045"
+    },
+    {
+      "input_text": "5576 + 4581 =",
+      "expected": "10157"
+    },
+    {
+      "input_text": "9767 + 4526 =",
+      "expected": "14293"
+    },
+    {
+      "input_text": "9106 + 166 =",
+      "expected": "9272"
+    },
+    {
+      "input_text": "8464 + 3130 =",
+      "expected": "11594"
+    },
+    {
+      "input_text": "1402 + 3954 =",
+      "expected": "5356"
+    },
+    {
+      "input_text": "6658 + 8004 =",
+      "expected": "14662"
+    },
+    {
+      "input_text": "9096 + 3937 =",
+      "expected": "13033"
+    },
+    {
+      "input_text": "7800 + 8041 =",
+      "expected": "15841"
+    },
+    {
+      "input_text": "7342 + 282 =",
+      "expected": "7624"
+    },
+    {
+      "input_text": "1524 + 4820 =",
+      "expected": "6344"
+    },
+    {
+      "input_text": "3630 + 6625 =",
+      "expected": "10255"
+    },
+    {
+      "input_text": "3986 + 5016 =",
+      "expected": "9002"
+    },
+    {
+      "input_text": "9528 + 6046 =",
+      "expected": "15574"
+    },
+    {
+      "input_text": "7753 + 9068 =",
+      "expected": "16821"
+    },
+    {
+      "input_text": "8698 + 5632 =",
+      "expected": "14330"
+    },
+    {
+      "input_text": "6971 + 9017 =",
+      "expected": "15988"
+    },
+    {
+      "input_text": "5419 + 5764 =",
+      "expected": "11183"
+    },
+    {
+      "input_text": "7434 + 4438 =",
+      "expected": "11872"
+    },
+    {
+      "input_text": "5023 + 4118 =",
+      "expected": "9141"
+    },
+    {
+      "input_text": "3777 + 1976 =",
+      "expected": "5753"
+    },
+    {
+      "input_text": "3155 + 5169 =",
+      "expected": "8324"
+    },
+    {
+      "input_text": "1958 + 8779 =",
+      "expected": "10737"
+    },
+    {
+      "input_text": "3033 + 3138 =",
+      "expected": "6171"
+    },
+    {
+      "input_text": "3545 + 7933 =",
+      "expected": "11478"
+    },
+    {
+      "input_text": "4530 + 9659 =",
+      "expected": "14189"
+    },
+    {
+      "input_text": "8595 + 9777 =",
+      "expected": "18372"
+    },
+    {
+      "input_text": "4636 + 1647 =",
+      "expected": "6283"
+    },
+    {
+      "input_text": "3180 + 4853 =",
+      "expected": "8033"
+    },
+    {
+      "input_text": "3727 + 5912 =",
+      "expected": "9639"
+    },
+    {
+      "input_text": "2939 + 4952 =",
+      "expected": "7891"
+    },
+    {
+      "input_text": "231 + 8751 =",
+      "expected": "8982"
+    },
+    {
+      "input_text": "2073 + 4494 =",
+      "expected": "6567"
+    },
+    {
+      "input_text": "745 + 893 =",
+      "expected": "1638"
+    },
+    {
+      "input_text": "9066 + 4786 =",
+      "expected": "13852"
+    },
+    {
+      "input_text": "2068 + 8042 =",
+      "expected": "10110"
+    },
+    {
+      "input_text": "1680 + 200 =",
+      "expected": "1880"
+    },
+    {
+      "input_text": "9405 + 4658 =",
+      "expected": "14063"
+    },
+    {
+      "input_text": "7690 + 7843 =",
+      "expected": "15533"
+    },
+    {
+      "input_text": "7216 + 5582 =",
+      "expected": "12798"
+    },
+    {
+      "input_text": "3020 + 841 =",
+      "expected": "3861"
+    },
+    {
+      "input_text": "4136 + 7827 =",
+      "expected": "11963"
+    },
+    {
+      "input_text": "1869 + 1070 =",
+      "expected": "2939"
+    },
+    {
+      "input_text": "6565 + 8056 =",
+      "expected": "14621"
+    },
+    {
+      "input_text": "1213 + 9453 =",
+      "expected": "10666"
+    },
+    {
+      "input_text": "878 + 2485 =",
+      "expected": "3363"
+    },
+    {
+      "input_text": "2444 + 9221 =",
+      "expected": "11665"
+    },
+    {
+      "input_text": "4978 + 1395 =",
+      "expected": "6373"
+    },
+    {
+      "input_text": "4066 + 1940 =",
+      "expected": "6006"
+    },
+    {
+      "input_text": "9143 + 6818 =",
+      "expected": "15961"
+    },
+    {
+      "input_text": "9933 + 9766 =",
+      "expected": "19699"
+    },
+    {
+      "input_text": "3697 + 8561 =",
+      "expected": "12258"
+    },
+    {
+      "input_text": "6232 + 7381 =",
+      "expected": "13613"
+    },
+    {
+      "input_text": "7253 + 4871 =",
+      "expected": "12124"
+    },
+    {
+      "input_text": "9642 + 7025 =",
+      "expected": "16667"
+    },
+    {
+      "input_text": "5003 + 9316 =",
+      "expected": "14319"
+    },
+    {
+      "input_text": "986 + 9988 =",
+      "expected": "10974"
+    },
+    {
+      "input_text": "1625 + 3404 =",
+      "expected": "5029"
+    },
+    {
+      "input_text": "3457 + 4335 =",
+      "expected": "7792"
+    },
+    {
+      "input_text": "1330 + 2573 =",
+      "expected": "3903"
+    },
+    {
+      "input_text": "3929 + 2847 =",
+      "expected": "6776"
+    },
+    {
+      "input_text": "9043 + 1229 =",
+      "expected": "10272"
+    },
+    {
+      "input_text": "2564 + 43 =",
+      "expected": "2607"
+    },
+    {
+      "input_text": "6693 + 7381 =",
+      "expected": "14074"
+    },
+    {
+      "input_text": "9729 + 7699 =",
+      "expected": "17428"
+    },
+    {
+      "input_text": "4771 + 534 =",
+      "expected": "5305"
+    },
+    {
+      "input_text": "3792 + 4720 =",
+      "expected": "8512"
+    },
+    {
+      "input_text": "4632 + 7438 =",
+      "expected": "12070"
+    },
+    {
+      "input_text": "1166 + 3824 =",
+      "expected": "4990"
+    },
+    {
+      "input_text": "4334 + 9663 =",
+      "expected": "13997"
+    },
+    {
+      "input_text": "3241 + 6965 =",
+      "expected": "10206"
+    },
+    {
+      "input_text": "1880 + 8922 =",
+      "expected": "10802"
+    },
+    {
+      "input_text": "3683 + 2441 =",
+      "expected": "6124"
+    },
+    {
+      "input_text": "4352 + 2330 =",
+      "expected": "6682"
+    },
+    {
+      "input_text": "1169 + 977 =",
+      "expected": "2146"
+    },
+    {
+      "input_text": "2718 + 5039 =",
+      "expected": "7757"
+    },
+    {
+      "input_text": "9749 + 9325 =",
+      "expected": "19074"
+    },
+    {
+      "input_text": "4728 + 7195 =",
+      "expected": "11923"
+    },
+    {
+      "input_text": "2037 + 7679 =",
+      "expected": "9716"
+    },
+    {
+      "input_text": "4982 + 6594 =",
+      "expected": "11576"
+    },
+    {
+      "input_text": "4460 + 8199 =",
+      "expected": "12659"
+    },
+    {
+      "input_text": "8847 + 8090 =",
+      "expected": "16937"
+    },
+    {
+      "input_text": "7172 + 1317 =",
+      "expected": "8489"
+    },
+    {
+      "input_text": "9798 + 653 =",
+      "expected": "10451"
+    },
+    {
+      "input_text": "7078 + 5280 =",
+      "expected": "12358"
+    },
+    {
+      "input_text": "9891 + 4102 =",
+      "expected": "13993"
+    },
+    {
+      "input_text": "423 + 1496 =",
+      "expected": "1919"
+    },
+    {
+      "input_text": "3750 + 9424 =",
+      "expected": "13174"
+    },
+    {
+      "input_text": "9619 + 339 =",
+      "expected": "9958"
+    },
+    {
+      "input_text": "4415 + 9441 =",
+      "expected": "13856"
+    },
+    {
+      "input_text": "659 + 2870 =",
+      "expected": "3529"
+    },
+    {
+      "input_text": "7708 + 8502 =",
+      "expected": "16210"
+    },
+    {
+      "input_text": "7245 + 4557 =",
+      "expected": "11802"
+    },
+    {
+      "input_text": "2973 + 9590 =",
+      "expected": "12563"
+    },
+    {
+      "input_text": "7141 + 8056 =",
+      "expected": "15197"
+    },
+    {
+      "input_text": "1494 + 7700 =",
+      "expected": "9194"
+    },
+    {
+      "input_text": "5700 + 6690 =",
+      "expected": "12390"
+    },
+    {
+      "input_text": "5460 + 5260 =",
+      "expected": "10720"
+    },
+    {
+      "input_text": "1713 + 2634 =",
+      "expected": "4347"
+    },
+    {
+      "input_text": "5403 + 6744 =",
+      "expected": "12147"
+    },
+    {
+      "input_text": "8117 + 4722 =",
+      "expected": "12839"
+    },
+    {
+      "input_text": "6561 + 9012 =",
+      "expected": "15573"
+    },
+    {
+      "input_text": "601 + 7451 =",
+      "expected": "8052"
+    },
+    {
+      "input_text": "1442 + 5153 =",
+      "expected": "6595"
+    },
+    {
+      "input_text": "4135 + 5296 =",
+      "expected": "9431"
+    },
+    {
+      "input_text": "1899 + 6622 =",
+      "expected": "8521"
+    },
+    {
+      "input_text": "8431 + 18 =",
+      "expected": "8449"
+    },
+    {
+      "input_text": "8889 + 7569 =",
+      "expected": "16458"
+    },
+    {
+      "input_text": "6770 + 888 =",
+      "expected": "7658"
+    },
+    {
+      "input_text": "3073 + 8494 =",
+      "expected": "11567"
+    },
+    {
+      "input_text": "5927 + 8167 =",
+      "expected": "14094"
+    },
+    {
+      "input_text": "7242 + 845 =",
+      "expected": "8087"
+    },
+    {
+      "input_text": "3335 + 4375 =",
+      "expected": "7710"
+    },
+    {
+      "input_text": "8998 + 2146 =",
+      "expected": "11144"
+    },
+    {
+      "input_text": "4719 + 7178 =",
+      "expected": "11897"
+    },
+    {
+      "input_text": "7941 + 1989 =",
+      "expected": "9930"
+    },
+    {
+      "input_text": "472 + 9975 =",
+      "expected": "10447"
+    },
+    {
+      "input_text": "3920 + 2594 =",
+      "expected": "6514"
+    },
+    {
+      "input_text": "5091 + 9024 =",
+      "expected": "14115"
+    },
+    {
+      "input_text": "224 + 9048 =",
+      "expected": "9272"
+    },
+    {
+      "input_text": "6684 + 1527 =",
+      "expected": "8211"
+    },
+    {
+      "input_text": "3681 + 1858 =",
+      "expected": "5539"
+    },
+    {
+      "input_text": "7560 + 1924 =",
+      "expected": "9484"
+    },
+    {
+      "input_text": "2522 + 8165 =",
+      "expected": "10687"
+    },
+    {
+      "input_text": "4781 + 8337 =",
+      "expected": "13118"
+    },
+    {
+      "input_text": "4479 + 6807 =",
+      "expected": "11286"
+    },
+    {
+      "input_text": "7905 + 7736 =",
+      "expected": "15641"
+    },
+    {
+      "input_text": "3993 + 7483 =",
+      "expected": "11476"
+    },
+    {
+      "input_text": "9031 + 2369 =",
+      "expected": "11400"
+    },
+    {
+      "input_text": "6284 + 3122 =",
+      "expected": "9406"
+    },
+    {
+      "input_text": "9820 + 8327 =",
+      "expected": "18147"
+    },
+    {
+      "input_text": "2236 + 1143 =",
+      "expected": "3379"
+    },
+    {
+      "input_text": "4526 + 6798 =",
+      "expected": "11324"
+    },
+    {
+      "input_text": "5568 + 8318 =",
+      "expected": "13886"
+    },
+    {
+      "input_text": "4377 + 42 =",
+      "expected": "4419"
+    },
+    {
+      "input_text": "4634 + 4891 =",
+      "expected": "9525"
+    },
+    {
+      "input_text": "9616 + 9501 =",
+      "expected": "19117"
+    },
+    {
+      "input_text": "8022 + 2434 =",
+      "expected": "10456"
+    },
+    {
+      "input_text": "7316 + 8824 =",
+      "expected": "16140"
+    },
+    {
+      "input_text": "7935 + 5654 =",
+      "expected": "13589"
+    },
+    {
+      "input_text": "5446 + 9042 =",
+      "expected": "14488"
+    },
+    {
+      "input_text": "8903 + 6180 =",
+      "expected": "15083"
+    },
+    {
+      "input_text": "7460 + 5272 =",
+      "expected": "12732"
+    },
+    {
+      "input_text": "3090 + 3912 =",
+      "expected": "7002"
+    },
+    {
+      "input_text": "9368 + 6274 =",
+      "expected": "15642"
+    },
+    {
+      "input_text": "3826 + 6730 =",
+      "expected": "10556"
+    },
+    {
+      "input_text": "715 + 5213 =",
+      "expected": "5928"
+    },
+    {
+      "input_text": "7749 + 6246 =",
+      "expected": "13995"
+    },
+    {
+      "input_text": "6325 + 2492 =",
+      "expected": "8817"
+    },
+    {
+      "input_text": "8115 + 606 =",
+      "expected": "8721"
+    },
+    {
+      "input_text": "2068 + 8229 =",
+      "expected": "10297"
+    },
+    {
+      "input_text": "9669 + 5439 =",
+      "expected": "15108"
+    },
+    {
+      "input_text": "1644 + 7213 =",
+      "expected": "8857"
+    },
+    {
+      "input_text": "1633 + 8617 =",
+      "expected": "10250"
+    },
+    {
+      "input_text": "7486 + 251 =",
+      "expected": "7737"
+    },
+    {
+      "input_text": "2361 + 6717 =",
+      "expected": "9078"
+    },
+    {
+      "input_text": "2529 + 1225 =",
+      "expected": "3754"
+    },
+    {
+      "input_text": "7692 + 4342 =",
+      "expected": "12034"
+    },
+    {
+      "input_text": "5546 + 6512 =",
+      "expected": "12058"
+    },
+    {
+      "input_text": "1315 + 5383 =",
+      "expected": "6698"
+    },
+    {
+      "input_text": "8742 + 6226 =",
+      "expected": "14968"
+    },
+    {
+      "input_text": "5188 + 7994 =",
+      "expected": "13182"
+    },
+    {
+      "input_text": "8864 + 588 =",
+      "expected": "9452"
+    },
+    {
+      "input_text": "1121 + 3846 =",
+      "expected": "4967"
+    },
+    {
+      "input_text": "4708 + 3727 =",
+      "expected": "8435"
+    },
+    {
+      "input_text": "1480 + 7110 =",
+      "expected": "8590"
+    },
+    {
+      "input_text": "1612 + 1646 =",
+      "expected": "3258"
+    },
+    {
+      "input_text": "7269 + 2725 =",
+      "expected": "9994"
+    },
+    {
+      "input_text": "4906 + 474 =",
+      "expected": "5380"
+    },
+    {
+      "input_text": "753 + 5314 =",
+      "expected": "6067"
+    },
+    {
+      "input_text": "919 + 4806 =",
+      "expected": "5725"
+    },
+    {
+      "input_text": "5873 + 6141 =",
+      "expected": "12014"
+    },
+    {
+      "input_text": "7056 + 2385 =",
+      "expected": "9441"
+    },
+    {
+      "input_text": "4000 + 8702 =",
+      "expected": "12702"
+    },
+    {
+      "input_text": "6751 + 9272 =",
+      "expected": "16023"
+    },
+    {
+      "input_text": "2950 + 2785 =",
+      "expected": "5735"
+    },
+    {
+      "input_text": "2868 + 1293 =",
+      "expected": "4161"
+    },
+    {
+      "input_text": "9985 + 6267 =",
+      "expected": "16252"
+    },
+    {
+      "input_text": "3945 + 8153 =",
+      "expected": "12098"
+    },
+    {
+      "input_text": "9554 + 2344 =",
+      "expected": "11898"
+    },
+    {
+      "input_text": "3804 + 7555 =",
+      "expected": "11359"
+    },
+    {
+      "input_text": "4161 + 7529 =",
+      "expected": "11690"
+    },
+    {
+      "input_text": "4183 + 153 =",
+      "expected": "4336"
+    },
+    {
+      "input_text": "7622 + 4712 =",
+      "expected": "12334"
+    },
+    {
+      "input_text": "8955 + 2588 =",
+      "expected": "11543"
+    },
+    {
+      "input_text": "1210 + 7237 =",
+      "expected": "8447"
+    },
+    {
+      "input_text": "5661 + 9626 =",
+      "expected": "15287"
+    },
+    {
+      "input_text": "4901 + 6951 =",
+      "expected": "11852"
+    },
+    {
+      "input_text": "4097 + 7484 =",
+      "expected": "11581"
+    },
+    {
+      "input_text": "4949 + 3263 =",
+      "expected": "8212"
+    },
+    {
+      "input_text": "6302 + 7916 =",
+      "expected": "14218"
+    },
+    {
+      "input_text": "1747 + 3886 =",
+      "expected": "5633"
+    },
+    {
+      "input_text": "6248 + 9370 =",
+      "expected": "15618"
+    },
+    {
+      "input_text": "5881 + 9417 =",
+      "expected": "15298"
+    },
+    {
+      "input_text": "4847 + 4837 =",
+      "expected": "9684"
+    },
+    {
+      "input_text": "359 + 6484 =",
+      "expected": "6843"
+    },
+    {
+      "input_text": "4497 + 132 =",
+      "expected": "4629"
+    },
+    {
+      "input_text": "9272 + 803 =",
+      "expected": "10075"
+    },
+    {
+      "input_text": "9935 + 8138 =",
+      "expected": "18073"
+    },
+    {
+      "input_text": "4689 + 3770 =",
+      "expected": "8459"
+    },
+    {
+      "input_text": "9946 + 5772 =",
+      "expected": "15718"
+    },
+    {
+      "input_text": "3588 + 3115 =",
+      "expected": "6703"
+    },
+    {
+      "input_text": "4106 + 2240 =",
+      "expected": "6346"
+    },
+    {
+      "input_text": "1591 + 645 =",
+      "expected": "2236"
+    },
+    {
+      "input_text": "5061 + 7222 =",
+      "expected": "12283"
+    },
+    {
+      "input_text": "546 + 9495 =",
+      "expected": "10041"
+    },
+    {
+      "input_text": "5977 + 2153 =",
+      "expected": "8130"
+    },
+    {
+      "input_text": "1476 + 4835 =",
+      "expected": "6311"
+    },
+    {
+      "input_text": "5352 + 6807 =",
+      "expected": "12159"
+    },
+    {
+      "input_text": "2877 + 3289 =",
+      "expected": "6166"
+    },
+    {
+      "input_text": "2165 + 8837 =",
+      "expected": "11002"
+    },
+    {
+      "input_text": "5994 + 8697 =",
+      "expected": "14691"
+    },
+    {
+      "input_text": "8221 + 4465 =",
+      "expected": "12686"
+    },
+    {
+      "input_text": "2695 + 4210 =",
+      "expected": "6905"
+    },
+    {
+      "input_text": "7894 + 4835 =",
+      "expected": "12729"
+    },
+    {
+      "input_text": "5549 + 1886 =",
+      "expected": "7435"
+    },
+    {
+      "input_text": "7673 + 1233 =",
+      "expected": "8906"
+    },
+    {
+      "input_text": "2306 + 3696 =",
+      "expected": "6002"
+    },
+    {
+      "input_text": "6511 + 9131 =",
+      "expected": "15642"
+    },
+    {
+      "input_text": "5992 + 1479 =",
+      "expected": "7471"
+    },
+    {
+      "input_text": "6464 + 228 =",
+      "expected": "6692"
+    },
+    {
+      "input_text": "4332 + 8791 =",
+      "expected": "13123"
+    },
+    {
+      "input_text": "2024 + 7451 =",
+      "expected": "9475"
+    },
+    {
+      "input_text": "6038 + 4295 =",
+      "expected": "10333"
+    },
+    {
+      "input_text": "9577 + 6242 =",
+      "expected": "15819"
+    },
+    {
+      "input_text": "6086 + 1775 =",
+      "expected": "7861"
+    },
+    {
+      "input_text": "3830 + 7724 =",
+      "expected": "11554"
+    },
+    {
+      "input_text": "410 + 9198 =",
+      "expected": "9608"
+    },
+    {
+      "input_text": "5374 + 9995 =",
+      "expected": "15369"
+    },
+    {
+      "input_text": "3626 + 1035 =",
+      "expected": "4661"
+    },
+    {
+      "input_text": "7606 + 4951 =",
+      "expected": "12557"
+    },
+    {
+      "input_text": "6689 + 1911 =",
+      "expected": "8600"
+    },
+    {
+      "input_text": "2290 + 742 =",
+      "expected": "3032"
+    },
+    {
+      "input_text": "609 + 4986 =",
+      "expected": "5595"
+    },
+    {
+      "input_text": "8071 + 1902 =",
+      "expected": "9973"
+    },
+    {
+      "input_text": "1592 + 3846 =",
+      "expected": "5438"
+    },
+    {
+      "input_text": "8807 + 2222 =",
+      "expected": "11029"
+    },
+    {
+      "input_text": "6367 + 7432 =",
+      "expected": "13799"
+    },
+    {
+      "input_text": "48629 + 87881 =",
+      "expected": "136510"
+    },
+    {
+      "input_text": "97404 + 91289 =",
+      "expected": "188693"
+    },
+    {
+      "input_text": "70804 + 54935 =",
+      "expected": "125739"
+    },
+    {
+      "input_text": "76983 + 97290 =",
+      "expected": "174273"
+    },
+    {
+      "input_text": "95236 + 20253 =",
+      "expected": "115489"
+    },
+    {
+      "input_text": "54379 + 85841 =",
+      "expected": "140220"
+    },
+    {
+      "input_text": "12978 + 64139 =",
+      "expected": "77117"
+    },
+    {
+      "input_text": "80694 + 53492 =",
+      "expected": "134186"
+    },
+    {
+      "input_text": "36666 + 4288 =",
+      "expected": "40954"
+    },
+    {
+      "input_text": "90476 + 48566 =",
+      "expected": "139042"
+    },
+    {
+      "input_text": "28477 + 58115 =",
+      "expected": "86592"
+    },
+    {
+      "input_text": "58287 + 30947 =",
+      "expected": "89234"
+    },
+    {
+      "input_text": "47537 + 13022 =",
+      "expected": "60559"
+    },
+    {
+      "input_text": "89873 + 48147 =",
+      "expected": "138020"
+    },
+    {
+      "input_text": "71364 + 84518 =",
+      "expected": "155882"
+    },
+    {
+      "input_text": "47012 + 7936 =",
+      "expected": "54948"
+    },
+    {
+      "input_text": "52184 + 36160 =",
+      "expected": "88344"
+    },
+    {
+      "input_text": "24878 + 16011 =",
+      "expected": "40889"
+    },
+    {
+      "input_text": "59600 + 12015 =",
+      "expected": "71615"
+    },
+    {
+      "input_text": "86870 + 27801 =",
+      "expected": "114671"
+    },
+    {
+      "input_text": "84109 + 83819 =",
+      "expected": "167928"
+    },
+    {
+      "input_text": "78269 + 2799 =",
+      "expected": "81068"
+    },
+    {
+      "input_text": "6629 + 43713 =",
+      "expected": "50342"
+    },
+    {
+      "input_text": "31925 + 16505 =",
+      "expected": "48430"
+    },
+    {
+      "input_text": "74000 + 26896 =",
+      "expected": "100896"
+    },
+    {
+      "input_text": "8992 + 72641 =",
+      "expected": "81633"
+    },
+    {
+      "input_text": "27152 + 76858 =",
+      "expected": "104010"
+    },
+    {
+      "input_text": "28305 + 30539 =",
+      "expected": "58844"
+    },
+    {
+      "input_text": "43064 + 19340 =",
+      "expected": "62404"
+    },
+    {
+      "input_text": "78116 + 371 =",
+      "expected": "78487"
+    },
+    {
+      "input_text": "36342 + 18964 =",
+      "expected": "55306"
+    },
+    {
+      "input_text": "17038 + 70807 =",
+      "expected": "87845"
+    },
+    {
+      "input_text": "32853 + 22871 =",
+      "expected": "55724"
+    },
+    {
+      "input_text": "14408 + 86646 =",
+      "expected": "101054"
+    },
+    {
+      "input_text": "3379 + 17275 =",
+      "expected": "20654"
+    },
+    {
+      "input_text": "1947 + 46955 =",
+      "expected": "48902"
+    },
+    {
+      "input_text": "31186 + 77182 =",
+      "expected": "108368"
+    },
+    {
+      "input_text": "42437 + 2068 =",
+      "expected": "44505"
+    },
+    {
+      "input_text": "22838 + 34782 =",
+      "expected": "57620"
+    },
+    {
+      "input_text": "6868 + 16614 =",
+      "expected": "23482"
+    },
+    {
+      "input_text": "97218 + 55176 =",
+      "expected": "152394"
+    },
+    {
+      "input_text": "68955 + 14896 =",
+      "expected": "83851"
+    },
+    {
+      "input_text": "97735 + 8330 =",
+      "expected": "106065"
+    },
+    {
+      "input_text": "62422 + 58756 =",
+      "expected": "121178"
+    },
+    {
+      "input_text": "47453 + 67271 =",
+      "expected": "114724"
+    },
+    {
+      "input_text": "77812 + 14293 =",
+      "expected": "92105"
+    },
+    {
+      "input_text": "59245 + 66039 =",
+      "expected": "125284"
+    },
+    {
+      "input_text": "29038 + 80623 =",
+      "expected": "109661"
+    },
+    {
+      "input_text": "5683 + 95321 =",
+      "expected": "101004"
+    },
+    {
+      "input_text": "86363 + 68347 =",
+      "expected": "154710"
+    },
+    {
+      "input_text": "39535 + 60036 =",
+      "expected": "99571"
+    },
+    {
+      "input_text": "84323 + 4082 =",
+      "expected": "88405"
+    },
+    {
+      "input_text": "7972 + 62781 =",
+      "expected": "70753"
+    },
+    {
+      "input_text": "52640 + 55872 =",
+      "expected": "108512"
+    },
+    {
+      "input_text": "89928 + 14150 =",
+      "expected": "104078"
+    },
+    {
+      "input_text": "64260 + 93375 =",
+      "expected": "157635"
+    },
+    {
+      "input_text": "58138 + 9632 =",
+      "expected": "67770"
+    },
+    {
+      "input_text": "10589 + 42219 =",
+      "expected": "52808"
+    },
+    {
+      "input_text": "79730 + 19442 =",
+      "expected": "99172"
+    },
+    {
+      "input_text": "8609 + 16540 =",
+      "expected": "25149"
+    },
+    {
+      "input_text": "36046 + 81830 =",
+      "expected": "117876"
+    },
+    {
+      "input_text": "82978 + 76724 =",
+      "expected": "159702"
+    },
+    {
+      "input_text": "71874 + 93343 =",
+      "expected": "165217"
+    },
+    {
+      "input_text": "42622 + 49925 =",
+      "expected": "92547"
+    },
+    {
+      "input_text": "78301 + 69541 =",
+      "expected": "147842"
+    },
+    {
+      "input_text": "38652 + 59469 =",
+      "expected": "98121"
+    },
+    {
+      "input_text": "66263 + 79354 =",
+      "expected": "145617"
+    },
+    {
+      "input_text": "56387 + 12999 =",
+      "expected": "69386"
+    },
+    {
+      "input_text": "91983 + 14996 =",
+      "expected": "106979"
+    },
+    {
+      "input_text": "85814 + 85316 =",
+      "expected": "171130"
+    },
+    {
+      "input_text": "72264 + 94481 =",
+      "expected": "166745"
+    },
+    {
+      "input_text": "28183 + 56370 =",
+      "expected": "84553"
+    },
+    {
+      "input_text": "59186 + 29949 =",
+      "expected": "89135"
+    },
+    {
+      "input_text": "54239 + 44424 =",
+      "expected": "98663"
+    },
+    {
+      "input_text": "59441 + 52262 =",
+      "expected": "111703"
+    },
+    {
+      "input_text": "54524 + 95631 =",
+      "expected": "150155"
+    },
+    {
+      "input_text": "12463 + 40966 =",
+      "expected": "53429"
+    },
+    {
+      "input_text": "55936 + 40963 =",
+      "expected": "96899"
+    },
+    {
+      "input_text": "87177 + 33408 =",
+      "expected": "120585"
+    },
+    {
+      "input_text": "49060 + 20006 =",
+      "expected": "69066"
+    },
+    {
+      "input_text": "90023 + 62163 =",
+      "expected": "152186"
+    },
+    {
+      "input_text": "8799 + 11957 =",
+      "expected": "20756"
+    },
+    {
+      "input_text": "11188 + 12219 =",
+      "expected": "23407"
+    },
+    {
+      "input_text": "56606 + 12656 =",
+      "expected": "69262"
+    },
+    {
+      "input_text": "97594 + 96835 =",
+      "expected": "194429"
+    },
+    {
+      "input_text": "48843 + 17054 =",
+      "expected": "65897"
+    },
+    {
+      "input_text": "72924 + 7861 =",
+      "expected": "80785"
+    },
+    {
+      "input_text": "76869 + 73608 =",
+      "expected": "150477"
+    },
+    {
+      "input_text": "73620 + 43207 =",
+      "expected": "116827"
+    },
+    {
+      "input_text": "87819 + 16021 =",
+      "expected": "103840"
+    },
+    {
+      "input_text": "53845 + 46346 =",
+      "expected": "100191"
+    },
+    {
+      "input_text": "87207 + 98341 =",
+      "expected": "185548"
+    },
+    {
+      "input_text": "55435 + 94510 =",
+      "expected": "149945"
+    },
+    {
+      "input_text": "6743 + 37700 =",
+      "expected": "44443"
+    },
+    {
+      "input_text": "78696 + 40953 =",
+      "expected": "119649"
+    },
+    {
+      "input_text": "46090 + 13579 =",
+      "expected": "59669"
+    },
+    {
+      "input_text": "75748 + 66507 =",
+      "expected": "142255"
+    },
+    {
+      "input_text": "27884 + 20280 =",
+      "expected": "48164"
+    },
+    {
+      "input_text": "86079 + 63201 =",
+      "expected": "149280"
+    },
+    {
+      "input_text": "29392 + 14184 =",
+      "expected": "43576"
+    },
+    {
+      "input_text": "45890 + 72910 =",
+      "expected": "118800"
+    },
+    {
+      "input_text": "48176 + 15058 =",
+      "expected": "63234"
+    },
+    {
+      "input_text": "99956 + 36512 =",
+      "expected": "136468"
+    },
+    {
+      "input_text": "75248 + 29643 =",
+      "expected": "104891"
+    },
+    {
+      "input_text": "56244 + 73526 =",
+      "expected": "129770"
+    },
+    {
+      "input_text": "81490 + 80422 =",
+      "expected": "161912"
+    },
+    {
+      "input_text": "88470 + 84239 =",
+      "expected": "172709"
+    },
+    {
+      "input_text": "72972 + 3441 =",
+      "expected": "76413"
+    },
+    {
+      "input_text": "79822 + 86223 =",
+      "expected": "166045"
+    },
+    {
+      "input_text": "90894 + 35054 =",
+      "expected": "125948"
+    },
+    {
+      "input_text": "3794 + 23647 =",
+      "expected": "27441"
+    },
+    {
+      "input_text": "35818 + 92104 =",
+      "expected": "127922"
+    },
+    {
+      "input_text": "99930 + 40499 =",
+      "expected": "140429"
+    },
+    {
+      "input_text": "44541 + 46009 =",
+      "expected": "90550"
+    },
+    {
+      "input_text": "800 + 23777 =",
+      "expected": "24577"
+    },
+    {
+      "input_text": "18776 + 74228 =",
+      "expected": "93004"
+    },
+    {
+      "input_text": "86159 + 52531 =",
+      "expected": "138690"
+    },
+    {
+      "input_text": "9120 + 18595 =",
+      "expected": "27715"
+    },
+    {
+      "input_text": "97120 + 82991 =",
+      "expected": "180111"
+    },
+    {
+      "input_text": "4018 + 12026 =",
+      "expected": "16044"
+    },
+    {
+      "input_text": "97794 + 69531 =",
+      "expected": "167325"
+    },
+    {
+      "input_text": "28197 + 49308 =",
+      "expected": "77505"
+    },
+    {
+      "input_text": "55028 + 59460 =",
+      "expected": "114488"
+    },
+    {
+      "input_text": "44681 + 20631 =",
+      "expected": "65312"
+    },
+    {
+      "input_text": "48503 + 40846 =",
+      "expected": "89349"
+    },
+    {
+      "input_text": "94581 + 42517 =",
+      "expected": "137098"
+    },
+    {
+      "input_text": "74395 + 78148 =",
+      "expected": "152543"
+    },
+    {
+      "input_text": "11135 + 6895 =",
+      "expected": "18030"
+    },
+    {
+      "input_text": "20392 + 20632 =",
+      "expected": "41024"
+    },
+    {
+      "input_text": "98885 + 80981 =",
+      "expected": "179866"
+    },
+    {
+      "input_text": "6522 + 88338 =",
+      "expected": "94860"
+    },
+    {
+      "input_text": "10693 + 35665 =",
+      "expected": "46358"
+    },
+    {
+      "input_text": "58079 + 86761 =",
+      "expected": "144840"
+    },
+    {
+      "input_text": "55576 + 63656 =",
+      "expected": "119232"
+    },
+    {
+      "input_text": "79570 + 57939 =",
+      "expected": "137509"
+    },
+    {
+      "input_text": "54287 + 35804 =",
+      "expected": "90091"
+    },
+    {
+      "input_text": "28255 + 98951 =",
+      "expected": "127206"
+    },
+    {
+      "input_text": "67154 + 14918 =",
+      "expected": "82072"
+    },
+    {
+      "input_text": "45242 + 56349 =",
+      "expected": "101591"
+    },
+    {
+      "input_text": "14534 + 37125 =",
+      "expected": "51659"
+    },
+    {
+      "input_text": "88895 + 88930 =",
+      "expected": "177825"
+    },
+    {
+      "input_text": "77743 + 63783 =",
+      "expected": "141526"
+    },
+    {
+      "input_text": "69066 + 87442 =",
+      "expected": "156508"
+    },
+    {
+      "input_text": "40425 + 5952 =",
+      "expected": "46377"
+    },
+    {
+      "input_text": "28903 + 51807 =",
+      "expected": "80710"
+    },
+    {
+      "input_text": "78554 + 7180 =",
+      "expected": "85734"
+    },
+    {
+      "input_text": "1007 + 26794 =",
+      "expected": "27801"
+    },
+    {
+      "input_text": "39507 + 27686 =",
+      "expected": "67193"
+    },
+    {
+      "input_text": "17987 + 33491 =",
+      "expected": "51478"
+    },
+    {
+      "input_text": "37938 + 43007 =",
+      "expected": "80945"
+    },
+    {
+      "input_text": "15726 + 1013 =",
+      "expected": "16739"
+    },
+    {
+      "input_text": "65193 + 97912 =",
+      "expected": "163105"
+    },
+    {
+      "input_text": "56446 + 23028 =",
+      "expected": "79474"
+    },
+    {
+      "input_text": "16932 + 49834 =",
+      "expected": "66766"
+    },
+    {
+      "input_text": "69806 + 92231 =",
+      "expected": "162037"
+    },
+    {
+      "input_text": "30161 + 65570 =",
+      "expected": "95731"
+    },
+    {
+      "input_text": "73233 + 87562 =",
+      "expected": "160795"
+    },
+    {
+      "input_text": "46421 + 9447 =",
+      "expected": "55868"
+    },
+    {
+      "input_text": "52044 + 97260 =",
+      "expected": "149304"
+    },
+    {
+      "input_text": "5544 + 57176 =",
+      "expected": "62720"
+    },
+    {
+      "input_text": "2456 + 60260 =",
+      "expected": "62716"
+    },
+    {
+      "input_text": "10205 + 41033 =",
+      "expected": "51238"
+    },
+    {
+      "input_text": "75465 + 56267 =",
+      "expected": "131732"
+    },
+    {
+      "input_text": "75156 + 53008 =",
+      "expected": "128164"
+    },
+    {
+      "input_text": "92995 + 83904 =",
+      "expected": "176899"
+    },
+    {
+      "input_text": "54747 + 37947 =",
+      "expected": "92694"
+    },
+    {
+      "input_text": "15096 + 53088 =",
+      "expected": "68184"
+    },
+    {
+      "input_text": "2733 + 42568 =",
+      "expected": "45301"
+    },
+    {
+      "input_text": "22527 + 81018 =",
+      "expected": "103545"
+    },
+    {
+      "input_text": "60305 + 90388 =",
+      "expected": "150693"
+    },
+    {
+      "input_text": "47428 + 11551 =",
+      "expected": "58979"
+    },
+    {
+      "input_text": "57240 + 13875 =",
+      "expected": "71115"
+    },
+    {
+      "input_text": "31891 + 57104 =",
+      "expected": "88995"
+    },
+    {
+      "input_text": "77184 + 52487 =",
+      "expected": "129671"
+    },
+    {
+      "input_text": "68676 + 10308 =",
+      "expected": "78984"
+    },
+    {
+      "input_text": "51873 + 40668 =",
+      "expected": "92541"
+    },
+    {
+      "input_text": "97754 + 44500 =",
+      "expected": "142254"
+    },
+    {
+      "input_text": "29041 + 43655 =",
+      "expected": "72696"
+    },
+    {
+      "input_text": "22037 + 10011 =",
+      "expected": "32048"
+    },
+    {
+      "input_text": "66910 + 82998 =",
+      "expected": "149908"
+    },
+    {
+      "input_text": "14945 + 69547 =",
+      "expected": "84492"
+    },
+    {
+      "input_text": "66840 + 25415 =",
+      "expected": "92255"
+    },
+    {
+      "input_text": "45793 + 46019 =",
+      "expected": "91812"
+    },
+    {
+      "input_text": "95339 + 84599 =",
+      "expected": "179938"
+    },
+    {
+      "input_text": "19358 + 30968 =",
+      "expected": "50326"
+    },
+    {
+      "input_text": "13474 + 19194 =",
+      "expected": "32668"
+    },
+    {
+      "input_text": "33550 + 25856 =",
+      "expected": "59406"
+    },
+    {
+      "input_text": "22740 + 78957 =",
+      "expected": "101697"
+    },
+    {
+      "input_text": "20036 + 99642 =",
+      "expected": "119678"
+    },
+    {
+      "input_text": "99503 + 85918 =",
+      "expected": "185421"
+    },
+    {
+      "input_text": "9876 + 23218 =",
+      "expected": "33094"
+    },
+    {
+      "input_text": "82306 + 64764 =",
+      "expected": "147070"
+    },
+    {
+      "input_text": "60811 + 98886 =",
+      "expected": "159697"
+    },
+    {
+      "input_text": "73889 + 99598 =",
+      "expected": "173487"
+    },
+    {
+      "input_text": "75952 + 58838 =",
+      "expected": "134790"
+    },
+    {
+      "input_text": "89277 + 73989 =",
+      "expected": "163266"
+    },
+    {
+      "input_text": "84278 + 83269 =",
+      "expected": "167547"
+    },
+    {
+      "input_text": "81857 + 42363 =",
+      "expected": "124220"
+    },
+    {
+      "input_text": "82210 + 41436 =",
+      "expected": "123646"
+    },
+    {
+      "input_text": "19786 + 57640 =",
+      "expected": "77426"
+    },
+    {
+      "input_text": "8950 + 61462 =",
+      "expected": "70412"
+    },
+    {
+      "input_text": "57961 + 82756 =",
+      "expected": "140717"
+    },
+    {
+      "input_text": "39691 + 36002 =",
+      "expected": "75693"
+    },
+    {
+      "input_text": "77518 + 7362 =",
+      "expected": "84880"
+    },
+    {
+      "input_text": "46129 + 66497 =",
+      "expected": "112626"
+    },
+    {
+      "input_text": "9724 + 40685 =",
+      "expected": "50409"
+    },
+    {
+      "input_text": "60521 + 59233 =",
+      "expected": "119754"
+    },
+    {
+      "input_text": "4929 + 7456 =",
+      "expected": "12385"
+    },
+    {
+      "input_text": "48331 + 37627 =",
+      "expected": "85958"
+    },
+    {
+      "input_text": "10057 + 84497 =",
+      "expected": "94554"
+    },
+    {
+      "input_text": "11835 + 80610 =",
+      "expected": "92445"
+    },
+    {
+      "input_text": "77867 + 66462 =",
+      "expected": "144329"
+    },
+    {
+      "input_text": "50394 + 60648 =",
+      "expected": "111042"
+    },
+    {
+      "input_text": "76064 + 72655 =",
+      "expected": "148719"
+    },
+    {
+      "input_text": "96851 + 5376 =",
+      "expected": "102227"
+    },
+    {
+      "input_text": "58947 + 74928 =",
+      "expected": "133875"
+    },
+    {
+      "input_text": "85437 + 24672 =",
+      "expected": "110109"
+    },
+    {
+      "input_text": "42143 + 79299 =",
+      "expected": "121442"
+    },
+    {
+      "input_text": "62341 + 65715 =",
+      "expected": "128056"
+    },
+    {
+      "input_text": "19773 + 8109 =",
+      "expected": "27882"
+    },
+    {
+      "input_text": "59050 + 13566 =",
+      "expected": "72616"
+    },
+    {
+      "input_text": "45015 + 93626 =",
+      "expected": "138641"
+    },
+    {
+      "input_text": "11053 + 66132 =",
+      "expected": "77185"
+    },
+    {
+      "input_text": "84689 + 22617 =",
+      "expected": "107306"
+    },
+    {
+      "input_text": "5130 + 32472 =",
+      "expected": "37602"
+    },
+    {
+      "input_text": "92749 + 57377 =",
+      "expected": "150126"
+    },
+    {
+      "input_text": "57595 + 68690 =",
+      "expected": "126285"
+    },
+    {
+      "input_text": "68517 + 79928 =",
+      "expected": "148445"
+    },
+    {
+      "input_text": "20807 + 47696 =",
+      "expected": "68503"
+    },
+    {
+      "input_text": "48870 + 37079 =",
+      "expected": "85949"
+    },
+    {
+      "input_text": "50779 + 53578 =",
+      "expected": "104357"
+    },
+    {
+      "input_text": "44350 + 88984 =",
+      "expected": "133334"
+    },
+    {
+      "input_text": "78366 + 6863 =",
+      "expected": "85229"
+    },
+    {
+      "input_text": "82691 + 84843 =",
+      "expected": "167534"
+    },
+    {
+      "input_text": "43863 + 8639 =",
+      "expected": "52502"
+    },
+    {
+      "input_text": "43213 + 12387 =",
+      "expected": "55600"
+    },
+    {
+      "input_text": "73133 + 88916 =",
+      "expected": "162049"
+    },
+    {
+      "input_text": "50667 + 37243 =",
+      "expected": "87910"
+    },
+    {
+      "input_text": "33029 + 94861 =",
+      "expected": "127890"
+    },
+    {
+      "input_text": "86057 + 78997 =",
+      "expected": "165054"
+    },
+    {
+      "input_text": "19709 + 43694 =",
+      "expected": "63403"
+    },
+    {
+      "input_text": "10682 + 76380 =",
+      "expected": "87062"
+    },
+    {
+      "input_text": "86980 + 18537 =",
+      "expected": "105517"
+    },
+    {
+      "input_text": "45851 + 40662 =",
+      "expected": "86513"
+    },
+    {
+      "input_text": "85990 + 91551 =",
+      "expected": "177541"
+    },
+    {
+      "input_text": "86787 + 51374 =",
+      "expected": "138161"
+    },
+    {
+      "input_text": "16901 + 77993 =",
+      "expected": "94894"
+    },
+    {
+      "input_text": "92908 + 11104 =",
+      "expected": "104012"
+    },
+    {
+      "input_text": "40577 + 73259 =",
+      "expected": "113836"
+    },
+    {
+      "input_text": "49372 + 84343 =",
+      "expected": "133715"
+    }
+  ]
+}

@@ -23,10 +23,11 @@ const props = defineProps({
   emptyText: { type: String, default: "还没有记录。" },
 });
 const emit = defineEmits(["load", "reset", "create", "view", "edit", "remove", "bulk", "update:selected"]);
-const pageCount = computed(() => Math.max(1, Math.ceil((props.total || 0) / Number(props.query.page_size || 20))));
+const pageCount = computed(() => Math.max(1, Math.ceil((props.total || 0) / Math.min(100, Math.max(1, Number(props.query.page_size) || 20)))));
 const allChecked = computed(() => props.rows.length > 0 && props.rows.every((row) => props.selected.includes(row.id)));
 
 function search() {
+  props.query.page_size = Math.min(100, Math.max(1, Number(props.query.page_size) || 20));
   props.query.page = 1;
   emit("load");
 }
@@ -71,10 +72,10 @@ function cell(row, column) {
   <div class="row filters">
     <label>关键词<input v-model="query.q" placeholder="关键字" @keydown.enter="search" /></label>
     <label>匹配字段
-      <select v-model="query.exact_field">
+      <SearchSelect v-model="query.exact_field">
         <option value="">不限</option>
         <option v-for="field in exactFields" :key="field.value" :value="field.value">{{ field.label }}</option>
-      </select>
+      </SearchSelect>
     </label>
     <label>匹配值<input v-model="query.exact" @keydown.enter="search" /></label>
     <label>开始时间<input v-model="query.time_from" type="datetime-local" /></label>

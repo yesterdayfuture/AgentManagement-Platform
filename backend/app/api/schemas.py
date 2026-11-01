@@ -328,6 +328,8 @@ class WorkflowIn(BaseModel):
     definition: dict
     enabled: bool = True
     release: str = "draft"
+    eval_dataset_id: int | None = None
+    eval_min_pass_rate: float = 1.0
 
 
 class DecisionIn(BaseModel):
@@ -351,13 +353,23 @@ class CaseIn(BaseModel):
 
 class DatasetIn(BaseModel):
     name: str
+    source_url: str | None = None
+    license: str | None = None
+    selection_note: str | None = None
+    default_metrics: list[str] = Field(default_factory=lambda: ["contains", "completion"])
     cases: list[CaseIn] = Field(default_factory=list)
 
 
 class EvalRunIn(BaseModel):
     agent_id: int | None = None
+    agent_version_id: int | None = None
     workflow_id: int | None = None
     metrics: list[str] = Field(default_factory=lambda: ["contains"])
+    min_pass_rate: float = Field(default=1.0, gt=0, le=1)
+
+
+class EvalRunNoteIn(BaseModel):
+    note: str = Field(default="", max_length=1000)
 
 
 class SandboxIn(BaseModel):
@@ -401,6 +413,7 @@ class PreviewIn(BaseModel):
 
 
 class WorkflowPatch(BaseModel):
+    revision: int | None = None
     name: str | None = None
     agent_id: int | None = None
     status: str | None = None
@@ -412,6 +425,8 @@ class WorkflowPatch(BaseModel):
     schedule_message: str | None = None
     schedule_nodes: list[dict] | None = None
     schedule_token_budget: int | None = None
+    eval_dataset_id: int | None = None
+    eval_min_pass_rate: float | None = None
 
 
 class MemoryPatch(BaseModel):

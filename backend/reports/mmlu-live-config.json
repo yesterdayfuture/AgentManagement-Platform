@@ -1,0 +1,41 @@
+{
+  "space_id": 1,
+  "space_name": "客服中心",
+  "agent_id": 31,
+  "agent_name": "DeepSeek 综合能力评测智能体",
+  "model_id": 3,
+  "model_code": "deepseek-flash",
+  "tool_id": 1,
+  "sets": [
+    {
+      "fixture": "mmlu-general-60.json",
+      "dataset_id": 9,
+      "case_count": 60,
+      "category": "general"
+    },
+    {
+      "fixture": "mmlu-math-reasoning-60.json",
+      "dataset_id": 10,
+      "case_count": 60,
+      "category": "complex_calculation"
+    },
+    {
+      "fixture": "mmlu-explanation-40.json",
+      "dataset_id": 11,
+      "case_count": 40,
+      "category": "generation_and_decomposition"
+    },
+    {
+      "fixture": "mmlu-tool-reasoning-40.json",
+      "dataset_id": 12,
+      "case_count": 40,
+      "category": "complex_tool_calling"
+    },
+    {
+      "fixture": "bigbench-text-editing-47.json",
+      "dataset_id": 13,
+      "case_count": 47,
+      "category": "generation"
+    }
+  ]
+}

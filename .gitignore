@@ -3,6 +3,8 @@ __pycache__/
 .pytest_cache/
 *.pyc
 backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm
 backend/.venv/
 frontend/node_modules/
 frontend/dist/

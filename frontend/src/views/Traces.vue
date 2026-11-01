@@ -87,7 +87,7 @@ onMounted(() => desk.refresh());
       异步远程会先返回「已受理」，远端算完后再回调写入最终回答；下面步骤里的两次返回对应这两段。
     </p>
     <label class="field"><span>评价</span>
-      <select v-model="form.vote"><option :value="1">有用</option><option :value="-1">无用</option></select>
+      <SearchSelect v-model="form.vote"><option :value="1">有用</option><option :value="-1">无用</option></SearchSelect>
     </label>
     <article class="pipe" v-for="step in form.steps || []" :key="step.idx">
       <strong>{{ stepTitle(step) }}</strong>

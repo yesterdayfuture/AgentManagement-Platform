@@ -92,6 +92,13 @@ async function show(row) {
     desk.error.value = err.message;
   }
 }
+async function retryRun(version, fromFailedNode = false) {
+  try {
+    const result = await api(`/api/workflow-runs/${detail.value.id}/retry`, { method: "POST", body: { version, from_failed_node: fromFailedNode } });
+    detail.value = result;
+    await desk.refresh();
+  } catch (err) { desk.error.value = err.message; }
+}
 async function remove(row) {
   if (!window.confirm(`删除执行 #${row.id}？`)) return;
   try {
@@ -123,6 +130,7 @@ onMounted(() => {
     desk.query.exact = String(route.query.workflow_id);
   }
   desk.refresh();
+  if (route.query.run_id) show({ id: Number(route.query.run_id) });
 });
 </script>
 
@@ -154,8 +162,10 @@ onMounted(() => {
     </p>
     <p class="sub" v-if="detail">
       <template v-if="detail.version != null">版本 v{{ detail.version }} · </template>
+      工作流 v{{ detail.workflow_revision || '旧记录' }} ·
       工具 {{ detail.tool_count || 0 }} · token {{ countText(detail.tokens || 0) }} · 花费 {{ moneyText(detail.cost || 0) }}
     </p>
+    <p v-if="detail?.retry_of_id" class="sub">重试自执行 #{{ detail.retry_of_id }}</p>
     <p class="sub" v-if="detail">开始 {{ detail.started_at || "—" }} · 结束 {{ detail.finished_at || "仍在进行" }}</p>
     <p class="sub" v-if="detail?.trace_id"><router-link :to="`/traces/${detail.trace_id}`">查看轨迹</router-link> · <router-link :to="`/workflows?open=${detail.workflow_id}&task=${encodeURIComponent(detail.message || '')}`">原工作流</router-link></p>
     <label class="field"><span>问题</span><textarea :value="detail?.message || ''" readonly rows="4" /></label>
@@ -172,6 +182,9 @@ onMounted(() => {
     <p v-if="detail && !detail.logs?.length" class="sub">这次执行没有留下步骤。</p>
     <template #footer>
       <div class="md-bar">
+        <button v-if="['failed', 'blocked', 'denied', 'limited', 'stopped'].includes(detail?.status)" class="ghost" type="button" @click="retryRun('original')">原版本重试</button>
+        <button v-if="['failed', 'blocked', 'denied', 'limited', 'stopped'].includes(detail?.status)" class="ghost" type="button" @click="retryRun('current')">当前版本重试</button>
+        <button v-if="['failed', 'blocked', 'denied', 'limited', 'stopped'].includes(detail?.status) && detail?.cursor" class="ghost" type="button" @click="retryRun('original', true)">失败节点重试</button>
         <button class="ghost" type="button" @click="download">下载 Markdown</button>
         <button class="btn" type="button" :disabled="!(detail?.files || []).length" @click="downloadProject">下载项目</button>
       </div>

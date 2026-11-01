@@ -1,6 +1,6 @@
 """部门对模型、工作流、知识库、工具和技能的使用授权。
 
-平台管理员新建的资源不会自动授权。部门内新建的资源只授给当前部门。
+平台管理员新建的模型和工具不会自动授权；有归属空间的工作流会授权给该空间成员。
 已有数据在授权表还是空的时候补一次，避免升级后原部门突然看不见内置工具和模型。
 技能按所属部门补授权，已有技能继续给创建它的部门使用。
 """
@@ -81,3 +81,9 @@ def ensure_skill_grants(db) -> None:
     for row in db.query(Skill).all():
         if row.space_id:
             grant(db, row.space_id, "skill", row.id)
+
+
+def ensure_workflow_home_grants(db) -> None:
+    """A workflow assigned to a space is readable by that space's members."""
+    for row in db.query(Workflow).filter(Workflow.space_id.is_not(None)).all():
+        grant(db, row.space_id, "workflow", row.id)

@@ -110,10 +110,10 @@ watch(() => route.query.usable_space, () => desk.refresh());
     <label class="field"><span>说明</span><textarea v-model="form.body" rows="8" placeholder="步骤、约束和输出格式" /></label>
     <label v-if="mode === 'create'" class="field"><span>脚本文件</span><input v-model="form.script_name" placeholder="run.py" /></label>
     <label v-else class="field"><span>脚本文件</span>
-      <select v-model="form.script_name" aria-label="脚本文件" @change="pickScript">
+      <SearchSelect v-model="form.script_name" aria-label="脚本文件" @change="pickScript">
         <option v-if="!form.scripts.length" value="">没有脚本</option>
         <option v-for="name in form.scripts" :key="name" :value="name">{{ name }}</option>
-      </select>
+      </SearchSelect>
     </label>
     <label class="field"><span>脚本内容</span><textarea v-model="form.script_source" rows="8" placeholder="支持 .py、.js、.mjs、.java。留空则不改已有脚本。" @input="rememberSource" /></label>
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用。停用后不能挂到智能体。</label>

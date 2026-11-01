@@ -218,28 +218,28 @@ watch(() => route.query.usable_space, () => bases.refresh());
   <Dialog :open="open" :mode="mode" :title="form.name || form.title || '知识'" @close="open = false" @submit="save">
     <template v-if="form.kind !== 'doc'">
       <label v-if="platform && mode === 'create'" class="field"><span>部门</span>
-        <select v-model="form.space_id"><option v-for="item in spaces" :key="item.id" :value="item.id">{{ item.name }}</option></select>
+        <SearchSelect v-model="form.space_id"><option v-for="item in spaces" :key="item.id" :value="item.id">{{ item.name }}</option></SearchSelect>
       </label>
       <label class="field"><span>名称</span><input v-model="form.name" /></label>
     </template>
     <template v-else>
       <label class="field"><span>知识库</span>
-        <select v-model="form.base_id" :disabled="mode !== 'create' || detailOpen">
+        <SearchSelect v-model="form.base_id" :disabled="mode !== 'create' || detailOpen">
           <option v-for="item in bases.pageData.value.items" :key="item.id" :value="item.id">{{ item.name }}</option>
-        </select>
+        </SearchSelect>
       </label>
       <label class="field"><span>文件</span><input type="file" accept=".txt,.md,.markdown,.csv,.json,.html,.htm,.docx,.pdf,.xml,.log" @change="onFile" /></label>
       <p class="sub" v-if="form.source_name">{{ form.source_name }} · {{ form.source_kind }}<template v-if="form.suggested"> · 建议{{ strategyLabels[form.suggested] }}</template></p>
       <label class="field"><span>标题</span><input v-model="form.title" /></label>
       <label class="field"><span>解析正文</span><textarea v-model="form.content" /></label>
       <label class="field"><span>切分策略</span>
-        <select v-model="form.strategy" @change="preview">
+        <SearchSelect v-model="form.strategy" @change="preview">
           <option v-for="(label, value) in strategyLabels" :key="value" :value="value">{{ label }}</option>
-        </select>
+        </SearchSelect>
       </label>
       <label class="field"><span>切块长度</span><input v-model.number="form.chunk_size" type="number" min="40" max="4000" @change="preview" /></label>
       <label class="field"><span>重叠长度</span><input v-model.number="form.chunk_overlap" type="number" min="0" max="2000" @change="preview" /></label>
-      <label class="field"><span>可见性</span><select v-model="form.visibility"><option value="space">空间内</option><option value="restricted">受限</option></select></label>
+      <label class="field"><span>可见性</span><SearchSelect v-model="form.visibility"><option value="space">空间内</option><option value="restricted">受限</option></SearchSelect></label>
       <label class="field"><span>受限角色，逗号分隔</span><input v-model="form.allowed_roles" placeholder="builder,admin" /></label>
     </template>
     <template #footer>

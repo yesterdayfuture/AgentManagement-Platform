@@ -266,11 +266,11 @@ watch(() => route.query.usable_space, () => desk.refresh());
   <Dialog :open="open" :mode="mode" :title="form.name || '工具'" @close="open = false" @submit="save">
     <label class="field"><span>名称</span><input v-model="form.name" /></label>
     <label class="field"><span>用途</span><input v-model="form.description" /></label>
-    <label class="field"><span>类型</span><select v-model="form.kind"><option value="builtin">builtin · 平台内置函数</option><option value="sandbox">sandbox · 隔离表达式</option><option value="http">http · 允许域上的地址</option></select></label>
+    <label class="field"><span>类型</span><SearchSelect v-model="form.kind"><option value="builtin">builtin · 平台内置函数</option><option value="sandbox">sandbox · 隔离表达式</option><option value="http">http · 允许域上的地址</option></SearchSelect></label>
     <p class="sub">内置函数已经写在服务端：calculator、knowledge.search、ledger.transfer、python.sandbox、files.list。名称要对上这些实现，调用才会成功。要增加一种新的内置函数，需要改服务端代码并登记同名工具。MCP 页签里的函数由外部服务提供，在这里登记连接即可，不用改本仓库。</p>
-    <label class="field"><span>访问</span><select v-model="form.access"><option value="read">只读</option><option value="write">写入</option></select></label>
-    <label class="field"><span>风险</span><select v-model="form.risk"><option>low</option><option>medium</option><option>high</option></select></label>
-    <label class="field"><span>数据流向</span><select v-model="form.data_flow"><option>internal</option><option>external</option></select></label>
+    <label class="field"><span>访问</span><SearchSelect v-model="form.access"><option value="read">只读</option><option value="write">写入</option></SearchSelect></label>
+    <label class="field"><span>风险</span><SearchSelect v-model="form.risk"><option>low</option><option>medium</option><option>high</option></SearchSelect></label>
+    <label class="field"><span>数据流向</span><SearchSelect v-model="form.data_flow"><option>internal</option><option>external</option></SearchSelect></label>
     <label class="field"><span>地址</span><input v-model="form.endpoint" /></label>
     <label class="field"><span>负责人</span><input v-model="form.owner" /></label>
     <label class="field"><span>每分钟上限</span><input v-model.number="form.rate_limit_per_min" type="number" /></label>
@@ -323,10 +323,10 @@ watch(() => route.query.usable_space, () => desk.refresh());
         <label v-for="field in schemaFields(tool)" :key="field.name" class="field">
           <span>{{ field.name }} · {{ field.type }} · {{ field.required ? "必填" : "可省略" }}</span>
           <p v-if="field.description" class="sub">{{ field.description }}</p>
-          <select v-if="field.enum.length" v-model="tool.values[field.name]">
+          <SearchSelect v-if="field.enum.length" v-model="tool.values[field.name]">
             <option value="">不填</option>
             <option v-for="option in field.enum" :key="option" :value="String(option)">{{ option }}</option>
-          </select>
+          </SearchSelect>
           <input v-else-if="field.type === 'integer' || field.type === 'number'" v-model="tool.values[field.name]" type="number" />
           <span v-else-if="field.type === 'boolean'" class="check"><input v-model="tool.values[field.name]" type="checkbox" /> 是</span>
           <textarea v-else-if="field.type === 'object' || field.type === 'array'" v-model="tool.values[field.name]" rows="3" />

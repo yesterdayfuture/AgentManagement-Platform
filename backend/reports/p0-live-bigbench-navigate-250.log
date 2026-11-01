@@ -1,0 +1,12 @@
+START bigbench-navigate-250.json dataset=6 workflow=14 cases=250
+PROGRESS bigbench-navigate-250.json 25/250 elapsed=60.2s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 50/250 elapsed=117.9s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 75/250 elapsed=184.7s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 100/250 elapsed=243.2s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 125/250 elapsed=303.6s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 150/250 elapsed=359.9s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 175/250 elapsed=418.1s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 200/250 elapsed=481.4s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 225/250 elapsed=537.7s passed=True model_online=True
+PROGRESS bigbench-navigate-250.json 250/250 elapsed=601.7s passed=True model_online=True
+DONE {"fixture": "bigbench-navigate-250.json", "eval_run_id": 8, "dataset_cases": 250, "elapsed_seconds": 601.7, "pass_rate": 0.996, "cost": 0.33822900000000006}

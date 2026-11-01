@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import json
 import re
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime, timedelta
 
 from app.models import Memory
@@ -17,6 +19,16 @@ KIND_SHORT = "short"
 KIND_LONG = "long"
 KIND_USER = "user"
 KIND_SUMMARY = "summary"
+_EVALUATING = ContextVar("limen_evaluating", default=False)
+
+
+@contextmanager
+def evaluation_scope():
+    token = _EVALUATING.set(True)
+    try:
+        yield
+    finally:
+        _EVALUATING.reset(token)
 
 
 def _parse_json(text: str) -> dict:
@@ -46,6 +58,8 @@ def visible_memories(
     viewer_id: int | None = None,
 ) -> list[Memory]:
     """运行时注入用的可见记忆。"""
+    if _EVALUATING.get():
+        return []
     now = datetime.utcnow()
     query = db.query(Memory).filter(Memory.space_id == space_id)
     query = query.filter((Memory.expires_at.is_(None)) | (Memory.expires_at > now))
@@ -778,6 +792,8 @@ def capture_task_memories(
 
     不强制写 summary 行，避免每次执行刷屏；压缩摘要仍走 extract_and_store。
     """
+    if _EVALUATING.get():
+        return {"short": [], "long": [], "user": []}
     turns = list(dialogue or [])
     if message:
         turns = turns + [{"role": "user", "content": message}]

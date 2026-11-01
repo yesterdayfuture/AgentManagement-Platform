@@ -92,6 +92,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     def _enable_fk(dbapi_connection, _record):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA busy_timeout=30000")
         cursor.close()
 
     Base.metadata.create_all(engine)
@@ -100,27 +101,56 @@ def create_app(database_url: str | None = None) -> FastAPI:
     factory = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
     db = factory()
     try:
-        from app.models import User
+        from app.models import User, Workflow, WorkflowVersion
 
         if db.query(User).count() == 0:
             seed(db)
             db.commit()
         ensure_builtin_tools(db)
+        for workflow in db.query(Workflow).all():
+            if not db.query(WorkflowVersion.id).filter_by(workflow_id=workflow.id).first():
+                workflow.revision = max(1, int(workflow.revision or 1))
+                if workflow.release == "published":
+                    workflow.published_revision = workflow.revision
+                db.add(WorkflowVersion(workflow_id=workflow.id, number=workflow.revision, name=workflow.name, agent_id=workflow.agent_id, definition_json=workflow.definition_json, created_by=workflow.created_by))
         db.commit()
-        from app.services.grants import ensure_backfill, ensure_skill_grants
+        from app.services.grants import ensure_backfill, ensure_skill_grants, ensure_workflow_home_grants
 
         ensure_backfill(db)
         ensure_skill_grants(db)
+        db.flush()
+        ensure_workflow_home_grants(db)
         from app.services.memory_layers import ensure_user_profile_backfill
 
         ensure_user_profile_backfill(db)
         db.commit()
+        # Older release paths could publish an unassigned platform agent
+        # without an evaluation. Withdraw those invalid pointers on startup.
+        from app.models import Agent, AgentVersion
+        from app.services.runtime import audit
+
+        for agent in db.query(Agent).filter(Agent.space_id.is_(None)).all():
+            invalid = db.query(AgentVersion).filter_by(agent_id=agent.id, eval_passed=False, status="published").all()
+            if not invalid:
+                continue
+            invalid_ids = {version.id for version in invalid}
+            for version in invalid:
+                version.status = "draft"
+            if agent.stable_version_id in invalid_ids:
+                agent.stable_version_id = None
+            if agent.gray_version_id in invalid_ids:
+                agent.gray_version_id = None
+                agent.gray_percent = 0
+            if agent.stable_version_id is None and agent.gray_version_id is None:
+                agent.status = "draft"
+            audit(db, None, "system", "agent.release_repaired", agent.key)
+        db.commit()
         from app.models import Membership
 
         platform_ids = [row[0] for row in db.query(User.id).filter(User.is_platform_admin.is_(True)).all()]
-        if platform_ids:
+        if platform_ids and db.query(Membership.id).filter(Membership.user_id.in_(platform_ids)).first():
             db.query(Membership).filter(Membership.user_id.in_(platform_ids)).delete(synchronize_session=False)
-        db.commit()
+            db.commit()
         from app.models import Document
         from app.services.ingest import IngestError
         from app.services.retrieval import index_document
@@ -282,6 +312,10 @@ def _ensure_columns(engine) -> None:
             ("chunk_count", "INTEGER"),
         ],
         "workflows": [
+            ("revision", "INTEGER"),
+            ("published_revision", "INTEGER"),
+            ("eval_dataset_id", "INTEGER"),
+            ("eval_min_pass_rate", "FLOAT"),
             ("created_at", "DATETIME"),
             ("enabled", "INTEGER"),
             ("origin", "VARCHAR(20)"),
@@ -296,9 +330,10 @@ def _ensure_columns(engine) -> None:
             ("schedule_token_used", "INTEGER"),
         ],
         "ledger_accounts": [("created_at", "DATETIME")],
-        "eval_datasets": [("created_at", "DATETIME")],
+        "eval_datasets": [("created_at", "DATETIME"), ("source_url", "VARCHAR(500)"), ("license", "VARCHAR(80)"), ("selection_note", "TEXT"), ("default_metrics_json", "TEXT")],
         "eval_cases": [("created_at", "DATETIME"), ("expected_tool", "VARCHAR(80)")],
-        "eval_runs": [("workflow_id", "INTEGER"), ("metrics_json", "TEXT")],
+        "eval_runs": [("workflow_id", "INTEGER"), ("workflow_revision", "INTEGER"), ("dataset_fingerprint", "VARCHAR(64)"), ("agent_fingerprint", "VARCHAR(64)"), ("metrics_json", "TEXT"), ("min_pass_rate", "FLOAT"), ("target_space_id", "INTEGER"), ("platform_only", "INTEGER DEFAULT 0"), ("note", "TEXT")],
+        "workflow_runs": [("workflow_revision", "INTEGER"), ("definition_json", "TEXT"), ("retry_of_id", "INTEGER")],
         "agent_versions": [("model_id", "INTEGER"), ("mcp_ids_json", "TEXT"), ("skill_ids_json", "TEXT")],
         "traces": [("dialogue_json", "TEXT")],
         "chat_sessions": [("pinned", "INTEGER")],
@@ -311,6 +346,14 @@ def _ensure_columns(engine) -> None:
         ],
     }
     text_defaults = {
+        ("eval_runs", "dataset_fingerprint"): "''",
+        ("eval_datasets", "source_url"): "''",
+        ("eval_datasets", "license"): "''",
+        ("eval_datasets", "selection_note"): "''",
+        ("eval_datasets", "default_metrics_json"): "'[\"contains\",\"completion\"]'",
+        ("eval_runs", "agent_fingerprint"): "''",
+        ("eval_runs", "min_pass_rate"): "1",
+        ("eval_runs", "note"): "''",
         ("documents", "source_name"): "''",
         ("documents", "source_kind"): "'text'",
         ("documents", "strategy"): "'paragraph'",
@@ -321,6 +364,9 @@ def _ensure_columns(engine) -> None:
         ("agent_versions", "mcp_ids_json"): "'[]'",
         ("agent_versions", "skill_ids_json"): "'[]'",
         ("workflows", "enabled"): "1",
+        ("workflows", "revision"): "1",
+        ("workflows", "eval_min_pass_rate"): "1",
+        ("workflow_runs", "definition_json"): "'{}'",
         ("workflows", "release"): "'published'",
         ("workflows", "schedule_enabled"): "0",
         ("workflows", "schedule_minutes"): "0",
@@ -360,26 +406,28 @@ def _ensure_columns(engine) -> None:
         ("agents", "remote_health_method"): "'GET'",
     }
     with engine.begin() as conn:
+        def update_if_missing(table: str, where: str, statement: str) -> None:
+            if conn.exec_driver_sql(f"SELECT 1 FROM {table} WHERE {where} LIMIT 1").first():
+                conn.exec_driver_sql(statement)
+
         for table, columns in additions.items():
             existing = {row[1] for row in conn.exec_driver_sql(f"PRAGMA table_info({table})")}
             for column, kind in columns:
                 if column not in existing:
                     conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
                 if column == "created_at":
-                    conn.exec_driver_sql(f"UPDATE {table} SET {column} = CURRENT_TIMESTAMP WHERE {column} IS NULL")
+                    update_if_missing(table, f"{column} IS NULL", f"UPDATE {table} SET {column} = CURRENT_TIMESTAMP WHERE {column} IS NULL")
                 elif (table, column) in text_defaults:
-                    conn.exec_driver_sql(
-                        f"UPDATE {table} SET {column} = {text_defaults[(table, column)]} WHERE {column} IS NULL"
-                    )
-        conn.exec_driver_sql("UPDATE users SET is_platform_admin = 1 WHERE username = 'admin'")
-        conn.exec_driver_sql("UPDATE model_endpoints SET origin = 'platform' WHERE space_id IS NULL")
-        conn.exec_driver_sql("UPDATE tools SET origin = 'platform' WHERE space_id IS NULL")
+                    update_if_missing(table, f"{column} IS NULL", f"UPDATE {table} SET {column} = {text_defaults[(table, column)]} WHERE {column} IS NULL")
+        update_if_missing("users", "username = 'admin' AND is_platform_admin != 1", "UPDATE users SET is_platform_admin = 1 WHERE username = 'admin'")
+        update_if_missing("model_endpoints", "space_id IS NULL AND origin != 'platform'", "UPDATE model_endpoints SET origin = 'platform' WHERE space_id IS NULL")
+        update_if_missing("tools", "space_id IS NULL AND origin != 'platform'", "UPDATE tools SET origin = 'platform' WHERE space_id IS NULL")
         for table, action, column in (
             ("agents", "agent.create", "key"),
             ("model_endpoints", "model.create", "name"),
             ("tools", "tool.register", "name"),
         ):
-            conn.exec_driver_sql(
+            update_if_missing(table, "created_by IS NULL",
                 f"""
                 UPDATE {table}
                 SET created_by = (
@@ -392,22 +440,11 @@ def _ensure_columns(engine) -> None:
                 WHERE created_by IS NULL
                 """
             )
-        conn.exec_driver_sql("UPDATE memories SET created_by = user_id WHERE created_by IS NULL AND user_id IS NOT NULL")
-        conn.exec_driver_sql(
-            "UPDATE agents SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL"
-        )
-        conn.exec_driver_sql(
-            "UPDATE model_endpoints SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL"
-        )
-        conn.exec_driver_sql(
-            "UPDATE tools SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL"
-        )
-        conn.exec_driver_sql(
-            "UPDATE knowledge_bases SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL AND name = '客服制度'"
-        )
-        conn.exec_driver_sql(
-            "UPDATE workflows SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL AND name = '问答与计算'"
-        )
+        update_if_missing("memories", "created_by IS NULL AND user_id IS NOT NULL", "UPDATE memories SET created_by = user_id WHERE created_by IS NULL AND user_id IS NOT NULL")
+        for table in ("agents", "model_endpoints", "tools"):
+            update_if_missing(table, "created_by IS NULL", f"UPDATE {table} SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL")
+        update_if_missing("knowledge_bases", "created_by IS NULL AND name = '客服制度'", "UPDATE knowledge_bases SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL AND name = '客服制度'")
+        update_if_missing("workflows", "created_by IS NULL AND name = '问答与计算'", "UPDATE workflows SET created_by = (SELECT id FROM users WHERE username = 'admin') WHERE created_by IS NULL AND name = '问答与计算'")
     _relax_agent_department(engine)
 
 

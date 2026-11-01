@@ -109,9 +109,9 @@ onMounted(() => desk.refresh());
   />
   <Dialog :open="open" :mode="mode" title="敏感词清单" @close="open = false" @submit="save">
     <label v-if="platform && mode === 'create'" class="field"><span>部门</span>
-      <select v-model="form.space_id">
+      <SearchSelect v-model="form.space_id">
         <option v-for="item in spaces" :key="item.id" :value="item.id">{{ item.name }}</option>
-      </select>
+      </SearchSelect>
     </label>
     <label class="field"><span>名称</span><input v-model="form.name" placeholder="例如：客服禁发词" /></label>
     <label class="field"><span>敏感词</span>

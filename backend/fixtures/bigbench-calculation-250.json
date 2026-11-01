@@ -1,0 +1,1016 @@
+{
+  "name": "BIG-bench simple_arithmetic · calculation 250",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/simple_arithmetic/task.py",
+  "license": "Apache-2.0",
+  "selection": "Task-rule-generated, seed 42; records 1-250 of 1,000 unique additions.",
+  "category": "calculation",
+  "metrics": [
+    "model_online",
+    "exact",
+    "completion",
+    "latency",
+    "cost"
+  ],
+  "cases": [
+    {
+      "input_text": "81 + 14 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "3 + 94 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "35 + 31 =",
+      "expected": "66"
+    },
+    {
+      "input_text": "28 + 17 =",
+      "expected": "45"
+    },
+    {
+      "input_text": "94 + 13 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "86 + 94 =",
+      "expected": "180"
+    },
+    {
+      "input_text": "69 + 11 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "75 + 54 =",
+      "expected": "129"
+    },
+    {
+      "input_text": "4 + 3 =",
+      "expected": "7"
+    },
+    {
+      "input_text": "11 + 27 =",
+      "expected": "38"
+    },
+    {
+      "input_text": "29 + 64 =",
+      "expected": "93"
+    },
+    {
+      "input_text": "77 + 3 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "71 + 25 =",
+      "expected": "96"
+    },
+    {
+      "input_text": "91 + 83 =",
+      "expected": "174"
+    },
+    {
+      "input_text": "89 + 69 =",
+      "expected": "158"
+    },
+    {
+      "input_text": "53 + 28 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "57 + 75 =",
+      "expected": "132"
+    },
+    {
+      "input_text": "35 + 0 =",
+      "expected": "35"
+    },
+    {
+      "input_text": "97 + 20 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "89 + 54 =",
+      "expected": "143"
+    },
+    {
+      "input_text": "43 + 35 =",
+      "expected": "78"
+    },
+    {
+      "input_text": "19 + 27 =",
+      "expected": "46"
+    },
+    {
+      "input_text": "97 + 43 =",
+      "expected": "140"
+    },
+    {
+      "input_text": "13 + 11 =",
+      "expected": "24"
+    },
+    {
+      "input_text": "48 + 12 =",
+      "expected": "60"
+    },
+    {
+      "input_text": "45 + 44 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "77 + 33 =",
+      "expected": "110"
+    },
+    {
+      "input_text": "5 + 93 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "58 + 68 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "15 + 48 =",
+      "expected": "63"
+    },
+    {
+      "input_text": "10 + 70 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "37 + 80 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "79 + 46 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "73 + 24 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "90 + 8 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "5 + 84 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "29 + 98 =",
+      "expected": "127"
+    },
+    {
+      "input_text": "37 + 10 =",
+      "expected": "47"
+    },
+    {
+      "input_text": "29 + 12 =",
+      "expected": "41"
+    },
+    {
+      "input_text": "48 + 35 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "58 + 81 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "46 + 20 =",
+      "expected": "66"
+    },
+    {
+      "input_text": "47 + 45 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "26 + 85 =",
+      "expected": "111"
+    },
+    {
+      "input_text": "34 + 89 =",
+      "expected": "123"
+    },
+    {
+      "input_text": "87 + 82 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "9 + 77 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "81 + 21 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "68 + 93 =",
+      "expected": "161"
+    },
+    {
+      "input_text": "31 + 20 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "59 + 48 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "34 + 81 =",
+      "expected": "115"
+    },
+    {
+      "input_text": "88 + 71 =",
+      "expected": "159"
+    },
+    {
+      "input_text": "28 + 87 =",
+      "expected": "115"
+    },
+    {
+      "input_text": "41 + 98 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "99 + 7 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "29 + 4 =",
+      "expected": "33"
+    },
+    {
+      "input_text": "40 + 51 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "34 + 8 =",
+      "expected": "42"
+    },
+    {
+      "input_text": "27 + 72 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "91 + 40 =",
+      "expected": "131"
+    },
+    {
+      "input_text": "27 + 83 =",
+      "expected": "110"
+    },
+    {
+      "input_text": "63 + 50 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "82 + 58 =",
+      "expected": "140"
+    },
+    {
+      "input_text": "18 + 33 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "17 + 31 =",
+      "expected": "48"
+    },
+    {
+      "input_text": "95 + 71 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "68 + 33 =",
+      "expected": "101"
+    },
+    {
+      "input_text": "95 + 74 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "54 + 74 =",
+      "expected": "128"
+    },
+    {
+      "input_text": "51 + 46 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "65 + 63 =",
+      "expected": "128"
+    },
+    {
+      "input_text": "11 + 96 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "6 + 14 =",
+      "expected": "20"
+    },
+    {
+      "input_text": "19 + 80 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "20 + 87 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "54 + 76 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "8 + 49 =",
+      "expected": "57"
+    },
+    {
+      "input_text": "48 + 76 =",
+      "expected": "124"
+    },
+    {
+      "input_text": "59 + 67 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "32 + 70 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "1 + 87 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "92 + 14 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "87 + 68 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "96 + 34 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "98 + 82 =",
+      "expected": "180"
+    },
+    {
+      "input_text": "43 + 14 =",
+      "expected": "57"
+    },
+    {
+      "input_text": "37 + 55 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "20 + 58 =",
+      "expected": "78"
+    },
+    {
+      "input_text": "0 + 92 =",
+      "expected": "92"
+    },
+    {
+      "input_text": "92 + 33 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "64 + 97 =",
+      "expected": "161"
+    },
+    {
+      "input_text": "22 + 64 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "13 + 80 =",
+      "expected": "93"
+    },
+    {
+      "input_text": "38 + 81 =",
+      "expected": "119"
+    },
+    {
+      "input_text": "64 + 77 =",
+      "expected": "141"
+    },
+    {
+      "input_text": "25 + 19 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "47 + 97 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "20 + 69 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "99 + 67 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "0 + 76 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "41 + 62 =",
+      "expected": "103"
+    },
+    {
+      "input_text": "2 + 14 =",
+      "expected": "16"
+    },
+    {
+      "input_text": "46 + 39 =",
+      "expected": "85"
+    },
+    {
+      "input_text": "30 + 7 =",
+      "expected": "37"
+    },
+    {
+      "input_text": "30 + 72 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "10 + 10 =",
+      "expected": "20"
+    },
+    {
+      "input_text": "93 + 62 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "8 + 97 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "68 + 98 =",
+      "expected": "166"
+    },
+    {
+      "input_text": "16 + 16 =",
+      "expected": "32"
+    },
+    {
+      "input_text": "84 + 60 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "70 + 21 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "33 + 67 =",
+      "expected": "100"
+    },
+    {
+      "input_text": "77 + 54 =",
+      "expected": "131"
+    },
+    {
+      "input_text": "27 + 69 =",
+      "expected": "96"
+    },
+    {
+      "input_text": "96 + 93 =",
+      "expected": "189"
+    },
+    {
+      "input_text": "88 + 25 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "91 + 39 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "51 + 85 =",
+      "expected": "136"
+    },
+    {
+      "input_text": "83 + 47 =",
+      "expected": "130"
+    },
+    {
+      "input_text": "56 + 66 =",
+      "expected": "122"
+    },
+    {
+      "input_text": "57 + 15 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "31 + 28 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "8 + 43 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "2 + 75 =",
+      "expected": "77"
+    },
+    {
+      "input_text": "70 + 29 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "75 + 28 =",
+      "expected": "103"
+    },
+    {
+      "input_text": "0 + 9 =",
+      "expected": "9"
+    },
+    {
+      "input_text": "90 + 80 =",
+      "expected": "170"
+    },
+    {
+      "input_text": "7 + 29 =",
+      "expected": "36"
+    },
+    {
+      "input_text": "8 + 4 =",
+      "expected": "12"
+    },
+    {
+      "input_text": "42 + 9 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "65 + 30 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "35 + 85 =",
+      "expected": "120"
+    },
+    {
+      "input_text": "62 + 27 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "69 + 16 =",
+      "expected": "85"
+    },
+    {
+      "input_text": "92 + 73 =",
+      "expected": "165"
+    },
+    {
+      "input_text": "73 + 60 =",
+      "expected": "133"
+    },
+    {
+      "input_text": "31 + 60 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "52 + 24 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "12 + 12 =",
+      "expected": "24"
+    },
+    {
+      "input_text": "84 + 55 =",
+      "expected": "139"
+    },
+    {
+      "input_text": "45 + 54 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "52 + 59 =",
+      "expected": "111"
+    },
+    {
+      "input_text": "93 + 6 =",
+      "expected": "99"
+    },
+    {
+      "input_text": "86 + 83 =",
+      "expected": "169"
+    },
+    {
+      "input_text": "82 + 12 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "7 + 51 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "93 + 43 =",
+      "expected": "136"
+    },
+    {
+      "input_text": "13 + 31 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "24 + 24 =",
+      "expected": "48"
+    },
+    {
+      "input_text": "68 + 57 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "17 + 54 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "23 + 35 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "59 + 31 =",
+      "expected": "90"
+    },
+    {
+      "input_text": "9 + 56 =",
+      "expected": "65"
+    },
+    {
+      "input_text": "70 + 12 =",
+      "expected": "82"
+    },
+    {
+      "input_text": "6 + 83 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "69 + 1 =",
+      "expected": "70"
+    },
+    {
+      "input_text": "30 + 21 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "52 + 62 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "61 + 27 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "51 + 7 =",
+      "expected": "58"
+    },
+    {
+      "input_text": "21 + 48 =",
+      "expected": "69"
+    },
+    {
+      "input_text": "0 + 49 =",
+      "expected": "49"
+    },
+    {
+      "input_text": "33 + 58 =",
+      "expected": "91"
+    },
+    {
+      "input_text": "36 + 54 =",
+      "expected": "90"
+    },
+    {
+      "input_text": "89 + 93 =",
+      "expected": "182"
+    },
+    {
+      "input_text": "71 + 84 =",
+      "expected": "155"
+    },
+    {
+      "input_text": "91 + 62 =",
+      "expected": "153"
+    },
+    {
+      "input_text": "19 + 24 =",
+      "expected": "43"
+    },
+    {
+      "input_text": "37 + 27 =",
+      "expected": "64"
+    },
+    {
+      "input_text": "7 + 74 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "94 + 69 =",
+      "expected": "163"
+    },
+    {
+      "input_text": "7 + 95 =",
+      "expected": "102"
+    },
+    {
+      "input_text": "40 + 7 =",
+      "expected": "47"
+    },
+    {
+      "input_text": "6 + 74 =",
+      "expected": "80"
+    },
+    {
+      "input_text": "61 + 64 =",
+      "expected": "125"
+    },
+    {
+      "input_text": "67 + 20 =",
+      "expected": "87"
+    },
+    {
+      "input_text": "7 + 65 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "10 + 23 =",
+      "expected": "33"
+    },
+    {
+      "input_text": "8 + 76 =",
+      "expected": "84"
+    },
+    {
+      "input_text": "8 + 86 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "30 + 51 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "15 + 72 =",
+      "expected": "87"
+    },
+    {
+      "input_text": "31 + 74 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "76 + 5 =",
+      "expected": "81"
+    },
+    {
+      "input_text": "79 + 10 =",
+      "expected": "89"
+    },
+    {
+      "input_text": "53 + 84 =",
+      "expected": "137"
+    },
+    {
+      "input_text": "74 + 72 =",
+      "expected": "146"
+    },
+    {
+      "input_text": "66 + 40 =",
+      "expected": "106"
+    },
+    {
+      "input_text": "33 + 26 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "85 + 91 =",
+      "expected": "176"
+    },
+    {
+      "input_text": "40 + 30 =",
+      "expected": "70"
+    },
+    {
+      "input_text": "33 + 50 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "16 + 85 =",
+      "expected": "101"
+    },
+    {
+      "input_text": "82 + 38 =",
+      "expected": "120"
+    },
+    {
+      "input_text": "58 + 40 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "96 + 9 =",
+      "expected": "105"
+    },
+    {
+      "input_text": "1 + 58 =",
+      "expected": "59"
+    },
+    {
+      "input_text": "79 + 72 =",
+      "expected": "151"
+    },
+    {
+      "input_text": "12 + 9 =",
+      "expected": "21"
+    },
+    {
+      "input_text": "68 + 27 =",
+      "expected": "95"
+    },
+    {
+      "input_text": "64 + 33 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "16 + 44 =",
+      "expected": "60"
+    },
+    {
+      "input_text": "8 + 31 =",
+      "expected": "39"
+    },
+    {
+      "input_text": "47 + 36 =",
+      "expected": "83"
+    },
+    {
+      "input_text": "20 + 56 =",
+      "expected": "76"
+    },
+    {
+      "input_text": "69 + 90 =",
+      "expected": "159"
+    },
+    {
+      "input_text": "38 + 78 =",
+      "expected": "116"
+    },
+    {
+      "input_text": "83 + 67 =",
+      "expected": "150"
+    },
+    {
+      "input_text": "1 + 85 =",
+      "expected": "86"
+    },
+    {
+      "input_text": "70 + 38 =",
+      "expected": "108"
+    },
+    {
+      "input_text": "84 + 13 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "17 + 33 =",
+      "expected": "50"
+    },
+    {
+      "input_text": "14 + 13 =",
+      "expected": "27"
+    },
+    {
+      "input_text": "95 + 70 =",
+      "expected": "165"
+    },
+    {
+      "input_text": "19 + 34 =",
+      "expected": "53"
+    },
+    {
+      "input_text": "36 + 77 =",
+      "expected": "113"
+    },
+    {
+      "input_text": "26 + 91 =",
+      "expected": "117"
+    },
+    {
+      "input_text": "43 + 26 =",
+      "expected": "69"
+    },
+    {
+      "input_text": "87 + 81 =",
+      "expected": "168"
+    },
+    {
+      "input_text": "33 + 64 =",
+      "expected": "97"
+    },
+    {
+      "input_text": "62 + 32 =",
+      "expected": "94"
+    },
+    {
+      "input_text": "6 + 11 =",
+      "expected": "17"
+    },
+    {
+      "input_text": "81 + 54 =",
+      "expected": "135"
+    },
+    {
+      "input_text": "35 + 5 =",
+      "expected": "40"
+    },
+    {
+      "input_text": "0 + 42 =",
+      "expected": "42"
+    },
+    {
+      "input_text": "98 + 16 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "81 + 33 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "20 + 94 =",
+      "expected": "114"
+    },
+    {
+      "input_text": "56 + 70 =",
+      "expected": "126"
+    },
+    {
+      "input_text": "90 + 54 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "71 + 1 =",
+      "expected": "72"
+    },
+    {
+      "input_text": "14 + 9 =",
+      "expected": "23"
+    },
+    {
+      "input_text": "88 + 19 =",
+      "expected": "107"
+    },
+    {
+      "input_text": "69 + 4 =",
+      "expected": "73"
+    },
+    {
+      "input_text": "47 + 74 =",
+      "expected": "121"
+    },
+    {
+      "input_text": "70 + 18 =",
+      "expected": "88"
+    },
+    {
+      "input_text": "55 + 16 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "5 + 39 =",
+      "expected": "44"
+    },
+    {
+      "input_text": "46 + 5 =",
+      "expected": "51"
+    },
+    {
+      "input_text": "45 + 26 =",
+      "expected": "71"
+    },
+    {
+      "input_text": "87 + 31 =",
+      "expected": "118"
+    },
+    {
+      "input_text": "85 + 13 =",
+      "expected": "98"
+    },
+    {
+      "input_text": "45 + 99 =",
+      "expected": "144"
+    },
+    {
+      "input_text": "71 + 52 =",
+      "expected": "123"
+    },
+    {
+      "input_text": "79 + 95 =",
+      "expected": "174"
+    },
+    {
+      "input_text": "19 + 30 =",
+      "expected": "49"
+    }
+  ]
+}

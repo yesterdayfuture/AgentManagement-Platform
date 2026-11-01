@@ -395,10 +395,10 @@ onUnmounted(() => document.removeEventListener("click", closeMenu));
       <header class="ask-bar">
         <label class="field">
           <span>智能体</span>
-          <select :value="selectedAgent" :disabled="!canSend" @change="chooseAgent">
+          <SearchSelect :value="selectedAgent" :disabled="!canSend" @change="chooseAgent">
             <option value="">{{ agents.length ? "请选择智能体" : "当前部门没有智能体" }}</option>
             <option v-for="agent in agents" :key="agent.id" :value="agent.id">{{ agent.name }}<template v-if="platformAdmin"> · {{ agent.department || "平台" }}</template></option>
-          </select>
+          </SearchSelect>
         </label>
         <div class="ask-title" v-if="thread">
           <p class="ask-title-button">{{ thread.title }}</p>
@@ -449,10 +449,10 @@ onUnmounted(() => document.removeEventListener("click", closeMenu));
       <Dialog v-if="editingDraft" wide :open="true" mode="edit" :title="`编辑草案 #${editingDraft.approval_id}`" @close="closeDraftEdit" @submit="saveDraftEdit">
         <label class="field"><span>名称</span><input v-model="editingDraft.name" /></label>
         <label class="field"><span>执行方式</span>
-          <select v-model="editingDraft.kind">
+          <SearchSelect v-model="editingDraft.kind">
             <option value="agents">固定步骤</option>
             <option value="autonomous">自主调度</option>
-          </select>
+          </SearchSelect>
         </label>
         <label class="field"><span>节点 JSON</span><textarea v-model="editingDraft.nodesText" rows="10" /></label>
         <label class="field"><span>连线 JSON</span><textarea v-model="editingDraft.edgesText" rows="5" /></label>

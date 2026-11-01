@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { clearSession, tokenExpired } from "./api";
+import { clearSession, session, tokenExpired } from "./api";
 import Login from "./views/Login.vue";
 import Overview from "./views/Overview.vue";
 import Agents from "./views/Agents.vue";
@@ -40,7 +40,7 @@ const router = createRouter({
     { path: "/memories", component: Memories },
     { path: "/skills", component: Skills },
     { path: "/sensitive-words", component: SensitiveWords },
-    { path: "/governance", component: Governance },
+    { path: "/governance", component: Governance, meta: { adminOnly: true } },
     { path: "/departments", component: Departments },
     { path: "/ask", component: Ask },
   ],
@@ -51,6 +51,10 @@ router.beforeEach((to) => {
   if (!to.meta.public && (!token || tokenExpired(token))) {
     clearSession();
     return "/login";
+  }
+  if (to.meta.adminOnly) {
+    const current = session();
+    if (!current.user?.platform_admin && !(current.spaces || []).some((item) => item.role === "admin")) return "/overview";
   }
   if (to.path === "/login" && token && !tokenExpired(token)) return "/overview";
   return true;

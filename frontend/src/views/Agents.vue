@@ -259,37 +259,37 @@ onMounted(async () => {
   </Desk>
   <Dialog :open="open" :mode="mode" :title="form.name || '智能体'" @close="open = false" @submit="save">
     <label v-if="platform && mode === 'create'" class="field"><span>部门</span>
-      <select v-model="form.space_id" @change="changeSpace">
+      <SearchSelect v-model="form.space_id" @change="changeSpace">
         <option value="">不分配部门</option>
         <option v-for="item in spaces" :key="item.id" :value="item.id">{{ item.name }}</option>
-      </select>
+      </SearchSelect>
     </label>
     <p v-else-if="platform && form.department" class="sub">部门 {{ form.department }} · 创建者 {{ form.creator || "—" }}</p>
     <label class="field"><span>名称</span><input v-model="form.name" /></label>
     <label class="field"><span>标识</span><input v-model="form.key" :disabled="mode !== 'create'" /></label>
     <label class="field"><span>类型</span>
-      <select v-model="form.kind" :disabled="mode !== 'create'">
+      <SearchSelect v-model="form.kind" :disabled="mode !== 'create'">
         <option value="local">本地 · 本机运行</option>
         <option value="remote">远程 · 转发到外部智能体</option>
-      </select>
+      </SearchSelect>
     </label>
     <template v-if="isRemote">
       <label class="field"><span>协议</span>
-        <select v-model="form.remote_protocol">
+        <SearchSelect v-model="form.remote_protocol">
           <option value="http_sync">同步 HTTP</option>
           <option value="http_async">异步 HTTP</option>
           <option value="a2a">A2A（JSON-RPC SendMessage）</option>
-        </select>
+        </SearchSelect>
       </label>
       <label class="field"><span>远端地址</span><input v-model="form.remote_endpoint" placeholder="http://127.0.0.1:8765/run/sync" /></label>
       <label class="field"><span>访问令牌</span><input v-model="form.remote_token" :placeholder="form.has_remote_token ? '已配置，留空则不改' : '可选 Bearer 令牌'" /></label>
       <label class="field"><span>超时毫秒</span><input v-model.number="form.remote_timeout_ms" type="number" min="1000" /></label>
       <label class="field"><span>健康探测（可选）</span>
         <div class="row" style="gap: 8px; align-items: center">
-          <select v-model="form.remote_health_method" style="width: 96px">
+          <SearchSelect v-model="form.remote_health_method" style="width: 96px">
             <option value="GET">GET</option>
             <option value="POST">POST</option>
-          </select>
+          </SearchSelect>
           <input v-model="form.remote_health_url" placeholder="例如 http://127.0.0.1:18765/health，留空则总览仅显示基本信息" style="flex: 1" />
         </div>
       </label>
@@ -300,10 +300,10 @@ onMounted(async () => {
       <label class="field"><span>提示词</span><textarea v-model="form.system_prompt" rows="12" /></label>
       <p class="sub">勾选工具、MCP 或技能后，介绍会写进提示词末尾。工具和 MCP 在「可用工具」一段，技能在「可用技能」一段，并随勾选变化。这两段之前的文字会保留。保存会写入最新草稿。</p>
       <label class="field"><span>模型</span>
-        <select v-model="form.model_id">
+        <SearchSelect v-model="form.model_id">
           <option value="">按任务自动选择</option>
           <option v-for="model in models" :key="model.id" :value="model.id">{{ model.name }} · {{ model.model }}</option>
-        </select>
+        </SearchSelect>
       </label>
       <p v-if="droppedModel" class="sub">{{ droppedModel }} 不在当前部门的可用范围内，已改为按任务自动选择。保存后生效。</p>
       <label class="check"><input type="checkbox" v-model="form.require_plan" /> 高风险先规划再审批</label>

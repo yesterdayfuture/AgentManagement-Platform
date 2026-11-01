@@ -1,22 +1,25 @@
 """工作流定义、运行、暂停、停止和执行记录。流式运行通过服务端事件推送步骤。"""
 
 import queue
+import json
 import threading
 import time
 import uuid
 import zipfile
+from difflib import unified_diff
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
+from sqlalchemy import update
 
 from app.deps import get_context, get_db, get_principal, require
 from app.models import (
     Agent, AgentVersion, Approval, AuditLog, Chunk, ContextPolicy, DelegationHop,
     DepartmentGrant, Document, EvalCase, EvalDataset, EvalRun, KnowledgeBase,
     LedgerAccount, Membership, McpServer, Memory, ModelEndpoint, Secret, Space,
-    Tool, ToolGrant, Trace, TraceStep, User, Workflow, WorkflowRun,
+    Tool, ToolGrant, Trace, TraceStep, User, Workflow, WorkflowRun, WorkflowVersion,
 )
 from app.paging import Desk, apply_desk, desk_params, finish, finish_rows, stamp, window
 from app.services.grants import drop_resource, grant, ids_for, is_platform, replace_grants, visible_ids
@@ -46,10 +49,15 @@ def _workflow_dict(db, row: Workflow) -> dict:
     definition = load(row.definition_json, {})
     return {
         "id": row.id,
+        "space_id": row.space_id,
         "name": row.name,
         "agent_id": row.agent_id,
         "status": row.status,
         "release": row.release or "draft",
+        "revision": int(row.revision or 1),
+        "published_revision": row.published_revision,
+        "eval_dataset_id": row.eval_dataset_id,
+        "eval_min_pass_rate": float(row.eval_min_pass_rate if row.eval_min_pass_rate is not None else 1),
         "enabled": bool(row.enabled),
         "origin": row.origin or "department",
         "definition": definition,
@@ -106,6 +114,8 @@ def _run_dict(db, row: WorkflowRun) -> dict:
     return {
         "id": row.id,
         "workflow_id": row.workflow_id,
+        "workflow_revision": row.workflow_revision,
+        "retry_of_id": row.retry_of_id,
         "workflow_name": workflow.name if workflow else "",
         "trace_id": row.trace_id,
         "status": row.status,
@@ -127,10 +137,13 @@ def _run_dict(db, row: WorkflowRun) -> dict:
     }
 
 
-def _can_run_release(ctx, row: Workflow) -> None:
+def _can_run_release(db, ctx, row: Workflow) -> None:
     """操作者只能执行已发布图；构建者与管理员可测草稿。"""
     release = row.release or "draft"
     if release == "published":
+        from app.services.runtime.evaluation import workflow_release_current
+        if not workflow_release_current(db, row):
+            raise HTTPException(409, "已发布版本的评测依据已变化，请重新评测并发布")
         return
     if ctx.role in {"builder", "admin"} or is_platform(ctx.user):
         return
@@ -222,6 +235,14 @@ def create_workflow(body: WorkflowIn, ctx=Depends(get_context), db=Depends(get_d
     release = (body.release or "draft").strip()
     if release not in {"draft", "published"}:
         raise HTTPException(400, "发布状态只能是 draft 或 published")
+    if release == "published":
+        raise HTTPException(409, "请先创建草稿、绑定评测集并通过评测")
+    if body.eval_dataset_id is not None:
+        dataset = db.get(EvalDataset, body.eval_dataset_id)
+        if dataset is None or dataset.space_id != agent.space_id:
+            raise HTTPException(404, "评测集不存在")
+    if not 0 < body.eval_min_pass_rate <= 1:
+        raise HTTPException(400, "通过率门槛必须大于 0 且不超过 1")
     row = Workflow(
         space_id=agent.space_id,
         origin=origin,
@@ -230,11 +251,14 @@ def create_workflow(body: WorkflowIn, ctx=Depends(get_context), db=Depends(get_d
         definition_json=dump(body.definition),
         enabled=body.enabled,
         release=release,
+        eval_dataset_id=body.eval_dataset_id,
+        eval_min_pass_rate=body.eval_min_pass_rate,
         created_by=ctx.user.id,
     )
     db.add(row)
     db.flush()
-    if origin == "department":
+    db.add(WorkflowVersion(workflow_id=row.id, number=1, name=row.name, agent_id=row.agent_id, definition_json=row.definition_json, created_by=ctx.user.id))
+    if agent.space_id is not None:
         grant(db, agent.space_id, "workflow", row.id)
     return _workflow_dict(db, row)
 
@@ -243,6 +267,15 @@ def create_workflow(body: WorkflowIn, ctx=Depends(get_context), db=Depends(get_d
 def patch_workflow(workflow_id: int, body: WorkflowPatch, ctx=Depends(get_context), db=Depends(get_db)):
     require(ctx, "builder")
     row = _load_workflow(db, ctx, workflow_id, write=True)
+    old_revision = int(row.revision or 1)
+    if body.revision is not None and body.revision != old_revision:
+        raise HTTPException(409, "工作流已被其他人修改，请刷新后重试")
+    content_changed = (body.name is not None and body.name != row.name) or (body.agent_id is not None and body.agent_id != row.agent_id) or (body.definition is not None and dump(body.definition) != row.definition_json)
+    if content_changed:
+        updated = db.execute(update(Workflow).where(Workflow.id == row.id, Workflow.revision == old_revision).values(revision=old_revision + 1))
+        if updated.rowcount != 1:
+            raise HTTPException(409, "工作流已被其他人修改，请刷新后重试")
+        row.revision = old_revision + 1
     if body.name is not None:
         row.name = body.name
     if body.status is not None:
@@ -258,28 +291,88 @@ def patch_workflow(workflow_id: int, body: WorkflowPatch, ctx=Depends(get_contex
         row.definition_json = dump(body.definition)
         if (row.release or "draft") == "published":
             row.release = "draft"
+    if content_changed:
+        row.release = "draft"
+        row.schedule_enabled = False
+        row.schedule_next_at = None
+        db.add(WorkflowVersion(workflow_id=row.id, number=row.revision, name=row.name, agent_id=row.agent_id, definition_json=row.definition_json, created_by=ctx.user.id))
     if body.release is not None:
         release = body.release.strip()
         if release not in {"draft", "published"}:
             raise HTTPException(400, "发布状态只能是 draft 或 published")
+        if release == "published":
+            raise HTTPException(409, "请使用发布操作，完成版本评测门禁")
         row.release = release
     if body.schedule_token_budget is not None:
         row.schedule_token_budget = max(0, int(body.schedule_token_budget))
+    if body.eval_dataset_id is not None:
+        dataset = db.get(EvalDataset, body.eval_dataset_id)
+        if dataset is None or dataset.space_id != row.space_id:
+            raise HTTPException(404, "评测集不存在")
+        row.eval_dataset_id = dataset.id
+    if body.eval_min_pass_rate is not None:
+        if not 0 < body.eval_min_pass_rate <= 1:
+            raise HTTPException(400, "通过率门槛必须大于 0 且不超过 1")
+        row.eval_min_pass_rate = body.eval_min_pass_rate
     if any(item is not None for item in (body.schedule_enabled, body.schedule_minutes, body.schedule_message, body.schedule_nodes)):
         _apply_schedule(db, row, body)
     return _workflow_dict(db, row)
 
 
+class PublishWorkflowIn(BaseModel):
+    revision: int | None = None
+
+
 @router.post("/api/workflows/{workflow_id}/publish")
-def publish_workflow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+def publish_workflow(workflow_id: int, body: PublishWorkflowIn | None = None, ctx=Depends(get_context), db=Depends(get_db)):
     require(ctx, "builder")
     row = _load_workflow(db, ctx, workflow_id, write=True)
+    if body and body.revision is not None and body.revision != row.revision:
+        raise HTTPException(409, "工作流已被其他人修改，请刷新后重试")
     definition = load(row.definition_json, {})
     if not definition.get("nodes"):
         raise HTTPException(400, "工作流没有节点，不能发布")
+    if row.eval_dataset_id is None:
+        raise HTTPException(409, "请先为工作流选择评测集")
+    latest = db.query(EvalRun).filter_by(dataset_id=row.eval_dataset_id, workflow_id=row.id, workflow_revision=row.revision).order_by(EvalRun.id.desc()).first()
+    from app.services.runtime.evaluation import dataset_fingerprint, workflow_agent_fingerprint
+    if latest is None or not latest.passed or latest.dataset_fingerprint != dataset_fingerprint(db, row.eval_dataset_id) or latest.agent_fingerprint != workflow_agent_fingerprint(db, row) or latest.completion < float(row.eval_min_pass_rate or 1) or not _eval_authentic(db, row, latest):
+        raise HTTPException(409, "当前版本未达到评测通过率门槛，请先运行评测")
+    updated = db.execute(update(Workflow).where(Workflow.id == row.id, Workflow.revision == row.revision).values(release="published", published_revision=row.revision))
+    if updated.rowcount != 1:
+        raise HTTPException(409, "工作流已被其他人修改，请刷新后重试")
     row.release = "published"
+    row.published_revision = row.revision
     audit(db, ctx.space.id, ctx.user.username, "workflow.publish", row.name)
     return _workflow_dict(db, row)
+
+
+def _eval_authentic(db, workflow: Workflow, report: EvalRun) -> bool:
+    for node in load(workflow.definition_json, {}).get("nodes") or []:
+        agent_id = int(node.get("agent_id") or 0)
+        if not agent_id:
+            continue
+        version = db.query(AgentVersion).filter_by(agent_id=agent_id).order_by(AgentVersion.number.desc()).first()
+        model = db.get(ModelEndpoint, version.model_id) if version and version.model_id else None
+        if model is not None and model.provider != "rules":
+            details = load(report.detail_json, [])
+            return bool(details) and all(item.get("model_online") is True for item in details)
+    return True
+
+
+@router.get("/api/workflows/{workflow_id}/eval-gate")
+def workflow_eval_gate(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    row = _load_workflow(db, ctx, workflow_id)
+    if row.eval_dataset_id is None:
+        return {"ready": False, "reason": "未选择评测集", "latest": None, "previous": None}
+    from app.services.runtime.evaluation import dataset_fingerprint, workflow_agent_fingerprint
+    runs = db.query(EvalRun).filter_by(workflow_id=row.id, dataset_id=row.eval_dataset_id).order_by(EvalRun.id.desc()).all()
+    latest = next((item for item in runs if item.workflow_revision == row.revision), None)
+    previous = next((item for item in runs if item.workflow_revision != row.revision), None)
+    def summary(item):
+        return None if item is None else {"id": item.id, "revision": item.workflow_revision, "pass_rate": item.completion, "cost": item.cost, "average_latency_ms": round(sum(d.get("latency_ms", 0) for d in load(item.detail_json, [])) / max(1, len(load(item.detail_json, [])))), "created_at": stamp(item.created_at)}
+    ready = bool(latest and latest.passed and latest.dataset_fingerprint == dataset_fingerprint(db, row.eval_dataset_id) and latest.agent_fingerprint == workflow_agent_fingerprint(db, row) and latest.completion >= float(row.eval_min_pass_rate or 1) and _eval_authentic(db, row, latest))
+    return {"ready": ready, "reason": "通过" if ready else "当前版本尚未达到评测门槛", "min_pass_rate": row.eval_min_pass_rate, "latest": summary(latest), "previous": summary(previous)}
 
 
 @router.get("/api/workflows/{workflow_id}/run-estimate")
@@ -294,6 +387,99 @@ def get_workflow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db))
     require(ctx, "viewer")
     row = _load_workflow(db, ctx, workflow_id)
     return _workflow_dict(db, row)
+
+
+@router.get("/api/workflows/{workflow_id}/versions")
+def list_workflow_versions(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    row = _load_workflow(db, ctx, workflow_id)
+    versions = db.query(WorkflowVersion).filter_by(workflow_id=row.id).order_by(WorkflowVersion.number.desc()).all()
+    return [{"number": item.number, "name": item.name, "agent_id": item.agent_id, "definition": load(item.definition_json, {}), "created_at": stamp(item.created_at), "published": item.number == row.published_revision} for item in versions]
+
+
+@router.get("/api/workflows/{workflow_id}/versions/{number}/diff")
+def diff_workflow_version(workflow_id: int, number: int, ctx=Depends(get_context), db=Depends(get_db)):
+    row = _load_workflow(db, ctx, workflow_id)
+    current = db.query(WorkflowVersion).filter_by(workflow_id=row.id, number=number).first()
+    previous = db.query(WorkflowVersion).filter_by(workflow_id=row.id, number=number - 1).first()
+    if current is None:
+        raise HTTPException(404, "版本不存在")
+    before_obj = {"name": previous.name, "agent_id": previous.agent_id, "definition": load(previous.definition_json, {})} if previous else {}
+    after_obj = {"name": current.name, "agent_id": current.agent_id, "definition": load(current.definition_json, {})}
+    before = json.dumps(before_obj, ensure_ascii=False, indent=2, sort_keys=True)
+    after = json.dumps(after_obj, ensure_ascii=False, indent=2, sort_keys=True)
+    return {"number": number, "previous_number": previous.number if previous else None, "diff": "\n".join(unified_diff(before.splitlines(), after.splitlines(), fromfile=f"v{number-1}", tofile=f"v{number}"))}
+
+
+class RestoreWorkflowIn(BaseModel):
+    revision: int
+
+
+@router.post("/api/workflows/{workflow_id}/versions/{number}/restore")
+def restore_workflow_version(workflow_id: int, number: int, body: RestoreWorkflowIn, ctx=Depends(get_context), db=Depends(get_db)):
+    require(ctx, "builder")
+    row = _load_workflow(db, ctx, workflow_id, write=True)
+    version = db.query(WorkflowVersion).filter_by(workflow_id=row.id, number=number).first()
+    if version is None:
+        raise HTTPException(404, "版本不存在")
+    updated = db.execute(update(Workflow).where(Workflow.id == row.id, Workflow.revision == body.revision).values(revision=body.revision + 1))
+    if updated.rowcount != 1:
+        raise HTTPException(409, "工作流已被其他人修改，请刷新后重试")
+    row.revision = body.revision + 1
+    row.name, row.agent_id, row.definition_json = version.name, version.agent_id, version.definition_json
+    row.release, row.schedule_enabled, row.schedule_next_at = "draft", False, None
+    db.add(WorkflowVersion(workflow_id=row.id, number=row.revision, name=row.name, agent_id=row.agent_id, definition_json=row.definition_json, created_by=ctx.user.id))
+    return _workflow_dict(db, row)
+
+
+class RetryWorkflowIn(BaseModel):
+    version: str = "original"
+    from_failed_node: bool = False
+
+
+@router.post("/api/workflow-runs/{run_id}/retry")
+def retry_workflow_run(run_id: int, body: RetryWorkflowIn, ctx=Depends(get_context), db=Depends(get_db)):
+    require(ctx, "operator")
+    original = db.get(WorkflowRun, run_id)
+    if original is None or original.space_id != ctx.space.id:
+        raise HTTPException(404, "执行记录不存在")
+    if original.status not in {"failed", "blocked", "denied", "limited", "stopped"}:
+        raise HTTPException(409, "只有失败或中断的执行可以重试")
+    workflow = _load_workflow(db, ctx, original.workflow_id)
+    if not workflow.enabled:
+        raise HTTPException(409, "工作流未启用")
+    if body.version not in {"original", "current"}:
+        raise HTTPException(400, "版本只能是 original 或 current")
+    _can_run_release(db, ctx, workflow)
+    if body.version == "original":
+        if original.definition_json == "{}":
+            raise HTTPException(409, "旧执行没有版本快照，只能用当前版本重试")
+        definition = load(original.definition_json, {})
+    else:
+        definition = load(workflow.definition_json, {})
+    if body.from_failed_node and (body.version != "original" or definition.get("kind") != "agents"):
+        raise HTTPException(400, "节点重试仅支持原版本的智能体连线工作流")
+    retry = None
+    if body.from_failed_node:
+        retry = WorkflowRun(space_id=original.space_id, workflow_id=original.workflow_id, workflow_revision=original.workflow_revision, definition_json=original.definition_json, retry_of_id=original.id, status="paused", environment=original.environment, actor=ctx.user.username, message=original.message, carry_text=original.carry_text, cursor=original.cursor, log_json=original.log_json, started_at=datetime.utcnow())
+        db.add(retry)
+        db.flush()
+    token = _DEFINITION.set(definition)
+    try:
+        result = run_workflow(db, workflow, user=ctx.user, space=ctx.space, message=original.message, environment=original.environment, role=ctx.role, policy=ctx.policy, resume=retry)
+        rerun = db.get(WorkflowRun, result["run_id"])
+        rerun.retry_of_id = original.id
+        if body.version == "original":
+            rerun.workflow_revision = original.workflow_revision
+        db.commit()
+        return _run_dict(db, rerun)
+    except GateError as exc:
+        if retry is not None:
+            retry.retry_of_id = original.id
+            db.commit()
+        agent = db.get(Agent, workflow.agent_id) if workflow.agent_id else None
+        _raise_gate(exc, db, agent)
+    finally:
+        _DEFINITION.reset(token)
 
 
 def _apply_schedule(db, row: Workflow, body: WorkflowPatch) -> None:
@@ -335,6 +521,7 @@ def _drop_workflow(db, ctx, workflow_id: int) -> None:
     require(ctx, "builder")
     row = _load_workflow(db, ctx, workflow_id, write=True)
     db.query(WorkflowRun).filter_by(workflow_id=row.id).delete()
+    db.query(WorkflowVersion).filter_by(workflow_id=row.id).delete()
     drop_resource(db, "workflow", row.id)
     db.delete(row)
 
@@ -453,7 +640,7 @@ def run_flow(workflow_id: int, body: RunIn, request: Request, ctx=Depends(get_co
     row = _load_workflow(db, ctx, workflow_id)
     if not row.enabled:
         raise HTTPException(409, "工作流未启用")
-    _can_run_release(ctx, row)
+    _can_run_release(db, ctx, row)
     definition = _merge_node_setup(load(row.definition_json, {}), body.nodes) if body.nodes else None
     if body.stream:
         return _stream_workflow(request, ctx, row.id, body, definition)
@@ -517,6 +704,7 @@ def resume_flow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
     run = _active_run(db, row.id, {"paused"})
     if run is None:
         raise HTTPException(409, "只有暂停的执行可以继续")
+    token = _DEFINITION.set(load(run.definition_json, {}) if run.definition_json and run.definition_json != "{}" else None)
     try:
         return run_workflow(
             db,
@@ -532,6 +720,8 @@ def resume_flow(workflow_id: int, ctx=Depends(get_context), db=Depends(get_db)):
     except GateError as exc:
         agent = db.get(Agent, row.agent_id) if row.agent_id else None
         _raise_gate(exc, db, agent)
+    finally:
+        _DEFINITION.reset(token)
 
 
 @router.get("/api/workflow-runs")

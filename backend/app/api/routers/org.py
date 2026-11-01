@@ -444,7 +444,7 @@ def quota(body: QuotaIn, ctx=Depends(get_context), db=Depends(get_db)):
 
 @router.put("/api/spaces/current/policy")
 def update_policy(body: PolicyIn, ctx=Depends(get_context), db=Depends(get_db)):
-    require(ctx, "builder")
+    require(ctx, "admin")
     ctx.policy.deny_json = dump(body.deny)
     ctx.policy.mask_json = dump(body.mask)
     ctx.policy.isolation = body.isolation

@@ -78,6 +78,11 @@ def _run_due(db, workflow_id: int) -> bool:
         row.schedule_enabled = False
         db.commit()
         return False
+    from app.services.runtime.evaluation import workflow_release_current
+    if not workflow_release_current(db, row):
+        row.schedule_enabled = False
+        db.commit()
+        return False
     space = db.get(Space, row.space_id)
     if space is not None and space.token_used >= space.token_budget:
         row.schedule_enabled = False

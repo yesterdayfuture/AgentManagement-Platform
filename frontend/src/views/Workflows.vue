@@ -15,9 +15,17 @@ const tools = ref([]);
 const bases = ref([]);
 const mcpServers = ref([]);
 const skills = ref([]);
+const datasets = ref([]);
+const versions = ref([]);
+const versionRuns = ref([]);
+const gate = ref(null);
+const versionDiff = ref("");
 const open = ref(false);
 const mode = ref("create");
 const form = ref(blank());
+const gatePercent = computed({ get: () => Math.round(Number(form.value.eval_min_pass_rate || 1) * 100), set: (value) => { form.value.eval_min_pass_rate = Number(value) / 100; } });
+const availableDatasets = computed(() => datasets.value.filter((item) => !form.value.space_id || item.space_id === form.value.space_id));
+const reportsFor = (number) => versionRuns.value.filter(item => item.target_version === number);
 const nodeSetupOpen = ref(false);
 const setupTarget = ref(null);
 const runMessage = ref("写一篇目前agent技术调研报告");
@@ -49,7 +57,7 @@ const columns = computed(() => [
 ]);
 
 function blank() {
-  return { id: null, name: "", enabled: true, release: "draft", mode: "agents", legacy: false, nodes: [], edges: [] };
+  return { id: null, name: "", revision: 1, eval_dataset_id: null, eval_min_pass_rate: 1, enabled: true, release: "draft", mode: "agents", legacy: false, nodes: [], edges: [] };
 }
 function statusText(value) {
   return (
@@ -76,7 +84,11 @@ function fromRow(row) {
   const agentNodes = (definition.nodes || []).filter((node) => node.type === "agent");
   return {
     id: row.id,
+    space_id: row.space_id,
     name: row.name,
+    revision: row.revision,
+    eval_dataset_id: row.eval_dataset_id,
+    eval_min_pass_rate: row.eval_min_pass_rate ?? 1,
     enabled: row.enabled !== false,
     release: row.release || "draft",
     mode: definition.kind === "autonomous" ? "autonomous" : "agents",
@@ -103,6 +115,37 @@ function openWith(row, next) {
   closeNodeSetup();
   mode.value = next;
   open.value = true;
+  if (row?.id) refreshHistory(row.id);
+  else { versions.value = []; versionRuns.value = []; gate.value = null; }
+  versionDiff.value = "";
+}
+async function refreshHistory(id) {
+  try {
+    const [foundVersions, foundGate, foundRuns] = await Promise.all([api(`/api/workflows/${id}/versions`), api(`/api/workflows/${id}/eval-gate`), api(`/api/evals/targets/workflow/${id}/runs?page=1&page_size=100`)]);
+    versions.value = foundVersions;
+    gate.value = foundGate;
+    versionRuns.value = foundRuns.items || [];
+  } catch (err) { desk.error.value = err.message; }
+}
+async function restoreVersion(number) {
+  try {
+    const restored = await api(`/api/workflows/${form.value.id}/versions/${number}/restore`, { method: "POST", body: { revision: form.value.revision } });
+    form.value = fromRow(restored);
+    await refreshHistory(restored.id);
+    await desk.refresh();
+  } catch (err) { desk.error.value = err.message; }
+}
+async function showVersionDiff(number) {
+  try { versionDiff.value = (await api(`/api/workflows/${form.value.id}/versions/${number}/diff`)).diff || "首个版本"; }
+  catch (err) { desk.error.value = err.message; }
+}
+async function runGateEval() {
+  if (!form.value.id || !form.value.eval_dataset_id) return;
+  try {
+    const chosen = datasets.value.find((item) => item.id === form.value.eval_dataset_id);
+    await api(`/api/evals/datasets/${form.value.eval_dataset_id}/run`, { method: "POST", body: { workflow_id: form.value.id, metrics: chosen?.default_metrics || ["contains", "completion"], min_pass_rate: Number(form.value.eval_min_pass_rate) } });
+    await refreshHistory(form.value.id);
+  } catch (err) { desk.error.value = err.message; }
 }
 function addAgent(agent, x = 36 + form.value.nodes.length * 28, y = 36 + form.value.nodes.length * 24) {
   const used = new Set(form.value.nodes.map((node) => node.id));
@@ -238,15 +281,21 @@ async function save(options = {}) {
       name: form.value.name.trim(),
       agent_id: definition.nodes[0].agent_id,
       enabled: form.value.enabled,
+      revision: form.value.revision,
+      eval_dataset_id: form.value.eval_dataset_id ? Number(form.value.eval_dataset_id) : null,
+      eval_min_pass_rate: Number(form.value.eval_min_pass_rate),
       definition,
     };
     if (mode.value === "create" && !form.value.id) {
       const created = await api("/api/workflows", { method: "POST", body: payload });
       form.value.id = created.id;
+      form.value.revision = created.revision;
       mode.value = "edit";
     } else {
-      await api(`/api/workflows/${form.value.id}`, { method: "PATCH", body: payload });
+      const saved = await api(`/api/workflows/${form.value.id}`, { method: "PATCH", body: payload });
+      form.value.revision = saved.revision;
     }
+    await refreshHistory(form.value.id);
     if (!options.keep) open.value = false;
     await desk.refresh();
     return true;
@@ -482,7 +531,7 @@ async function confirmRun() {
 }
 async function publish(row) {
   try {
-    await api(`/api/workflows/${row.id}/publish`, { method: "POST" });
+    await api(`/api/workflows/${row.id}/publish`, { method: "POST", body: { revision: row.revision } });
     await desk.refresh();
   } catch (err) {
     desk.error.value = err.message;
@@ -531,6 +580,7 @@ onMounted(async () => {
     bases.value = asList(await api("/api/knowledge?page=1&page_size=100"));
     mcpServers.value = asList(await api("/api/mcp?page=1&page_size=100"));
     skills.value = asList(await api("/api/skills?page=1&page_size=100"));
+    datasets.value = asList(await api("/api/evals/datasets?page=1&page_size=100"));
   } catch (err) {
     desk.error.value = err.message;
   }
@@ -589,12 +639,16 @@ watch(() => route.query.usable_space, () => desk.refresh());
   <Dialog wide :open="open" :mode="mode" :title="form.name || '新建工作流'" @close="open = false" @submit="save()">
     <label class="field"><span>名称</span><input v-model="form.name" placeholder="例如 客服转退款" /></label>
     <label class="field"><span>执行方式</span>
-      <select v-model="form.mode">
+      <SearchSelect v-model="form.mode">
         <option value="agents">固定步骤：按连线依次流转</option>
         <option value="autonomous">自主调度：先拆子任务，再自己做或分发</option>
-      </select>
+      </SearchSelect>
     </label>
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用。停用后不能执行，也不能继续。</label>
+    <label class="field"><span>发布评测集</span><SearchSelect v-model="form.eval_dataset_id"><option :value="null">请选择评测集</option><option v-for="item in availableDatasets" :key="item.id" :value="item.id">{{ item.name }}（{{ item.case_count }} 条）</option></SearchSelect></label>
+    <label class="field"><span>发布最低通过率（%）</span><input type="number" min="1" max="100" step="1" v-model.number="gatePercent" /></label>
+    <div v-if="form.id" class="sheet"><strong>发布门禁 · v{{ form.revision }}</strong><p class="sub">{{ gate?.reason || '待评测' }}；本版 {{ gate?.latest ? `${Math.round(gate.latest.pass_rate * 100)}% / ${gate.latest.average_latency_ms} ms / ${moneyText(gate.latest.cost)}` : '无结果' }}；上版 {{ gate?.previous ? `${Math.round(gate.previous.pass_rate * 100)}% / ${gate.previous.average_latency_ms} ms / ${moneyText(gate.previous.cost)}` : '无结果' }}</p><button class="ghost" type="button" :disabled="!form.eval_dataset_id" @click="runGateEval">运行当前版本评测</button></div>
+    <div v-if="form.id" class="sheet"><strong>版本历史与评测</strong><div v-for="item in versions" :key="item.number" class="md-bar"><span>v{{ item.number }} · {{ item.name }} · {{ item.created_at }}{{ item.published ? ' · 已发布' : '' }} · {{ reportsFor(item.number).length ? `最近评测 ${Math.round(reportsFor(item.number)[0].completion * 100)}% / 标准 ${Math.round((reportsFor(item.number)[0].min_pass_rate || 1) * 100)}%` : '未评测' }}</span><router-link v-if="reportsFor(item.number).length" :to="`/evals?report=${reportsFor(item.number)[0].id}`">查看报告</router-link><button class="ghost" type="button" @click="showVersionDiff(item.number)">比较</button><button class="ghost" type="button" :disabled="item.number === form.revision" @click="restoreVersion(item.number)">恢复为新版本</button></div><pre v-if="versionDiff" class="version-diff">{{ versionDiff }}</pre></div>
     <p class="sub">当前为{{ form.release === "published" ? "已发布" : "草稿" }}。改节点保存后会回到草稿，需再点「发布」后操作者才能执行。</p>
     <p v-if="form.mode === 'autonomous'" class="sub">规划时系统会固定注入全体成员花名册（调度者 + 下游），调度指令模板不可改；各节点「提示词」只影响花名册中的职责文案与该节点执行时的系统提示。详见 docs/autonomous-agent.md。</p>
     <p v-if="form.legacy" class="sub">这份工作流还是旧的意图节点。拖入智能体并保存后，改为智能体之间流转。</p>

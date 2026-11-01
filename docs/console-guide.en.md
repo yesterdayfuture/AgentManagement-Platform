@@ -99,7 +99,7 @@ Left nav is the control plane (resources, orchestration, governance):
 9. Workflows: draft vs published; operators may only run published graphs. Run / online test can enable **streaming** (off by default; not available for schedules). Confirm model/cost before run or schedule; schedules may set a token cap. Skills can be narrowed per node / run
 10. Run history: version, tools, tokens, cost, stop reason; jump back to the workflow
 11. Traces: steps and cost; quality votes; return from modal or detail page
-12. Evals
+12. Evals: run agent or workflow benchmarks by dataset, choose metrics and a minimum pass rate, and inspect or manage history and per-case results
 13. Approvals: high-risk writes and Ask-drafted workflows. Pending drafts can be renamed/edited; only after approval are they stored and published. Jump back to Ask or workflow
 14. Sensitive words: per-department lists (multiple words per row). When enabled, monitors agent / workflow / Ask input and output (including streaming); on hit, stops and reports the matched word; streaming **keeps** already-shown text then appends the notice. See below and [docs/sensitive-words.md](sensitive-words.md)
 15. Governance: members, secrets, ledger, audit, context policy, retention, department token budget. Only platform/department admins add members
@@ -181,6 +181,8 @@ Lists support pagination, keywords, exact fields, and time ranges. Without `page
 
 Agents version system prompts, models, tools, and skills. Builders, dept admins, and platform admins run the latest draft; operators run published versions. When skills are selected, their instructions append under “Available skills”; the model decides whether to call them.
 
+The studio shows each version's latest evaluation pass rate and threshold. Open a version to inspect its report history and per-case results, or use “Evaluate this version” and then choose a dataset in Evals. When evaluation is required, the selected version must pass before it can be published or promoted to stable or gray. This gate also applies to unassigned platform agents and is enforced by the API. On startup, a legacy unassigned release without a passing evaluation is returned to draft while its version content is preserved.
+
 ### Studio run and streaming
 
 Page: `/agents/{id}`. Configure/versions on the left; trial run on the right. Local agents (`kind=local`) can check **Streaming output**, **off by default**:
@@ -252,6 +254,14 @@ Nodes and the run dialog can change skills for that run. Outputs with `<<<FILE r
 Legacy graphs still run with `classify` / `tool` / `respond` nodes. A `tool` node’s `tool` field is the registered name and ends in `execute_builtin`.
 
 Also: `POST /api/workflows/{id}/run` (`stream` defaults `false`), `POST /api/workflows/{id}/publish`, `GET /api/workflows/{id}/run-estimate`; approvals `PATCH /api/approvals/{id}` can edit pending draft name/`definition`.
+
+## Evals
+
+Page: `/evals`. Add cases individually or upload Excel; the dataset list supports search, pagination, and page size. Platform admins can choose any agent or workflow, including agents labeled “平台 · 未分配空间” in the current UI; other users can evaluate only targets in the dataset's space. Select an agent version or the workflow's current revision, metrics, and a minimum pass rate. Reports record the target version and each case's input, model output, expected answer, actual tools, result, latency, and cost. A case must meet every selected metric; the report passes when its passing-case share reaches the threshold.
+
+Each dataset's evaluation history supports search, result filtering, pagination, page size, note edits, deletion, and per-case detail. Outputs and scores remain snapshots; editing changes only the note. Version views in Agent Studio and Workflows link to their reports. Cross-space evaluations run in the target's space; unassigned agents run in the dataset's space. Both report types are visible only to platform admins and are omitted from dataset summaries for other users.
+
+API: `POST /api/evals/datasets/{id}/run`, `POST /api/evals/datasets/{id}/run-stream`, `GET /api/evals/datasets/{id}/runs`, `GET /api/evals/targets/{kind}/{id}/runs`, and `GET/PATCH/DELETE /api/evals/runs/{id}`. Benchmark sources and scoring: [P0 evaluation](p0-closures-evaluation.md) and [MMLU evaluation](mmlu-evaluation.md) (Chinese).
 
 ## Sensitive words
 

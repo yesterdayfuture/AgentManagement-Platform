@@ -1,0 +1,1267 @@
+{
+  "name": "BIG-bench simple_arithmetic · tool_calling 250",
+  "source": "https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/simple_arithmetic/task.py",
+  "license": "Apache-2.0",
+  "selection": "Task-rule-generated, seed 42; records 251-500 of 1,000 unique additions.",
+  "category": "tool_calling",
+  "metrics": [
+    "model_online",
+    "exact",
+    "completion",
+    "tool",
+    "latency",
+    "cost"
+  ],
+  "cases": [
+    {
+      "input_text": "885 + 166 =",
+      "expected": "1051",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "999 + 819 =",
+      "expected": "1818",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "830 + 181 =",
+      "expected": "1011",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "902 + 422 =",
+      "expected": "1324",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "25 + 183 =",
+      "expected": "208",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "754 + 946 =",
+      "expected": "1700",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "340 + 801 =",
+      "expected": "1141",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "953 + 421 =",
+      "expected": "1374",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "821 + 685 =",
+      "expected": "1506",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "884 + 752 =",
+      "expected": "1636",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "830 + 254 =",
+      "expected": "1084",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "273 + 163 =",
+      "expected": "436",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "806 + 718 =",
+      "expected": "1524",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "110 + 391 =",
+      "expected": "501",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "893 + 39 =",
+      "expected": "932",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "879 + 481 =",
+      "expected": "1360",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "227 + 204 =",
+      "expected": "431",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "836 + 940 =",
+      "expected": "1776",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "471 + 358 =",
+      "expected": "829",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "312 + 840 =",
+      "expected": "1152",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "814 + 892 =",
+      "expected": "1706",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "233 + 228 =",
+      "expected": "461",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "24 + 675 =",
+      "expected": "699",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "197 + 408 =",
+      "expected": "605",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "336 + 285 =",
+      "expected": "621",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "885 + 71 =",
+      "expected": "956",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "990 + 791 =",
+      "expected": "1781",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "285 + 359 =",
+      "expected": "644",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "656 + 521 =",
+      "expected": "1177",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "409 + 695 =",
+      "expected": "1104",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "863 + 549 =",
+      "expected": "1412",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "339 + 961 =",
+      "expected": "1300",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "28 + 118 =",
+      "expected": "146",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "898 + 993 =",
+      "expected": "1891",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "267 + 182 =",
+      "expected": "449",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "594 + 985 =",
+      "expected": "1579",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "271 + 39 =",
+      "expected": "310",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "111 + 610 =",
+      "expected": "721",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "444 + 353 =",
+      "expected": "797",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "746 + 805 =",
+      "expected": "1551",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "321 + 446 =",
+      "expected": "767",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "620 + 523 =",
+      "expected": "1143",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "118 + 394 =",
+      "expected": "512",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "921 + 590 =",
+      "expected": "1511",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "194 + 260 =",
+      "expected": "454",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "45 + 725 =",
+      "expected": "770",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "446 + 1 =",
+      "expected": "447",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "532 + 947 =",
+      "expected": "1479",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "825 + 551 =",
+      "expected": "1376",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "703 + 736 =",
+      "expected": "1439",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "962 + 759 =",
+      "expected": "1721",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "754 + 686 =",
+      "expected": "1440",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "201 + 372 =",
+      "expected": "573",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "441 + 71 =",
+      "expected": "512",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "971 + 680 =",
+      "expected": "1651",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "942 + 338 =",
+      "expected": "1280",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "638 + 321 =",
+      "expected": "959",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "679 + 868 =",
+      "expected": "1547",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "127 + 737 =",
+      "expected": "864",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "921 + 307 =",
+      "expected": "1228",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "519 + 316 =",
+      "expected": "835",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "682 + 418 =",
+      "expected": "1100",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "334 + 412 =",
+      "expected": "746",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "713 + 302 =",
+      "expected": "1015",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "567 + 130 =",
+      "expected": "697",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "196 + 430 =",
+      "expected": "626",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "680 + 962 =",
+      "expected": "1642",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "388 + 693 =",
+      "expected": "1081",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "766 + 924 =",
+      "expected": "1690",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "178 + 630 =",
+      "expected": "808",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "582 + 308 =",
+      "expected": "890",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "415 + 561 =",
+      "expected": "976",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "853 + 0 =",
+      "expected": "853",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "311 + 293 =",
+      "expected": "604",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "215 + 440 =",
+      "expected": "655",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "804 + 593 =",
+      "expected": "1397",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "621 + 670 =",
+      "expected": "1291",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "329 + 476 =",
+      "expected": "805",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "452 + 452 =",
+      "expected": "904",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "691 + 218 =",
+      "expected": "909",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "523 + 484 =",
+      "expected": "1007",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "812 + 922 =",
+      "expected": "1734",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "982 + 815 =",
+      "expected": "1797",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "753 + 173 =",
+      "expected": "926",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "674 + 86 =",
+      "expected": "760",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "290 + 527 =",
+      "expected": "817",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "679 + 648 =",
+      "expected": "1327",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "634 + 343 =",
+      "expected": "977",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "95 + 838 =",
+      "expected": "933",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "974 + 769 =",
+      "expected": "1743",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "240 + 688 =",
+      "expected": "928",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "317 + 230 =",
+      "expected": "547",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "825 + 203 =",
+      "expected": "1028",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "150 + 25 =",
+      "expected": "175",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "47 + 250 =",
+      "expected": "297",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "486 + 625 =",
+      "expected": "1111",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "870 + 786 =",
+      "expected": "1656",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "74 + 466 =",
+      "expected": "540",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "424 + 907 =",
+      "expected": "1331",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "644 + 589 =",
+      "expected": "1233",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "199 + 735 =",
+      "expected": "934",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "713 + 393 =",
+      "expected": "1106",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "506 + 409 =",
+      "expected": "915",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "249 + 151 =",
+      "expected": "400",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "671 + 704 =",
+      "expected": "1375",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "5 + 914 =",
+      "expected": "919",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "768 + 881 =",
+      "expected": "1649",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "788 + 906 =",
+      "expected": "1694",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "109 + 797 =",
+      "expected": "906",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "435 + 224 =",
+      "expected": "659",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "180 + 823 =",
+      "expected": "1003",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "980 + 712 =",
+      "expected": "1692",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "530 + 475 =",
+      "expected": "1005",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "51 + 570 =",
+      "expected": "621",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "255 + 939 =",
+      "expected": "1194",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "868 + 124 =",
+      "expected": "992",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "467 + 136 =",
+      "expected": "603",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "820 + 475 =",
+      "expected": "1295",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "683 + 543 =",
+      "expected": "1226",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "572 + 609 =",
+      "expected": "1181",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "324 + 972 =",
+      "expected": "1296",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "773 + 912 =",
+      "expected": "1685",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "453 + 627 =",
+      "expected": "1080",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "834 + 736 =",
+      "expected": "1570",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "913 + 516 =",
+      "expected": "1429",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "436 + 850 =",
+      "expected": "1286",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "928 + 561 =",
+      "expected": "1489",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "456 + 918 =",
+      "expected": "1374",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "162 + 761 =",
+      "expected": "923",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "882 + 486 =",
+      "expected": "1368",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "460 + 265 =",
+      "expected": "725",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "769 + 253 =",
+      "expected": "1022",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "860 + 652 =",
+      "expected": "1512",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "283 + 784 =",
+      "expected": "1067",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "796 + 533 =",
+      "expected": "1329",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "496 + 641 =",
+      "expected": "1137",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "244 + 281 =",
+      "expected": "525",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "450 + 79 =",
+      "expected": "529",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "730 + 292 =",
+      "expected": "1022",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "240 + 278 =",
+      "expected": "518",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "343 + 327 =",
+      "expected": "670",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "914 + 553 =",
+      "expected": "1467",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "82 + 141 =",
+      "expected": "223",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "154 + 236 =",
+      "expected": "390",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "392 + 710 =",
+      "expected": "1102",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "156 + 723 =",
+      "expected": "879",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "219 + 65 =",
+      "expected": "284",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "424 + 417 =",
+      "expected": "841",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "338 + 555 =",
+      "expected": "893",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "477 + 425 =",
+      "expected": "902",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "63 + 211 =",
+      "expected": "274",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "852 + 430 =",
+      "expected": "1282",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "398 + 926 =",
+      "expected": "1324",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "788 + 598 =",
+      "expected": "1386",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "968 + 712 =",
+      "expected": "1680",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "20 + 877 =",
+      "expected": "897",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "901 + 783 =",
+      "expected": "1684",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "589 + 389 =",
+      "expected": "978",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "488 + 6 =",
+      "expected": "494",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "965 + 360 =",
+      "expected": "1325",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "305 + 771 =",
+      "expected": "1076",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "399 + 873 =",
+      "expected": "1272",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "913 + 976 =",
+      "expected": "1889",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "855 + 429 =",
+      "expected": "1284",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "551 + 765 =",
+      "expected": "1316",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "752 + 559 =",
+      "expected": "1311",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "819 + 617 =",
+      "expected": "1436",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "919 + 225 =",
+      "expected": "1144",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "499 + 224 =",
+      "expected": "723",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "279 + 446 =",
+      "expected": "725",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "497 + 29 =",
+      "expected": "526",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "398 + 344 =",
+      "expected": "742",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "684 + 695 =",
+      "expected": "1379",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "817 + 414 =",
+      "expected": "1231",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "741 + 169 =",
+      "expected": "910",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "860 + 478 =",
+      "expected": "1338",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "941 + 130 =",
+      "expected": "1071",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "637 + 546 =",
+      "expected": "1183",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "27 + 928 =",
+      "expected": "955",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "403 + 606 =",
+      "expected": "1009",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "577 + 678 =",
+      "expected": "1255",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "27 + 85 =",
+      "expected": "112",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "658 + 438 =",
+      "expected": "1096",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "138 + 887 =",
+      "expected": "1025",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "472 + 186 =",
+      "expected": "658",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "51 + 266 =",
+      "expected": "317",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "388 + 335 =",
+      "expected": "723",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "216 + 465 =",
+      "expected": "681",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "334 + 345 =",
+      "expected": "679",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "779 + 900 =",
+      "expected": "1679",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "388 + 284 =",
+      "expected": "672",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "770 + 974 =",
+      "expected": "1744",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "851 + 431 =",
+      "expected": "1282",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "258 + 854 =",
+      "expected": "1112",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "83 + 481 =",
+      "expected": "564",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "19 + 767 =",
+      "expected": "786",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "552 + 53 =",
+      "expected": "605",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "974 + 358 =",
+      "expected": "1332",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "229 + 665 =",
+      "expected": "894",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "70 + 799 =",
+      "expected": "869",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "980 + 667 =",
+      "expected": "1647",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "41 + 772 =",
+      "expected": "813",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "31 + 972 =",
+      "expected": "1003",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "253 + 204 =",
+      "expected": "457",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "859 + 20 =",
+      "expected": "879",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "636 + 156 =",
+      "expected": "792",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "244 + 129 =",
+      "expected": "373",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "484 + 685 =",
+      "expected": "1169",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "117 + 577 =",
+      "expected": "694",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "970 + 223 =",
+      "expected": "1193",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "476 + 716 =",
+      "expected": "1192",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "262 + 785 =",
+      "expected": "1047",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "377 + 171 =",
+      "expected": "548",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "620 + 621 =",
+      "expected": "1241",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "986 + 765 =",
+      "expected": "1751",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "735 + 117 =",
+      "expected": "852",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "796 + 838 =",
+      "expected": "1634",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "167 + 987 =",
+      "expected": "1154",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "318 + 110 =",
+      "expected": "428",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "592 + 26 =",
+      "expected": "618",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "951 + 319 =",
+      "expected": "1270",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "589 + 693 =",
+      "expected": "1282",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "929 + 981 =",
+      "expected": "1910",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "384 + 406 =",
+      "expected": "790",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "964 + 732 =",
+      "expected": "1696",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "203 + 77 =",
+      "expected": "280",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "606 + 707 =",
+      "expected": "1313",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "850 + 642 =",
+      "expected": "1492",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "248 + 104 =",
+      "expected": "352",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "713 + 791 =",
+      "expected": "1504",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "308 + 870 =",
+      "expected": "1178",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "700 + 614 =",
+      "expected": "1314",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "824 + 123 =",
+      "expected": "947",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "815 + 579 =",
+      "expected": "1394",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "801 + 42 =",
+      "expected": "843",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "355 + 545 =",
+      "expected": "900",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "438 + 677 =",
+      "expected": "1115",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "379 + 70 =",
+      "expected": "449",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "518 + 663 =",
+      "expected": "1181",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "349 + 12 =",
+      "expected": "361",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "869 + 430 =",
+      "expected": "1299",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "842 + 501 =",
+      "expected": "1343",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "108 + 443 =",
+      "expected": "551",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "983 + 370 =",
+      "expected": "1353",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "650 + 912 =",
+      "expected": "1562",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "848 + 470 =",
+      "expected": "1318",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "724 + 156 =",
+      "expected": "880",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "445 + 180 =",
+      "expected": "625",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "751 + 534 =",
+      "expected": "1285",
+      "expected_tool": "calculator"
+    },
+    {
+      "input_text": "988 + 666 =",
+      "expected": "1654",
+      "expected_tool": "calculator"
+    }
+  ]
+}

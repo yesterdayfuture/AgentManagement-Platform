@@ -337,10 +337,10 @@ onUnmounted(() => {
   <header class="overview-header">
     <div><p class="kicker">运行观测 / OVERVIEW</p><h1>运行总览</h1><p class="sub">集中查看智能体与工作流实时状态、部门调用、资源分布与运行质量。</p></div>
     <label v-if="platform" class="field department-filter"><span>统计部门</span>
-      <select aria-label="统计部门" v-model="departmentId" @change="load">
+      <SearchSelect aria-label="统计部门" v-model="departmentId" @change="load">
         <option value="">全部部门</option>
         <option v-for="item in spaces" :key="item.id" :value="String(item.id)">{{ item.name }}</option>
-      </select>
+      </SearchSelect>
     </label>
     <span v-else class="role-badge">当前部门</span>
   </header>

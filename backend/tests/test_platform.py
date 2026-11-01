@@ -675,7 +675,7 @@ def test_task_runs_produce_sourced_memories(client):
             "name": "记忆工作流联调",
             "agent_id": node_a.json()["id"],
             "enabled": True,
-            "release": "published",
+                "release": "draft",
             "definition": {
                 "kind": "agents",
                 "entry": "n1",
@@ -2498,6 +2498,11 @@ def test_workflow_schedule_runs_saved_question(client, app):
     assert created.status_code == 200, created.text
     flow_id = created.json()["id"]
     assert created.json()["release"] == "draft"
+    dataset = client.post("/api/evals/datasets", headers=headers, json={"name": "定时发布门禁", "cases": [{"input_text": "你好", "expected": ""}]}).json()
+    configured = client.patch(f"/api/workflows/{flow_id}", headers=headers, json={"revision": 1, "eval_dataset_id": dataset["id"]})
+    assert configured.status_code == 200, configured.text
+    report = client.post(f"/api/evals/datasets/{dataset['id']}/run", headers=headers, json={"workflow_id": flow_id, "metrics": ["completion"]})
+    assert report.status_code == 200 and report.json()["passed"], report.text
     published = client.post(f"/api/workflows/{flow_id}/publish", headers=headers)
     assert published.status_code == 200, published.text
     assert published.json()["release"] == "published"
@@ -2522,7 +2527,7 @@ def test_workflow_schedule_runs_saved_question(client, app):
     db.close()
     assert tick(app.state.session_factory) == 1
     listed = client.get("/api/workflow-runs", headers=headers, params={"page": 1, "exact_field": "workflow_id", "exact": str(flow_id)}).json()
-    assert listed["total"] == 1
+    assert listed["total"] == 2  # 评测和定时执行各留一条运行记录
     assert listed["items"][0]["environment"] == "schedule"
     assert listed["items"][0]["message"] == "只回复已收到"
 

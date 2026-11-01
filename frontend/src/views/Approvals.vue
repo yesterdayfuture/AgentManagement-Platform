@@ -125,10 +125,10 @@ onMounted(() => desk.refresh());
     <template v-if="isWorkflowDraft">
       <label class="field"><span>草案名称</span><input v-model="form.draftName" :readonly="!canEditDraft" /></label>
       <label class="field"><span>执行方式</span>
-        <select v-model="form.draftKind" :disabled="!canEditDraft">
+        <SearchSelect v-model="form.draftKind" :disabled="!canEditDraft">
           <option value="agents">固定步骤</option>
           <option value="autonomous">自主调度</option>
-        </select>
+        </SearchSelect>
       </label>
       <label class="field"><span>节点 JSON</span><textarea v-model="form.draftNodes" rows="8" :readonly="!canEditDraft" /></label>
       <label class="field"><span>连线 JSON</span><textarea v-model="form.draftEdges" rows="4" :readonly="!canEditDraft" /></label>

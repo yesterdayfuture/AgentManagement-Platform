@@ -56,6 +56,14 @@ def _facade():
     return api
 
 
+def _release_eval_transaction(db):
+    """Persist the trace before a slow model call so evaluations do not lock SQLite writers."""
+    from app.services.memory_layers import _EVALUATING
+
+    if _EVALUATING.get():
+        db.commit()
+
+
 def _overlay(version, setup: dict | None):
     """本次运行临时盖住提示词、工具和知识库，不写回已保存的版本。"""
     if not setup:
@@ -92,6 +100,7 @@ def execute_agent(
     task_id: str = "",
     source_kind: str = "agent",
     source_name: str = "",
+    version_id: int | None = None,
 ) -> dict:
     """跑一个智能体。depth 用来限制转交只发生一层，避免子智能体再转交。"""
     if space.token_used >= space.token_budget:
@@ -118,6 +127,7 @@ def execute_agent(
             task_id=task_id,
             source_kind=source_kind,
             source_name=source_name or agent.name,
+            version_id=version_id,
         )
     finally:
         reset_words(sensitive_token)
@@ -142,6 +152,7 @@ def _execute_agent_body(
     task_id: str = "",
     source_kind: str = "agent",
     source_name: str = "",
+    version_id: int | None = None,
 ) -> dict:
     from app.services.sensitive import find_hit, stop_message
 
@@ -159,7 +170,10 @@ def _execute_agent_body(
         hit = find_hit(turn.get("content") or "")
         if hit:
             raise GateError("denied", stop_message(hit))
-    version = _overlay(pick_version(db, agent, user.id, environment), setup)
+    selected_version = db.get(AgentVersion, version_id) if version_id is not None else pick_version(db, agent, user.id, environment)
+    if selected_version is None or selected_version.agent_id != agent.id:
+        raise GateError("denied", "所选智能体版本不存在")
+    version = _overlay(selected_version, setup)
     memory_task = str(task_id or resume_trace_id or "")
     memory_source = source_kind or "agent"
     memory_name = (source_name or agent.name or "")[:160]
@@ -632,6 +646,8 @@ def _lookup_tool(bound: dict, name: str):
 
 def _record_generate(db, trace, model, prompt, text, usage, spent_model, fallback=False):
     tokens_in, tokens_out = usage
+    if fallback:
+        spent_model = None
     cost_in, cost_out, spent = cost_parts(spent_model, tokens_in, tokens_out)
     charge_model(spent_model, spent)
     _step(
@@ -866,6 +882,7 @@ def _close_with_answer(db, trace, model, messages, message, observations):
             "content": "请根据上面已经返回的工具结果，直接回答最初的问题。不要再调用工具，不要输出工具调用标记。结果不足或互相矛盾时，说明哪些结论无法确认。",
         }
     )
+    _release_eval_transaction(db)
     result = _facade().complete_with_tools(db, model, follow, [])
     shown = result.get("error") or result["text"] or "、".join(item["name"] for item in result["tool_calls"])
     _record_generate(db, trace, model, message, shown, result["usage"], model, fallback=bool(result["fallback"]))
@@ -978,6 +995,7 @@ def _agent_loop(
                 task_id=meta.get("task_id") or trace.id,
                 source_kind=meta.get("source_kind") or "agent",
             )
+        _release_eval_transaction(db)
         result = _facade().complete_with_tools(db, model, messages, specs)
         shown = result.get("error") or result["text"] or "、".join(item["name"] for item in result["tool_calls"])
         _record_generate(db, trace, model, message, shown, result["usage"], model, fallback=bool(result["fallback"]))
@@ -1252,6 +1270,7 @@ def _chat(db, trace, version, space, user, message, project_id, policy, memory_m
     pinned = db.get(ModelEndpoint, version.model_id) if version.model_id else None
     allowed = set(ids_for(db, space.id, "model"))
     model = pinned if pinned and pinned.id in allowed and pinned.enabled and quota_open(pinned) else select_model(db, space.id, "reason")
+    _release_eval_transaction(db)
     text, model_name, fallback, usage = complete(db, model, prompt, message, memories, [])
     tokens_in, tokens_out = usage
     cost_in, cost_out, spent = cost_parts(model, tokens_in, tokens_out)

@@ -42,6 +42,8 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .space-picker { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .space-picker > span { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .space-picker select { width: 168px; }
+.space-picker .search-select { width: 168px; }
+.workspace-scope { display: inline-block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 12px; }
 .role-badge { color: var(--moss); background: #e8f6f4; padding: 3px 9px; border-radius: 5px; font: 11px/1.6 ui-monospace, monospace; }
 .page-content { padding: 28px 30px 48px; max-width: 1920px; margin: auto; }
 .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }
@@ -115,6 +117,7 @@ input[type="checkbox"], input[type="radio"] { width: 15px; height: 15px; margin:
 .check-col, td:has(> input[type="checkbox"]) { overflow: visible; text-align: center; }
 .field input, .field textarea, .field select, .sheet > input, .sheet > textarea { width: 100%; }
 .top select, .row select, .row input { width: 180px; min-width: 0; }
+.top .search-select, .row .search-select { width: 180px; min-width: 0; }
 select { appearance: none; -webkit-appearance: none; padding-right: 32px; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23687b93' stroke-width='1.5'/%3E%3C/svg%3E"); background-position: right 11px center; background-size: 10px 7px; background-repeat: no-repeat; }
 select option { background: var(--surface); color: var(--ink); }
 textarea { min-height: 108px; resize: vertical; }
@@ -122,6 +125,8 @@ input:disabled, textarea:disabled, select:disabled { opacity: .65; background-co
 .filters { margin: 20px 0 16px; padding: 16px; align-items: flex-end; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; gap: 12px; }
 .filters label { display: flex; flex-direction: column; gap: 7px; font-size: 11px; color: var(--muted); min-width: 0; }
 .filters input, .filters select { width: 148px; }
+.filters .search-select { width: 148px; }
+.version-diff { max-height: 320px; max-width: 100%; overflow: auto; padding: 12px; background: #f7f9fd; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; }
 .filters input[type="datetime-local"] { width: 208px; }
 .filters input[type="number"] { width: 72px; }
 .filters .ghost { height: 38px; }
@@ -585,11 +590,13 @@ pre { max-width: 100%; overflow: auto; background: #f4f7fb; border-radius: 6px; 
   .workspace-bar { padding: 12px 14px; }
   .workspace-controls { width: 100%; justify-content: space-between; }
   .space-picker select { width: 180px; }
+  .space-picker .search-select { width: 180px; }
   h1 { font-size: 23px; }
   .filters { gap: 10px; padding: 12px; }
   .filters label { flex: 1 1 130px; }
   .filters label:has(input[type="datetime-local"]) { flex-basis: 100%; }
   .filters input, .filters select, .filters input[type="datetime-local"], .filters input[type="number"] { width: 100%; }
+  .filters .search-select { width: 100%; }
   .top { align-items: flex-start; }
   .sheet { padding: 16px; }
   .data-sheet { padding: 0; }
