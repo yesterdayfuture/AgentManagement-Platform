@@ -42,6 +42,8 @@ LIMEN 是一套可自部署的智能体管理与运行平台。模型负责理�
     <td><img src="docs/images/workflows.png" alt="工作流列表与执行管理" /></td>
     <td><img src="docs/images/department-grants.png" alt="部门资源授权编辑界面" /></td>
   </tr>
+  <tr><th colspan="2">智能体版本工作室</th></tr>
+  <tr><td colspan="2"><img src="docs/images/agent-versions.png" alt="线上版本、历史版本与最新草稿" /></td></tr>
 </table>
 
 [查看完整截图与拍摄说明](docs/images/README.md)
@@ -56,7 +58,7 @@ LIMEN 是一套可自部署的智能体管理与运行平台。模型负责理�
 | **评测与发布** | 使用 BIG-bench、MMLU 等开源数据集评测生成、计算、任务拆解和工具调用；按智能体/工作流版本查看逐题报告、设置通过比例，并以评测结果控制上线。平台管理员也可评测未分配空间的智能体。 |
 | **知识与记忆** | 文档入库与检索、上下文压缩、短期/长期记忆、用户画像版本与来源追溯。 |
 | **工具与技能** | 内置工具、MCP 服务、SKILL.md 压缩包导入；技能脚本在 Docker 容器中运行。 |
-| **运行观测** | 部门筛选、调用趋势、费用与 token 图表、智能体/工作流运行监控、执行记录和轨迹。 |
+| **运行观测** | 部门筛选、调用趋势、费用与 token 图表、智能体/工作流运行监控、执行记录、轨迹和结果质量评价；平台管理员可筛选及导出评价。 |
 | **权限与治理** | 部门资源授权、角色权限、密钥管理、审批、敏感词监测、评测和审计。 |
 
 <a id="quick-start"></a>
@@ -124,6 +126,7 @@ npm run dev
 | 文档 | 内容 |
 |---|---|
 | [控制台与运行指南](docs/console-guide.zh.md) | 完整页面说明、角色规则、接口索引、流式执行与费用口径 |
+| [智能体版本与查询设计](docs/agent-versioning.md) | 版本指针、表结构、发布与灰度、列表和历史查询 SQL |
 | [自主调度工作流](docs/autonomous-agent.md) | 规划、成员职责、调度与执行 |
 | [问答生成工作流](docs/ask-workflow.md) | 草案提示词、模型输入与审批流程 |
 | [P0 闭环与 DeepSeek 评测](docs/p0-closures-evaluation.md) | 版本、发布门禁、失败重试及 1,047 条开源基准用例 |

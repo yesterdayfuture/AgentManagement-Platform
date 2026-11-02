@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { api } from "../api";
+import { api, session } from "../api";
 import { countText, durationText, moneyText, prettyJson } from "../format";
 import { renderMarkdown } from "../markdown";
 
@@ -9,9 +9,25 @@ const route = useRoute();
 const router = useRouter();
 const trace = ref(null);
 const error = ref("");
+const qualityScore = ref(5);
+const qualityNote = ref("");
+const qualitySaved = ref("");
 onMounted(async () => {
-  try { trace.value = await api(`/api/traces/${route.params.id}`); } catch (err) { error.value = err.message; }
+  try {
+    trace.value = await api(`/api/traces/${route.params.id}`);
+    qualityScore.value = trace.value.quality_score || 5;
+    qualityNote.value = trace.value.quality_note || "";
+  } catch (err) { error.value = err.message; }
 });
+async function saveQuality() {
+  try {
+    const exists = trace.value.quality_score != null;
+    const result = await api(exists ? `/api/quality-reviews/${route.params.id}` : `/api/traces/${route.params.id}/quality`, { method: exists ? "PATCH" : "POST", body: { score: Number(qualityScore.value), note: qualityNote.value } });
+    trace.value = { ...trace.value, quality_score: result.score, quality_note: result.note, quality_reviewed_at: result.reviewed_at };
+    qualitySaved.value = "评价已保存";
+    error.value = "";
+  } catch (err) { error.value = err.message; }
+}
 async function vote(value) {
   trace.value = { ...trace.value, ...(await api(`/api/traces/${route.params.id}/feedback`, { method: "POST", body: { vote: value } })) };
 }
@@ -55,13 +71,15 @@ function stepTitle(step) {
         <template v-if="trace.workflow_name"> · 工作流 {{ trace.workflow_name }}</template>
         · {{ trace.environment }}
       </p>
+      <p v-if="trace" class="sub">{{ trace.workflow_version ? `工作流 v${trace.workflow_version} · ` : '' }}{{ trace.agent_version ? `智能体 v${trace.agent_version}${trace.agent_version_status === 'draft' ? '（草稿）' : ''}` : '' }}</p>
     </div>
     <button class="ghost" type="button" @click="back">返回</button>
   </div>
   <p class="error">{{ error }}</p>
   <div v-if="trace" class="grid-2">
     <div class="sheet">
-      <p class="sub">{{ trace.input }}</p>
+      <p class="kicker">执行输入</p><p class="sub">{{ trace.input }}</p>
+      <p class="kicker">最终模型输出</p>
       <div class="md" v-html="renderMarkdown(String(trace.output || '').replace(/^【v\d+】/, ''))"></div>
       <p class="sub" :title="`${trace.cost} 元 · ${trace.latency_ms} 毫秒 · ${trace.tokens} token`">费用 {{ moneyText(trace.cost) }} · {{ durationText(trace.latency_ms) }} · {{ countText(trace.tokens) }} token</p>
       <p v-if="isAsyncRemote" class="sub">
@@ -72,6 +90,12 @@ function stepTitle(step) {
       <div class="row">
         <button class="ghost" @click="vote(1)">有用</button>
         <button class="ghost" @click="vote(-1)">无用</button>
+      </div>
+      <div class="sheet" style="margin-top: 16px">
+        <h2>结果质量评价</h2>
+        <div class="row"><label class="field"><span>评分（1–5）</span><input v-model.number="qualityScore" type="number" min="1" max="5" /></label><button class="btn" type="button" :disabled="['running', 'waiting', 'paused'].includes(trace.status)" @click="saveQuality">保存评价</button></div>
+        <label class="field"><span>评价说明</span><textarea v-model="qualityNote" rows="3" placeholder="说明结果的准确性、完整性或需改进之处" /></label>
+        <p class="sub">{{ qualitySaved || (trace.quality_score ? `当前评分 ${trace.quality_score}/5` : '尚未评价') }}<router-link v-if="session().user?.platform_admin" to="/quality-reviews"> · 查看质量评价汇总</router-link></p>
       </div>
       <h2 style="margin-top: 18px">委托链</h2>
       <div class="pipe" v-for="hop in trace.hops" :key="hop.seq">{{ hop.credential }} · {{ hop.actor }} → {{ hop.target }}</div>
@@ -87,7 +111,7 @@ function stepTitle(step) {
           <pre class="tool-io">{{ prettyJson(step.tool_args) }}</pre>
         </template>
         <template v-if="step.output">
-          <p class="kicker">输出</p>
+          <p class="kicker">{{ step.kind === 'generate' && step.output === 'calculator' ? '模型选择的工具' : step.kind === 'generate' ? '模型原始回复' : '步骤输出' }}</p>
           <pre class="tool-io">{{ step.output }}</pre>
         </template>
       </article>

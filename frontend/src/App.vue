@@ -10,13 +10,13 @@ const route = useRoute();
 const navSource = [
   { label: "工作台", items: [["overview", "运行总览", "/overview"]] },
   { label: "资源管理", items: [["agents", "智能体", "/agents"], ["skills", "技能", "/skills"], ["tools", "工具服务", "/tools"], ["models", "模型管理", "/models"], ["knowledge", "知识库", "/knowledge"], ["memories", "记忆管理", "/memories"]] },
-  { label: "编排与观测", items: [["ask", "模型问答", "/ask"], ["workflows", "工作流", "/workflows"], ["runs", "执行记录", "/workflow-runs"], ["traces", "调用轨迹", "/traces"], ["evals", "评测中心", "/evals"]] },
+  { label: "编排与观测", items: [["ask", "模型问答", "/ask"], ["workflows", "工作流", "/workflows"], ["runs", "执行记录", "/workflow-runs"], ["traces", "调用轨迹", "/traces"], ["evals", "评测中心", "/evals"], ["traces", "质量评价", "/quality-reviews"]] },
   { label: "安全与治理", items: [["departments", "部门管理", "/departments"], ["approvals", "审批中心", "/approvals"], ["sensitive", "敏感词", "/sensitive-words"], ["governance", "空间治理", "/governance"]] },
 ];
 const isDeptAdmin = computed(() => state.value.spaces?.some((item) => item.role === "admin"));
 const navGroups = computed(() => navSource.map((group) => ({
   ...group,
-  items: group.items.filter((item) => !["/departments", "/governance"].includes(item[2]) || isPlatform.value || isDeptAdmin.value),
+  items: group.items.filter((item) => item[2] !== "/quality-reviews" && (!["/departments", "/governance"].includes(item[2]) || isPlatform.value || isDeptAdmin.value) || item[2] === "/quality-reviews" && isPlatform.value),
 })));
 const activeNav = computed(() => navGroups.value.flatMap(group => group.items).find(item => route.path === item[2] || route.path.startsWith(item[2] + "/")));
 const state = ref(session());

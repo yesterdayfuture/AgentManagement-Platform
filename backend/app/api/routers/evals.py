@@ -1,5 +1,6 @@
 """评测集、用例和运行。用例可以逐条维护，也可以从表格解析。"""
 
+import json
 import queue
 import threading
 import time
@@ -258,6 +259,11 @@ def list_datasets(ctx=Depends(get_context), db=Depends(get_db), desk: Desk = Dep
     )
 
 
+@router.get("/api/evals/datasets/{dataset_id}")
+def get_dataset(dataset_id: int, ctx=Depends(get_context), db=Depends(get_db)):
+    return _dataset_dict(db, _load_dataset(db, ctx, dataset_id), ctx)
+
+
 @router.get("/api/evals/metrics")
 def eval_metrics(ctx=Depends(get_context)):
     from app.services.evalkit import METRICS
@@ -289,8 +295,20 @@ async def eval_parse(file: UploadFile = File(...), ctx=Depends(get_context)):
     from app.services.sheet import cases_of
 
     name = (file.filename or "").lower()
+    if name.endswith(".json"):
+        try:
+            payload = json.loads((await file.read()).decode("utf-8-sig"))
+            raw = payload.get("cases") if isinstance(payload, dict) else None
+            if not isinstance(raw, list) or not raw or len(raw) > 1000:
+                raise ValueError("JSON 须包含 1–1000 条 cases")
+            cases = [CaseIn.model_validate(item).model_dump() for item in raw]
+            if any(not item["input_text"].strip() or not item["expected"].strip() for item in cases):
+                raise ValueError("用例输入和期望答案不能为空")
+            return {"cases": cases}
+        except (ValueError, TypeError, UnicodeError) as exc:
+            raise HTTPException(400, f"无法读取评测 JSON：{exc}") from exc
     if not name.endswith(".xlsx"):
-        raise HTTPException(400, "请上传 xlsx 文件")
+        raise HTTPException(400, "请上传 xlsx 或 JSON 文件")
     try:
         cases = cases_of(await file.read())
     except ValueError as exc:

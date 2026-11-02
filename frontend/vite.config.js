@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000",
+        target: process.env.LIMEN_API_TARGET || "http://127.0.0.1:8000",
         configure: (proxy) => {
           proxy.on("proxyRes", (proxyRes) => {
             const type = proxyRes.headers["content-type"] || "";
@@ -18,7 +18,7 @@ export default defineConfig({
           });
         },
       },
-      "/v1": "http://127.0.0.1:8000",
+      "/v1": process.env.LIMEN_API_TARGET || "http://127.0.0.1:8000",
     },
   },
 });

@@ -42,6 +42,8 @@ LIMEN is a self-hosted agent management and runtime platform. Models handle unde
     <td><img src="docs/images/workflows.png" alt="Workflow list and execution management" /></td>
     <td><img src="docs/images/department-grants.png" alt="Editing resource grants for a department" /></td>
   </tr>
+  <tr><th colspan="2">Agent version studio</th></tr>
+  <tr><td colspan="2"><img src="docs/images/agent-versions.png" alt="Live, historical, and latest draft versions" /></td></tr>
 </table>
 
 [All screenshots and capture notes](docs/images/README.md)
@@ -56,7 +58,7 @@ LIMEN is a self-hosted agent management and runtime platform. Models handle unde
 | **Evaluation and release** | Benchmark generation, math, task decomposition, and tool use with open BIG-bench and MMLU data; inspect per-case reports by agent or workflow version, set a pass-rate threshold, and gate release on evaluation. Platform admins can also evaluate unassigned agents. |
 | **Knowledge and memory** | Ingest and retrieve documents, compress context, and inspect short-term memory, long-term memory, versioned user profiles, and provenance. |
 | **Tools and skills** | Register built-in tools and MCP services; import SKILL.md packages and execute skill scripts inside Docker. |
-| **Observability** | Filter by department; inspect usage trends, cost and token charts, live agent/workflow monitoring, run history, and traces. |
+| **Observability** | Filter by department; inspect usage trends, cost and token charts, live agent/workflow monitoring, run history, traces, and result quality ratings. Platform admins can filter and export ratings. |
 | **Access and governance** | Manage department grants, roles, secrets, approvals, sensitive-word checks, evaluations, and audit records. |
 
 <a id="quick-start"></a>
@@ -124,6 +126,7 @@ The default database is `backend/data/app.db`; override it with `DATABASE_URL`. 
 | Guide | Topics |
 |---|---|
 | [Console and runtime guide](docs/console-guide.en.md) | Full page reference, roles, APIs, streaming, and billing conventions |
+| [Agent versions, schema, and queries](docs/agent-versioning.en.md) | Release pointers, snapshots, gray traffic, list and history SQL |
 | [Autonomous workflows](docs/autonomous-agent.md) | Planning, member responsibilities, dispatch, and execution |
 | [Draft workflows from chat](docs/ask-workflow.md) | Drafting prompts, model input, and approval flow |
 | [P0 loops and DeepSeek evaluation](docs/p0-closures-evaluation.md) | Versions, release gates, retries, and 1,047 open benchmark cases (Chinese) |
@@ -134,7 +137,7 @@ The default database is `backend/data/app.db`; override it with `DATABASE_URL`. 
 | [Remote asynchronous agents](docs/remote-async-agent.md) | Python + FastAPI integration example |
 | [Sensitive-word monitoring](docs/sensitive-words.md) | Input, output, and streaming checks |
 
-The console/runtime guide is available in English; topic-specific guides are currently in Chinese.
+The console/runtime and agent-versioning guides are available in English; other topic-specific guides are currently in Chinese.
 
 ## Project structure
 

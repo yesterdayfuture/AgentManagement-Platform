@@ -81,9 +81,8 @@ function cell(row, column) {
     <label>开始时间<input v-model="query.time_from" type="datetime-local" /></label>
     <label>结束时间<input v-model="query.time_to" type="datetime-local" /></label>
     <label>每页<input v-model.number="query.page_size" type="number" min="1" max="100" /></label>
-    <button class="ghost" type="button" @click="search">查询</button>
-    <button class="ghost" type="button" @click="reset">重置</button>
     <slot name="filters" />
+    <div class="filter-actions"><button class="ghost" type="button" @click="search">查询</button><button class="ghost" type="button" @click="reset">重置</button><slot name="filter-actions" /></div>
   </div>
   <div class="sheet data-sheet">
     <div class="list-heading">
@@ -109,7 +108,7 @@ function cell(row, column) {
         <tr v-if="!rows.length"><td class="empty-cell" :colspan="columns.length + 1 + (removable ? 1 : 0)">{{ emptyText }}</td></tr>
         <tr v-for="row in rows" :key="row.id" :class="{ selected: selected.includes(row.id) }">
           <td v-if="removable"><input type="checkbox" :aria-label="`选择 ${row.id}`" :checked="selected.includes(row.id)" @change="toggle(row.id, $event)" /></td>
-          <td v-for="column in columns" :key="column.key" :title="column.format ? String(row[column.key] ?? '') : String(cell(row, column))">
+          <td v-for="column in columns" :key="column.key" :title="String(cell(row, column))">
             <slot :name="`cell-${column.key}`" :row="row" :value="cell(row, column)">
               <StatusBadge v-if="['status', 'review_status', 'risk', 'enabled'].includes(column.key)" :value="row[column.key]" :label="cell(row, column)" />
               <template v-else>{{ cell(row, column) }}</template>

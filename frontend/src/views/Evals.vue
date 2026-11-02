@@ -196,7 +196,8 @@ async function bulk() {
 function openRun(row) {
   const available = agents.value.filter(item => isPlatform.value || item.space_id === row.space_id);
   const requested = available.find(item => item.id === Number(route.query.agent_id));
-  runForm.value = { datasetId: row.id, name: row.name, spaceId: row.space_id, kind: "agent", targetId: requested?.id || available.find(item => item.space_id === row.space_id)?.id || available[0]?.id || "", agentVersionId: "", minPassRate: 80, metrics: row.default_metrics || ["contains", "completion"] };
+  const requestedWorkflow = workflows.value.find(item => item.id === Number(route.query.workflow_id));
+  runForm.value = { datasetId: row.id, name: row.name, spaceId: row.space_id, kind: requestedWorkflow ? "workflow" : "agent", targetId: requestedWorkflow?.id || requested?.id || available.find(item => item.space_id === row.space_id)?.id || available[0]?.id || "", agentVersionId: "", minPassRate: requestedWorkflow ? Math.round(Number(requestedWorkflow.eval_min_pass_rate || 1) * 100) : 80, metrics: row.default_metrics || ["contains", "completion"] };
   runProgress.value = null;
   historyOpen.value = false;
   runOpen.value = true;
@@ -310,6 +311,16 @@ onMounted(async () => {
   workflows.value = asList(await api("/api/workflows"));
   metrics.value = await api("/api/evals/metrics");
   await desk.refresh();
+  if (route.query.workflow_id) {
+    const workflow = workflows.value.find(item => item.id === Number(route.query.workflow_id));
+    if (!workflow) desk.error.value = "工作流不存在或无权评测";
+    else if (workflow.eval_dataset_id) {
+      try { openRun(await api(`/api/evals/datasets/${workflow.eval_dataset_id}`)); }
+      catch (err) { desk.error.value = err.message; }
+    } else {
+      desk.error.value = `「${workflow.name}」尚未指定发布评测集；可点击下方数据集的「运行」并选择该工作流。`;
+    }
+  }
   if (route.query.report) {
     try {
       await showHistorical({ id: Number(route.query.report) });
@@ -331,9 +342,9 @@ onMounted(async () => {
     <template v-if="mode === 'create'">
       <div class="row">
         <button class="ghost" type="button" @click="downloadSample">下载 Excel 样例</button>
-        <label class="ghost file-pick">上传 Excel<input type="file" accept=".xlsx" @change="onFile" /></label>
+        <label class="ghost file-pick">上传 Excel / JSON<input type="file" accept=".xlsx,.json" @change="onFile" /></label>
       </div>
-      <p class="sub">表头是「输入」「期望」「期望工具」。期望工具可以留空。上传后的行会出现在下面，保存评测集时一起写入。</p>
+      <p class="sub">Excel 表头是「输入」「期望」「期望工具」；也可导入质量评价导出的评估 JSON。上传后的用例会出现在下面，保存评测集时一起写入。</p>
       <label class="field"><span>输入</span><input v-model="draftForm.input_text" /></label>
       <label class="field"><span>期望</span><input v-model="draftForm.expected" /></label>
       <label class="field"><span>期望工具</span><input v-model="draftForm.expected_tool" placeholder="例如 calculator，可留空" /></label>
@@ -409,7 +420,7 @@ onMounted(async () => {
         <option v-for="item in targets" :key="item.id" :value="item.id">{{ item.name }} · {{ item.space_id == null ? '平台 · 未分配空间' : item.department || '所属空间' }}</option>
       </SearchSelect>
     </label>
-    <p class="sub">当前数据集位于「{{ desk.pageData.value.items.find(item => item.id === runForm.datasetId)?.space_name || '所属空间' }}」。{{ isPlatform ? '平台管理员可选择所有智能体；未分配空间的智能体在数据集空间执行，跨空间及未分配空间的报告仅平台管理员可见。' : '只显示当前数据集所属空间内、你有权限评测的智能体。' }} 共 {{ targets.length }} 个候选对象。</p>
+    <p class="sub">当前数据集位于「{{ desk.pageData.value.items.find(item => item.id === runForm.datasetId)?.space_name || '所属空间' }}」。{{ isPlatform ? '平台管理员可选择所有可评测对象；未分配空间的智能体在数据集空间执行，跨空间及未分配空间的报告仅平台管理员可见。' : '只显示当前数据集所属空间内、你有权限评测的对象。' }} 共 {{ targets.length }} 个候选对象。</p>
     <label v-if="runForm.kind === 'agent'" class="field"><span>评测智能体版本</span><SearchSelect v-model="runForm.agentVersionId"><option v-for="item in targetVersions" :key="item.id" :value="item.id">v{{ item.number }} · {{ item.status }} · {{ item.model_name || '按任务选择' }}{{ item.number === targetVersions[0]?.number ? '（最新）' : '' }}</option></SearchSelect></label>
     <p v-if="runForm.kind === 'workflow'" class="sub">评估工作流当前版本 v{{ workflows.find(item => item.id === Number(runForm.targetId))?.revision || '—' }}，报告将固定记录该版本。</p>
     <label class="field"><span>通过标准（通过用例占比，%）</span><input v-model.number="runForm.minPassRate" type="number" min="1" max="100" step="1" /></label>

@@ -130,6 +130,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: .65; background-co
 .filters input[type="datetime-local"] { width: 208px; }
 .filters input[type="number"] { width: 72px; }
 .filters .ghost { height: 38px; }
+.filter-actions { display: flex; gap: 10px; align-items: flex-end; margin-left: auto; }
 .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 20px; border-top: 1px solid var(--line); }
 .pager span { color: var(--muted); font-size: 11px; }
 .pager .ghost { min-height: 30px; padding: 5px 10px; font-size: 11px; }

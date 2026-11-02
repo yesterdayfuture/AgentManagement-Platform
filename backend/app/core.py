@@ -335,7 +335,7 @@ def _ensure_columns(engine) -> None:
         "eval_runs": [("workflow_id", "INTEGER"), ("workflow_revision", "INTEGER"), ("dataset_fingerprint", "VARCHAR(64)"), ("agent_fingerprint", "VARCHAR(64)"), ("metrics_json", "TEXT"), ("min_pass_rate", "FLOAT"), ("target_space_id", "INTEGER"), ("platform_only", "INTEGER DEFAULT 0"), ("note", "TEXT")],
         "workflow_runs": [("workflow_revision", "INTEGER"), ("definition_json", "TEXT"), ("retry_of_id", "INTEGER")],
         "agent_versions": [("model_id", "INTEGER"), ("mcp_ids_json", "TEXT"), ("skill_ids_json", "TEXT")],
-        "traces": [("dialogue_json", "TEXT")],
+        "traces": [("dialogue_json", "TEXT"), ("quality_score", "INTEGER"), ("quality_note", "TEXT DEFAULT ''"), ("quality_reviewer_id", "INTEGER"), ("quality_reviewed_at", "DATETIME")],
         "chat_sessions": [("pinned", "INTEGER")],
         "trace_steps": [
             ("tokens_in", "INTEGER"),

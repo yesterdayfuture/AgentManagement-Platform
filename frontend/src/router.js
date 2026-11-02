@@ -13,6 +13,7 @@ import Approvals from "./views/Approvals.vue";
 import Traces from "./views/Traces.vue";
 import TraceDetail from "./views/TraceDetail.vue";
 import Evals from "./views/Evals.vue";
+import QualityReviews from "./views/QualityReviews.vue";
 import Memories from "./views/Memories.vue";
 import Skills from "./views/Skills.vue";
 import SensitiveWords from "./views/SensitiveWords.vue";
@@ -37,6 +38,7 @@ const router = createRouter({
     { path: "/traces", component: Traces },
     { path: "/traces/:id", component: TraceDetail },
     { path: "/evals", component: Evals },
+    { path: "/quality-reviews", component: QualityReviews, meta: { platformOnly: true } },
     { path: "/memories", component: Memories },
     { path: "/skills", component: Skills },
     { path: "/sensitive-words", component: SensitiveWords },
@@ -56,6 +58,7 @@ router.beforeEach((to) => {
     const current = session();
     if (!current.user?.platform_admin && !(current.spaces || []).some((item) => item.role === "admin")) return "/overview";
   }
+  if (to.meta.platformOnly && !session().user?.platform_admin) return "/overview";
   if (to.path === "/login" && token && !tokenExpired(token)) return "/overview";
   return true;
 });

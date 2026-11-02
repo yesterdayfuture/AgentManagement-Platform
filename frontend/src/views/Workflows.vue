@@ -76,6 +76,10 @@ function statusText(value) {
 function agentName(id) {
   return agents.value.find((item) => item.id === Number(id))?.name || "智能体";
 }
+function agentVersionLabel(id) {
+  const agent = agents.value.find((item) => item.id === Number(id));
+  return agent ? `测试 v${agent.latest_version || '—'}${agent.latest_version_status === 'draft' ? '（草稿）' : ''} · 生产 v${agent.stable_version || '—'}` : "版本未知";
+}
 function asList(payload) {
   return Array.isArray(payload) ? payload : payload?.items || [];
 }
@@ -138,14 +142,6 @@ async function restoreVersion(number) {
 async function showVersionDiff(number) {
   try { versionDiff.value = (await api(`/api/workflows/${form.value.id}/versions/${number}/diff`)).diff || "首个版本"; }
   catch (err) { desk.error.value = err.message; }
-}
-async function runGateEval() {
-  if (!form.value.id || !form.value.eval_dataset_id) return;
-  try {
-    const chosen = datasets.value.find((item) => item.id === form.value.eval_dataset_id);
-    await api(`/api/evals/datasets/${form.value.eval_dataset_id}/run`, { method: "POST", body: { workflow_id: form.value.id, metrics: chosen?.default_metrics || ["contains", "completion"], min_pass_rate: Number(form.value.eval_min_pass_rate) } });
-    await refreshHistory(form.value.id);
-  } catch (err) { desk.error.value = err.message; }
 }
 function addAgent(agent, x = 36 + form.value.nodes.length * 28, y = 36 + form.value.nodes.length * 24) {
   const used = new Set(form.value.nodes.map((node) => node.id));
@@ -400,6 +396,7 @@ function placeOf(node, form) {
     const lead = form.nodes.find((item) => !incoming.has(item.id)) || form.nodes[0];
     return node.id === lead?.id ? "lead" : "member";
   }
+  if (!incoming.has(node.id) && !outgoing.has(node.id)) return "end";
   if (!incoming.has(node.id)) return "start";
   if (!outgoing.has(node.id)) return "end";
   return "middle";
@@ -566,7 +563,7 @@ async function testFlow() {
     const nodes = [];
     for (const node of form.value.nodes) {
       await fillNode(node);
-      nodes.push(nodePayload(node));
+      nodes.push({ ...nodePayload(node), prompt: composePrompt(node.prompt, runMessage.value, placeOf(node, form.value)) });
     }
     await play(form.value.id, runMessage.value, nodes, Boolean(testStream.value));
   } catch (err) {
@@ -627,6 +624,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
   >
     <template #extra="{ row }">
       <button class="ghost" type="button" @click="openRun(row)">执行</button>
+      <button class="ghost" type="button" @click="router.push(`/evals?workflow_id=${row.id}`)">评测</button>
       <button v-if="row.release !== 'published'" class="ghost" type="button" @click="publish(row)">发布</button>
       <button class="ghost" type="button" @click="control(row, 'pause')">暂停</button>
       <button class="ghost" type="button" @click="control(row, 'stop')">停止</button>
@@ -635,7 +633,6 @@ watch(() => route.query.usable_space, () => desk.refresh());
       <button class="ghost" type="button" @click="router.push(`/workflow-runs?workflow_id=${row.id}`)">结果</button>
     </template>
   </Desk>
-  <p v-if="runOutput && !open" class="sub">{{ runOutput }}</p>
   <Dialog wide :open="open" :mode="mode" :title="form.name || '新建工作流'" @close="open = false" @submit="save()">
     <label class="field"><span>名称</span><input v-model="form.name" placeholder="例如 客服转退款" /></label>
     <label class="field"><span>执行方式</span>
@@ -647,7 +644,8 @@ watch(() => route.query.usable_space, () => desk.refresh());
     <label class="check"><input type="checkbox" v-model="form.enabled" /> 启用。停用后不能执行，也不能继续。</label>
     <label class="field"><span>发布评测集</span><SearchSelect v-model="form.eval_dataset_id"><option :value="null">请选择评测集</option><option v-for="item in availableDatasets" :key="item.id" :value="item.id">{{ item.name }}（{{ item.case_count }} 条）</option></SearchSelect></label>
     <label class="field"><span>发布最低通过率（%）</span><input type="number" min="1" max="100" step="1" v-model.number="gatePercent" /></label>
-    <div v-if="form.id" class="sheet"><strong>发布门禁 · v{{ form.revision }}</strong><p class="sub">{{ gate?.reason || '待评测' }}；本版 {{ gate?.latest ? `${Math.round(gate.latest.pass_rate * 100)}% / ${gate.latest.average_latency_ms} ms / ${moneyText(gate.latest.cost)}` : '无结果' }}；上版 {{ gate?.previous ? `${Math.round(gate.previous.pass_rate * 100)}% / ${gate.previous.average_latency_ms} ms / ${moneyText(gate.previous.cost)}` : '无结果' }}</p><button class="ghost" type="button" :disabled="!form.eval_dataset_id" @click="runGateEval">运行当前版本评测</button></div>
+    <p class="sub">评测集提供测试问题，通过率是本版本发布的最低门槛。保存后在工作流列表点击「评测」，达到门槛后才能发布。修改评测集或通过率后也须先保存。</p>
+      <div v-if="form.id" class="sheet"><strong>发布门禁 · v{{ form.revision }}</strong><p class="sub">{{ gate?.reason || '待评测' }}；本版 {{ gate?.latest ? `${Math.round(gate.latest.pass_rate * 100)}% / ${gate.latest.average_latency_ms} ms / ${moneyText(gate.latest.cost)}` : '无结果' }}；上版 {{ gate?.previous ? `${Math.round(gate.previous.pass_rate * 100)}% / ${gate.previous.average_latency_ms} ms / ${moneyText(gate.previous.cost)}` : '无结果' }}</p><button class="ghost" type="button" @click="router.push(`/evals?workflow_id=${form.id}`)">评测当前版本</button></div>
     <div v-if="form.id" class="sheet"><strong>版本历史与评测</strong><div v-for="item in versions" :key="item.number" class="md-bar"><span>v{{ item.number }} · {{ item.name }} · {{ item.created_at }}{{ item.published ? ' · 已发布' : '' }} · {{ reportsFor(item.number).length ? `最近评测 ${Math.round(reportsFor(item.number)[0].completion * 100)}% / 标准 ${Math.round((reportsFor(item.number)[0].min_pass_rate || 1) * 100)}%` : '未评测' }}</span><router-link v-if="reportsFor(item.number).length" :to="`/evals?report=${reportsFor(item.number)[0].id}`">查看报告</router-link><button class="ghost" type="button" @click="showVersionDiff(item.number)">比较</button><button class="ghost" type="button" :disabled="item.number === form.revision" @click="restoreVersion(item.number)">恢复为新版本</button></div><pre v-if="versionDiff" class="version-diff">{{ versionDiff }}</pre></div>
     <p class="sub">当前为{{ form.release === "published" ? "已发布" : "草稿" }}。改节点保存后会回到草稿，需再点「发布」后操作者才能执行。</p>
     <p v-if="form.mode === 'autonomous'" class="sub">规划时系统会固定注入全体成员花名册（调度者 + 下游），调度指令模板不可改；各节点「提示词」只影响花名册中的职责文案与该节点执行时的系统提示。详见 docs/autonomous-agent.md。</p>
@@ -668,7 +666,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
         <article v-for="node in form.nodes" :key="node.id" class="flow-node" :class="{ lead: node.id === leadId }" :style="{ left: `${node.x}px`, top: `${node.y}px` }" :data-inlet="node.id" @pointerdown="startMove(node, $event)" @dragover.prevent @drop="onWireDrop($event, node)">
           <button class="port in" type="button" aria-label="连入" :data-inlet="node.id" @dragover.prevent @drop.stop="onWireDrop($event, node)" />
           <header>{{ agentName(node.agent_id) }}</header>
-          <p class="sub">{{ node.id === leadId ? (form.mode === "autonomous" ? "调度" : "起点") : "下游" }}</p>
+          <p class="sub">{{ form.nodes.length === 1 ? "唯一节点 · 最终回答" : node.id === leadId ? (form.mode === "autonomous" ? "调度" : "起点") : "下游" }} · {{ agentVersionLabel(node.agent_id) }}</p>
           <button class="ghost" type="button" @click.stop="configure(node)">配置</button>
           <button class="ghost" type="button" @click.stop="removeNode(node.id)">去掉</button>
           <button class="port out" type="button" draggable="true" aria-label="拖出连线" @dragstart.stop="onWireDrag($event, node)" @pointerdown.stop="startWire(node, $event)" />
@@ -717,7 +715,7 @@ watch(() => route.query.usable_space, () => desk.refresh());
       <article v-for="node in runForm?.nodes || []" :key="node.id" class="node-card">
         <div>
           <strong>{{ agentName(node.agent_id) }}</strong>
-          <p class="sub">{{ node.id }} · 提示词 {{ (node.prompt || "").trim() ? "已填写" : "待填写" }}</p>
+          <p class="sub">{{ node.id }} · {{ agentVersionLabel(node.agent_id) }} · 提示词 {{ (node.prompt || "").trim() ? "已填写" : "待填写" }}</p>
         </div>
         <button class="ghost" type="button" @click="configure(node)">配置</button>
       </article>

@@ -87,6 +87,9 @@ def _trace_brief(db, row: Trace) -> dict:
         "cost": row.cost,
         "latency_ms": row.latency_ms,
         "quality_vote": row.quality_vote,
+        "quality_score": row.quality_score,
+        "quality_note": row.quality_note or "",
+        "quality_reviewed_at": stamp(row.quality_reviewed_at),
         "created_at": row.created_at.isoformat(),
     }
 
@@ -99,6 +102,11 @@ def get_trace(trace_id: str, ctx=Depends(get_context), db=Depends(get_db)):
     steps = db.query(TraceStep).filter_by(trace_id=row.id).order_by(TraceStep.idx.asc()).all()
     hops = db.query(DelegationHop).filter_by(trace_id=row.id).order_by(DelegationHop.seq.asc()).all()
     data = _trace_brief(db, row)
+    version = db.get(AgentVersion, row.version_id) if row.version_id else None
+    run = db.query(WorkflowRun).filter_by(trace_id=row.id).order_by(WorkflowRun.id.desc()).first() if row.workflow_id else None
+    data["agent_version"] = version.number if version else None
+    data["agent_version_status"] = version.status if version else None
+    data["workflow_version"] = run.workflow_revision if run else None
     data["citations"] = load(row.citations_json, [])
     data["error"] = row.error
     data["steps"] = [

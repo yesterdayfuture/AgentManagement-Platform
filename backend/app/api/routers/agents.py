@@ -217,6 +217,8 @@ def _agent_brief(db, agent: Agent) -> dict:
         "release_requires_eval": space is None or space.require_eval,
         "gray_percent": agent.gray_percent,
         "stable_version": stable.number if stable else None,
+        "latest_version": latest.number if latest else None,
+        "latest_version_status": latest.status if latest else None,
         "gray_version": gray.number if gray else None,
         "model_id": latest.model_id if latest else None,
         "model_name": model.name if model else "",

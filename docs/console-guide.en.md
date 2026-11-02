@@ -179,6 +179,8 @@ Lists support pagination, keywords, exact fields, and time ranges. Without `page
 
 ## Agents
 
+For version numbers, stable and gray pointers, tables, and list/history SQL, see [Agent versions, schema, and queries](agent-versioning.en.md).
+
 Agents version system prompts, models, tools, and skills. Builders, dept admins, and platform admins run the latest draft; operators run published versions. When skills are selected, their instructions append under “Available skills”; the model decides whether to call them.
 
 The studio shows each version's latest evaluation pass rate and threshold. Open a version to inspect its report history and per-case results, or use “Evaluate this version” and then choose a dataset in Evals. When evaluation is required, the selected version must pass before it can be published or promoted to stable or gray. This gate also applies to unassigned platform agents and is enforced by the API. On startup, a legacy unassigned release without a passing evaluation is returned to draft while its version content is preserved.
@@ -207,6 +209,8 @@ Remote agents do not attach local tools, skills, or MCP. **Introduction** text i
 Demo script `scripts/remote_agent_demo.py` reads `deepseek_pro` (or a deepseek-named endpoint) from the DB, starts sync/async HTTP and A2A remotes, registers introductions, and smoke-runs. Use `--serve` to keep them up. Step-by-step guide for a Python + FastAPI remote async agent: [docs/remote-async-agent.md](remote-async-agent.md).
 
 ![Agent list. Each agent binds model, department, and versions.](images/agents.png)
+
+![Live, historical, and latest draft versions in the agent studio](images/agent-versions.png)
 
 Related APIs:
 
@@ -262,6 +266,12 @@ Page: `/evals`. Add cases individually or upload Excel; the dataset list support
 Each dataset's evaluation history supports search, result filtering, pagination, page size, note edits, deletion, and per-case detail. Outputs and scores remain snapshots; editing changes only the note. Version views in Agent Studio and Workflows link to their reports. Cross-space evaluations run in the target's space; unassigned agents run in the dataset's space. Both report types are visible only to platform admins and are omitted from dataset summaries for other users.
 
 API: `POST /api/evals/datasets/{id}/run`, `POST /api/evals/datasets/{id}/run-stream`, `GET /api/evals/datasets/{id}/runs`, `GET /api/evals/targets/{kind}/{id}/runs`, and `GET/PATCH/DELETE /api/evals/runs/{id}`. Benchmark sources and scoring: [P0 evaluation](p0-closures-evaluation.md) and [MMLU evaluation](mmlu-evaluation.md) (Chinese).
+
+## Execution quality ratings
+
+After an agent or workflow run ends, open its trace and rate the result from 1 to 5 with an optional note. The rating is linked to the run's input, output, space, agent/workflow, and time; updating it does not change the original execution. The platform-admin-only `/quality-reviews` page supports CRUD, filters, pagination, and page size. Select rows and an export purpose: model fine-tuning produces conversation JSONL; agent evaluation produces JSON that can be uploaded when creating a dataset in the evaluation center. Export requires selected, completed runs with a score of at least 4 and nonempty input and output. Review model answers before treating them as reference answers. The list removes version prefixes from output; details show agent and workflow versions. Deleting a rating leaves the trace intact. Other users may rate runs in spaces they can access but cannot view or export the aggregate page.
+
+In the workflow editor, the evaluation dataset supplies release-gate questions and the minimum pass rate is the required share of passing cases for the current version. Save closes the editor; every workflow row has an **Evaluate** action. A configured dataset opens its evaluation dialog directly; otherwise choose a dataset in the evaluation center. Version history links to reports. A single fixed-flow node is instructed to give the final answer. Test runs use the node agent's latest version, including drafts, while production uses the stable version; both are shown beside the node. Trace details distinguish the final answer, model tool selection, and tool results. `GET /api/spaces/current` returns the space identified by `X-Space-Id`, including its name, current role, evaluation policy, token quota, and context policy for the UI; the endpoint does not switch spaces.
 
 ## Sensitive words
 
